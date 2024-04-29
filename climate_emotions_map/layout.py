@@ -17,6 +17,14 @@ def create_state_dropdown():
     )
 
 
+def create_party_switch():
+    """Create the switch for stratifying data by party affiliation."""
+    return dmc.Switch(
+        label="Stratify by party affiliation",
+        checked=False,
+    )
+
+
 def create_header():
     """Create the header for the dashboard."""
     return dmc.AppShellHeader(
@@ -44,6 +52,7 @@ def create_header():
                                 justify="flex-end",
                                 children=[
                                     create_state_dropdown(),
+                                    create_party_switch(),
                                 ],
                             ),
                             span="auto",
