@@ -4,12 +4,11 @@ import dash_mantine_components as dmc
 
 from . import utility as utils
 
-# TODO: Add component IDs!
-
 
 def create_state_dropdown():
     """Create the dropdown for states and state clusters."""
     return dmc.Select(
+        id="state-select",
         label="Select a state",
         placeholder="Showing national results",
         data=utils.get_state_options(),
@@ -22,6 +21,7 @@ def create_state_dropdown():
 def create_party_switch():
     """Create the switch for stratifying data by party affiliation."""
     return dmc.Switch(
+        id="party-stratify-switch",
         label="Stratify by party affiliation",
         checked=False,
     )
@@ -34,6 +34,7 @@ def create_response_threshold_control():
     )  # "response endorsements of"?
 
     segmented_control = dmc.SegmentedControl(
+        id="response-threshold-control",
         data=[
             {"label": "Any endorsement level", "value": "all"},
             {"label": "3+ (moderately and above)", "value": "3+"},
