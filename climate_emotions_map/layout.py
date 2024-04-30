@@ -4,6 +4,8 @@ import dash_mantine_components as dmc
 
 from . import utility as utils
 
+# TODO: Add component IDs!
+
 
 def create_state_dropdown():
     """Create the dropdown for states and state clusters."""
@@ -22,6 +24,44 @@ def create_party_switch():
     return dmc.Switch(
         label="Stratify by party affiliation",
         checked=False,
+    )
+
+
+def create_response_threshold_control():
+    """Create the segmented control for selecting the endorsement threshold to display."""
+    label = dmc.Text(
+        "Display results for responses rated:", size="sm"
+    )  # "response endorsements of"?
+
+    segmented_control = dmc.SegmentedControl(
+        data=[
+            {"label": "Any endorsement level", "value": "all"},
+            {"label": "3+ (moderately and above)", "value": "3+"},
+            {"label": "4+ (very much and above)", "value": "4+"},
+        ],
+        orientation="vertical",
+        fullWidth=True,
+    )
+
+    return dmc.Stack(
+        gap=5,
+        children=[label, segmented_control],
+    )
+
+
+def create_navbar():
+    """Create the navbar for the dashboard."""
+    return dmc.AppShellNavbar(
+        children=dmc.Stack(
+            mt=25,
+            px=25,
+            gap="lg",
+            children=[
+                create_state_dropdown(),
+                create_party_switch(),
+                create_response_threshold_control(),
+            ],
+        )
     )
 
 
@@ -50,10 +90,8 @@ def create_header():
                         dmc.GridCol(
                             dmc.Group(
                                 justify="flex-end",
-                                children=[
-                                    create_state_dropdown(),
-                                    create_party_switch(),
-                                ],
+                                # TODO: Add GitHub link? Not sure if needed/wanted.
+                                # TODO: Add link to paper
                             ),
                             span="auto",
                         ),
@@ -67,5 +105,5 @@ def create_header():
 def construct_layout():
     """Generate the overall dashboard layout."""
     return dmc.AppShell(
-        children=[create_header()],
+        children=[create_header(), create_navbar()], header={"height": 70}
     )
