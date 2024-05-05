@@ -1,30 +1,13 @@
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from data_loader import load_data_dictionaries, load_survey_data
 
-opinions_state = pd.read_csv(
-    Path(__file__).parents[1]
-    / "data"
-    / "survey_results"
-    / "opinions_state.tsv",
-    sep="\t",
-)
-impacts_state = pd.read_csv(
-    Path(__file__).parents[1]
-    / "data"
-    / "survey_results"
-    / "impacts_state.tsv",
-    sep="\t",
-)
-state_abbreviations = pd.read_csv(
-    Path(__file__).parents[1]
-    / "data"
-    / "data_dictionaries"
-    / "state_abbreviations.tsv",
-    sep="\t",
-)
+opinions_state = load_survey_data()["opinions_state.tsv"]
+
+impacts_state = load_survey_data()["impacts_state.tsv"]
+
+state_abbreviations = load_data_dictionaries()["state_abbreviations.tsv"]
 
 
 def get_state_abbrevs_in_long_format(state_abbreviations=state_abbreviations):
@@ -34,12 +17,11 @@ def get_state_abbrevs_in_long_format(state_abbreviations=state_abbreviations):
     abbrevs = []
     for _, row in state_abbreviations.iterrows():
         state_list = row["state"].split(", ")
-        for state in state_list:
-            states.append(state.split("(")[0].replace("(", ""))
+        states.extend(
+            state.split("(")[0].replace("(", "") for state in state_list
+        )
         abbrev_list = row["state_abbreviated"].split(", ")
-        for abbrev in abbrev_list:
-            abbrevs.append(abbrev)
-
+        abbrevs.extend(iter(abbrev_list))
     state_abbrevs_long = pd.DataFrame(
         data=np.array([states, abbrevs]).T,
         columns=["state", "state_abbreviated"],
