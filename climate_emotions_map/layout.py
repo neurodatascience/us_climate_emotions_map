@@ -4,6 +4,27 @@ import dash_mantine_components as dmc
 
 from . import utility as utils
 
+DEFAULT_QUESTION = {"question": "q2", "sub_question": 1}
+
+
+def create_question_dropdown():
+    """Create the dropdown for subquestions grouped by question."""
+    return dmc.Select(
+        id="question-select",
+        label="Select a question",  # "Select a sub-question"?
+        data=utils.get_question_options(),
+        value=f"{DEFAULT_QUESTION['question']}_{DEFAULT_QUESTION['sub_question']}",
+        allowDeselect=False,
+        clearable=False,
+        searchable=True,
+        nothingFoundMessage="No matches",
+        styles={
+            "group": {"marginTop": 10},
+            "option": {"paddingTop": 2, "paddingBottom": 2},
+            "input": {"textOverflow": "ellipsis"},
+        },
+    )
+
 
 def create_state_dropdown():
     """Create the dropdown for states and state clusters."""
@@ -58,6 +79,7 @@ def create_navbar():
             px=25,
             gap="lg",
             children=[
+                create_question_dropdown(),
                 create_state_dropdown(),
                 create_party_switch(),
                 create_response_threshold_control(),
@@ -106,5 +128,7 @@ def create_header():
 def construct_layout():
     """Generate the overall dashboard layout."""
     return dmc.AppShell(
-        children=[create_header(), create_navbar()], header={"height": 70}
+        children=[create_header(), create_navbar()],
+        header={"height": 70},
+        navbar={"width": 400},
     )
