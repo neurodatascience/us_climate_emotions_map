@@ -25,6 +25,11 @@ def load_data_dictionary(file: str) -> pd.DataFrame:
     )
 
 
+def remove_ignored_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Remove rows from a dataframe that have a value of TRUE in the "ignore" column."""
+    return df[df["ignore"] == False]
+
+
 def load_survey_data() -> dict[str, pd.DataFrame]:
     """
     Load all survey result TSV files of interest.
@@ -60,6 +65,8 @@ def load_data_dictionaries() -> dict[str, pd.DataFrame]:
     data_frames = {}
     for file in data_files:
         data_frames[file] = load_data_dictionary(file)
+        if "ignore" in data_frames[file].columns:
+            data_frames[file] = remove_ignored_rows(data_frames[file])
 
     return data_frames
 
