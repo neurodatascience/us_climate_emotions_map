@@ -31,6 +31,7 @@ def load_survey_data() -> dict[str, pd.DataFrame]:
     Climate impact data is excluded because it is not used in the dashboard.
     """
     data_files = [
+        "impacts_state.tsv",
         "opinions_party.tsv",
         "opinions_state.tsv",
         "opinions_wholesample.tsv",
