@@ -125,10 +125,33 @@ def create_header():
     )
 
 
+def create_question_title():
+    """Create the title for the main content of the dashboard."""
+    # TODO: This will be updated in a callback to reflect the selected question and subquestion.
+    return dmc.Title(
+        "This is the question: This is the subquestion", order=3, fw=300
+    )
+
+
+def create_main():
+    """Create the main content of the dashboard."""
+    return dmc.AppShellMain(
+        children=[
+            dmc.Container(
+                my=25,
+                mx="xs",
+                children=[
+                    create_question_title(),
+                ],
+            )
+        ]
+    )
+
+
 def construct_layout():
     """Generate the overall dashboard layout."""
     return dmc.AppShell(
-        children=[create_header(), create_navbar()],
+        children=[create_header(), create_navbar(), create_main()],
         header={"height": 70},
         navbar={"width": 400},
     )
