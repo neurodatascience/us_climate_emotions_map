@@ -6,6 +6,8 @@ Interactive web app for visualizing US survey results about climate change emoti
 
 See also the [Contributing Guidelines](CONTRIBUTING.md) for more information.
 
+To install the app from source:
+
 1. Clone the repository
     ```bash
     git clone https://github.com/neurodatascience/us_climate_emotions_map.git
@@ -37,3 +39,8 @@ See also the [Contributing Guidelines](CONTRIBUTING.md) for more information.
     ```bash
     git submodule update
     ```
+
+To launch the app locally:
+```bash
+python -m climate_emotions_map.app
+```
