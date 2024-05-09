@@ -6,6 +6,7 @@ from data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
 survey_states = GEOJSON_OBJECTS["survey_states.json"]
 
 opinions_state = SURVEY_DATA["opinions_state.tsv"]
+samplesizes_state = SURVEY_DATA["samplesizes_state.tsv"]
 
 impacts_state = SURVEY_DATA["impacts_state.tsv"]
 
@@ -274,15 +275,23 @@ def make_map2(
     df_hover_data = state_abbrevs_long.merge(
         df_opinions_to_plot,
         on=col_location,
+    ).merge(
+        samplesizes_state,
+        on=col_location,
     )
     fig.add_choropleth(
         locations=df_hover_data["state_abbreviated"],
         locationmode="USA-states",
-        customdata=df_hover_data[col_location],
+        customdata=df_hover_data[[col_location, "n"]],
         z=df_hover_data[col_color],
         marker=dict(opacity=0),
         name="hover_info",
-        hovertemplate=f"%{{customdata}}<br>{col_color.capitalize()}: %{{z:.2f}}<extra></extra>",
+        hovertemplate=(
+            "<b>%{customdata[0]}</b>"
+            "<br>Sample size: %{customdata[1]}"
+            f"<br>{col_color.capitalize()}: %{{z:.2f}}"
+            "<extra></extra>"
+        ),
         showscale=False,
     )
 
