@@ -1,13 +1,13 @@
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from data_loader import load_data_dictionaries, load_survey_data
+from data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
-opinions_state = load_survey_data()["opinions_state.tsv"]
+opinions_state = SURVEY_DATA["opinions_state.tsv"]
 
-impacts_state = load_survey_data()["impacts_state.tsv"]
+impacts_state = SURVEY_DATA["impacts_state.tsv"]
 
-state_abbreviations = load_data_dictionaries()["state_abbreviations.tsv"]
+state_abbreviations = DATA_DICTIONARIES["state_abbreviations.tsv"]
 
 
 def get_state_abbrevs_in_long_format(state_abbreviations=state_abbreviations):
