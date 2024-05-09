@@ -5,6 +5,7 @@ Example usage: After importing SURVEY_DATA in another script, the dataframe for 
 opinions_party.tsv data file can be accessed with SURVEY_DATA["opinions_party.tsv"].
 """
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -22,6 +23,13 @@ def load_data_dictionary(file: str) -> pd.DataFrame:
     return pd.read_csv(
         Path(__file__).parents[1] / "data" / "data_dictionaries" / file,
         sep="\t",
+    )
+
+
+def load_geoson_object(file: str) -> dict:
+    """Load a geojson file into a dataframe."""
+    return json.loads(
+        (Path(__file__).parents[1] / "data" / "geojson" / file).read_text(),
     )
 
 
@@ -65,5 +73,18 @@ def load_data_dictionaries() -> dict[str, pd.DataFrame]:
     return data_frames
 
 
+def load_geojson_objects() -> dict:
+    """Load the available GeoJSON files."""
+    geojson_files = [
+        "us_states.json",
+        "survey_states.json",
+    ]
+    geojson_objects = {}
+    for file in geojson_files:
+        geojson_objects[file] = load_geoson_object(file)
+    return geojson_objects
+
+
 SURVEY_DATA = load_survey_data()
 DATA_DICTIONARIES = load_data_dictionaries()
+GEOJSON_OBJECTS = load_geojson_objects()
