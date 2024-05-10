@@ -56,7 +56,9 @@ tox
 ```
 
 Pre-commit will then run all those hooks on the files you have staged for commit.
-Note that if some of those hooks fail you may have to edit some files and stage them again.
+Note that while several hooks will auto-fix files when they have failed the checks
+(meaning you just need to stage the edited files),
+for others, if the hooks fail you may have to edit some files manually before staging them again.
 
 ### To know more about pre-commit
 

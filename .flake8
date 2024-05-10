@@ -13,6 +13,10 @@ exclude =
 
 max-line-length = 79
 
+# Otherwise, limits readability of comparing against booleans in pandas
+# (e.g., https://github.com/astral-sh/ruff/issues/1852)
+ignore = E712
+
 ; ignore =
 ; per-file-ignores =
 
