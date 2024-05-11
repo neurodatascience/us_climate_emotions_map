@@ -34,7 +34,7 @@ def remove_ignored_rows(df: pd.DataFrame) -> pd.DataFrame:
 def load_geoson_object(file: str) -> dict:
     """Load a geojson file into a dataframe."""
     return json.loads(
-        (Path(__file__).parents[1] / "data" / "geojson" / file).read_text(),
+        (Path(__file__).parents[1] / "code" / "assets" / file).read_text(),
     )
 
 
