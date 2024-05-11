@@ -9,11 +9,14 @@ import pandas as pd
 # path to data directory
 DPATH_DATA = Path(__file__).parent.parent / "data"
 
+# path to assets directory (for GeoJSON data input/output)
+DPATH_ASSETS = Path(__file__).parent / "assets"
+
 # path to generic US states GeoJSON file
-FPATH_STATES_JSON_DEFAULT = DPATH_DATA / "geojson" / "us_states.json"
+FPATH_STATES_JSON_DEFAULT = DPATH_ASSETS / "us_states.json"
 
 # path to output GeoJSON file
-FPATH_OUT_DEFAULT = DPATH_DATA / "geojson" / "survey_states.json"
+FPATH_OUT_DEFAULT = DPATH_ASSETS / "survey_states.json"
 
 
 def create_survey_geojson(
@@ -143,7 +146,6 @@ def create_survey_geojson(
 
 if __name__ == "__main__":
 
-    # TODO switch to data_loader SURVEY_RESULTS when that is merged
     fpath_df_states = DPATH_DATA / "survey_results" / "sampledesc_state.tsv"
     df_states = pd.read_csv(fpath_df_states, sep="\t")
 
