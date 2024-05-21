@@ -65,28 +65,30 @@ def create_survey_geojson(
         info["properties"]["name"]: info for info in states_json["features"]
     }
 
-    # split into states and clusters
-    survey_states = [
+    # split into clusters and states
+    survey_clusters = [
         state for state in survey_states_and_clusters if "Cluster" in state
     ]
-    survey_clusters = [
+    survey_states = [
         state
         for state in survey_states_and_clusters
-        if state not in survey_states
+        if state not in survey_clusters
     ]
 
-    survey_state_info = []
+    # array of feature dictionaries representing geometries
+    # this will be the main content of the final GeoJSON object
+    survey_regions_geo_features = []
 
     # add single states
-    for state in survey_clusters:
+    for state in survey_states:
         print(f"Adding state {state}")
         state_info = state_info_map[state]
         state_info["id"] = state
         del state_info["properties"]["density"]
-        survey_state_info.append(state_info)
+        survey_regions_geo_features.append(state_info)
 
     # add clusters
-    for cluster in survey_states:
+    for cluster in survey_clusters:
 
         # get individual state names
         try:
@@ -132,11 +134,11 @@ def create_survey_geojson(
                 cluster_info["geometry"]["coordinates"].extend(to_extend)
 
         del cluster_info["properties"]["density"]
-        survey_state_info.append(cluster_info)
+        survey_regions_geo_features.append(cluster_info)
 
     survey_json = {
         "type": "FeatureCollection",
-        "features": survey_state_info,
+        "features": survey_regions_geo_features,
     }
     fpath_out.write_text(json.dumps(survey_json, indent=4))
     print(f"GeoJSON file written to {fpath_out}")
