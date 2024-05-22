@@ -71,6 +71,38 @@ def create_response_threshold_control():
     )
 
 
+def create_drawer_state():
+    """Create the state/cluster for the drawer."""
+    return dmc.Text("State placeholder", size="md")
+
+
+def create_drawer_sample_size():
+    """Create the sample size for the drawer."""
+    return dmc.Text("Sample size placeholder", size="md")
+
+
+def create_sample_description_drawer():
+    """Create the toggleable drawer for sample description."""
+    return dmc.Container(
+        [
+            dmc.Button(
+                "View Sample Description", id="drawer-button", variant="subtle"
+            ),
+            dmc.Drawer(
+                children=[create_drawer_state(), create_drawer_sample_size()],
+                title=dmc.Title("Sample Description", order=3, fw=300),
+                id="drawer",
+                padding="md",
+                transitionProps={
+                    "transition": "slide-right",
+                    "duration": 550,
+                    "timingFunction": "ease",
+                },
+            ),
+        ]
+    )
+
+
 def create_navbar():
     """Create the navbar for the dashboard."""
     return dmc.AppShellNavbar(
@@ -83,6 +115,7 @@ def create_navbar():
                 create_state_dropdown(),
                 create_party_switch(),
                 create_response_threshold_control(),
+                create_sample_description_drawer(),
             ],
         )
     )

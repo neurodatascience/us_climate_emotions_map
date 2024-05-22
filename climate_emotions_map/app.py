@@ -3,7 +3,7 @@
 import os
 
 import dash_mantine_components as dmc
-from dash import Dash
+from dash import Dash, Input, Output, callback
 
 from .layout import construct_layout
 
@@ -18,6 +18,17 @@ app = Dash(
 app.layout = dmc.MantineProvider(construct_layout(), forceColorScheme="light")
 
 server = app.server
+
+
+@callback(
+    Output("drawer", "opened"),
+    Input("drawer-button", "n_clicks"),
+    prevent_initial_call=True,
+)
+def drawer_demo(n_clicks):
+    """Simple callback function for toggling drawer visibility."""
+    return True
+
 
 if __name__ == "__main__":
     app.run(debug=True)
