@@ -1,25 +1,25 @@
 import pandas as pd
 import plotly.express as px
-from data_loader import SURVEY_DATA  # TODO: Use relative import .data_loader
 
-# subquestion_dict_tsv = "subquestion_dictionary.tsv"
-# outcome_dict = "outcome_dictionary.tsv"
-
-# # load the data
-# data_dir = "../../data/"
-
-# subquestion_dict_df = pd.read_csv(
-#     f"{data_dir}/data_dictionaries/{subquestion_dict_tsv}", sep="\t"
-# )
-# outcome_dict_df = pd.read_csv(
-#     f"{data_dir}/data_dictionaries/{outcome_dict}", sep="\t"
-# )
-
+# TODO: Use relative import .data_loader
+from data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 available_threshold_dict = {"3+": ["1", "2"], "4+": ["1", "2", "3"]}
 
 AGG_OUTCOME_LABEL = "agg"
 NA_OUTCOME_LABEL = "NA"
+
+THEME = "plotly_white"
+LAYOUTS = {
+    "margin": {"l": 30, "r": 30, "t": 30, "b": 20},
+    "title": {  # figure title position properties, see https://plotly.com/python/reference/layout/#layout-title
+        "yanchor": "bottom",
+        "yref": "paper",
+        # "pad": {"t": 10},
+        "y": 1,
+    },
+    # NOTE: to debug the title layout, use the "plotly" theme to make the plot area visible
+}
 
 
 def load_opinions_df(state: str | None, stratify: bool) -> pd.DataFrame | None:
@@ -83,6 +83,10 @@ def fill_na_percentage(df: pd.DataFrame, strata_col: str = None):
     return df
 
 
+# TODO:
+# - Remove legend
+# - Add text annotations for each outcome (?)
+# - Update colours
 def plot_bars(
     plot_df,
     x="percentage",
@@ -110,9 +114,41 @@ def plot_bars(
     else:
         pass
 
-    fig = px.bar(plot_df, x=x, y=y, color=color, title=title, text_auto=True)
+    fig = px.bar(
+        plot_df,
+        x=x,
+        y=y,
+        color=color,
+        title=title,
+        text_auto=True,
+        template=THEME,
+    )
+    fig.update_xaxes(
+        showgrid=False,
+        showline=False,
+        zeroline=False,
+        title=None,
+        showticklabels=False,
+    )
+    fig.update_yaxes(showgrid=False, title=None)
+    # TODO: Hide y axis tick label?
+    fig.update_layout(
+        margin=LAYOUTS["margin"], title=LAYOUTS["title"]
+    )  # , yaxis_title=None, xaxis_title=None)
+    # Add percentage sign to the bar text
+    fig.update_traces(texttemplate="%{x}%")
     return fig
-    # fig.show()
+
+
+def get_subquestion_text(question: str, subquestion: str):
+    """Get the full text for a subquestion."""
+    dict_df = DATA_DICTIONARIES["subquestion_dictionary.tsv"]
+    question_text = dict_df[
+        (dict_df["question"] == question)
+        & (dict_df["sub_question"] == subquestion)
+    ]["full_text"]
+
+    return question_text.values[0]
 
 
 def run(
@@ -215,7 +251,12 @@ def run(
     print(f"possible_outcomes: {q_df['outcome'].unique()}")
 
     stacked_bar = plot_bars(
-        q_df, x="percentage", y=y, round_values=True, sort_order=sort_order
+        q_df,
+        x="percentage",
+        y=y,
+        title=get_subquestion_text(question, subquestion),
+        round_values=True,
+        sort_order=sort_order,
     )
     return stacked_bar
 
@@ -223,10 +264,10 @@ def run(
 if __name__ == "__main__":
     # Example run
     fig = run(
-        question="q15",
+        question="q2",
         subquestion="1",
-        state="Wisconsin",
-        stratify=False,
+        state=None,
+        stratify=True,
         threshold="3+",
         binarize_threshold=True,
     )
