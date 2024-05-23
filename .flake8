@@ -12,13 +12,13 @@ exclude =
 --extend-select=B950
 # Ignore error of "W503 line break before binary operator" as it conflicts with black auto-formatting
 # See: https://stackoverflow.com/questions/73568036/flake8-line-break-before-binary-operator-how-to-fix-it
---extend-ignore=W503
+--extend-ignore=E712
 
 max-line-length = 79
 
 # Otherwise, limits readability of comparing against booleans in pandas
 # (e.g., https://github.com/astral-sh/ruff/issues/1852)
-ignore = E712
+# ignore = E712
 
 ; ignore =
 ; per-file-ignores =
