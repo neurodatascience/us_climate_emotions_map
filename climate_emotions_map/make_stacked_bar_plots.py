@@ -6,8 +6,13 @@ from data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 available_threshold_dict = {"3+": ["1", "2"], "4+": ["1", "2", "3"]}
 
+# Label used for custom outcome created to aggregate over unaccounted for outcome proportions for 3+ and 4+ thresholds
+# (i.e., for subquestions that have >5 response options)
+# TODO: See if we can remove this
 AGG_OUTCOME_LABEL = "agg"
-NA_OUTCOME_LABEL = "NA"
+
+# Label used for custom outcome created to fill in the missing proportion when binarizing data based on a threshold
+NA_OUTCOME_LABEL = "Other"
 
 THEME = "plotly_white"
 LAYOUTS = {
@@ -160,6 +165,22 @@ def run(
     """
     Make plots for a given question, subquestion, and state.
     Optionally stratify by party and/or categorize by a threshold.
+
+    Parameters
+    ----------
+    question : str
+        The question ID (e.g. "q1").
+    subquestion : str
+        The subquestion ID (e.g. "1").
+    state : str, optional
+        The state to filter the data by. The default is None. NOTE: This is expected to be None if stratify is True.
+    stratify : bool, optional
+        Whether to stratify the data by party. The default is False.
+    threshold : str, optional
+        The outcome ID for the Likert endorsement level to threshold at (e.g. "3+"). The default is None.
+    binarize_threshold : bool, optional
+        Whether to binarize the data based on the threshold, meaning that the stacked bar will include two segments, one
+        representing the threshold and another segment representing 100% - the proportion for the threshold. The default is False.
     """
 
     df = load_opinions_df(state, stratify)
@@ -239,6 +260,7 @@ def run(
         q_df["outcome"] = pd.Categorical(q_df["outcome"], cat_order["outcome"])
         q_df = q_df.sort_values(by="outcome")
 
+        # This value doesn't have any specific meaning, it's just a placeholder to indicate not ascending or descending
         sort_order = "predetermined"
 
     else:
