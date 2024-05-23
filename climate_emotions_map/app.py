@@ -6,6 +6,7 @@ import dash_mantine_components as dmc
 from dash import Dash, Input, Output, callback
 
 from .layout import construct_layout
+from .utility import SURVEY_DATA
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
 os.environ["REACT_VERSION"] = "18.2.0"
@@ -26,8 +27,33 @@ server = app.server
     prevent_initial_call=True,
 )
 def drawer_demo(n_clicks):
-    """Simple callback function for toggling drawer visibility."""
+    """Callback function for toggling drawer visibility."""
     return True
+
+
+@callback(
+    Output("drawer-state", "children"),
+    Input("state-select", "value"),
+)
+def update_drawer_state(value):
+    """Callback function for updating the state in the drawer."""
+    if value is None:
+        return "National"
+    else:
+        return f"State: {value}"
+
+
+@callback(
+    Output("drawer-sample-size", "children"),
+    [Input("state-select", "value")],
+)
+def updater_drawer_sample_size(value):
+    """Callback function for updating the sample size in the drawer."""
+    df = SURVEY_DATA["samplesizes_state.tsv"]
+    if value is None:
+        return f"Sample size: {df['n'].sum()}"
+    else:
+        return f"Sample size: {df[df['state'] == value]['n'].values[0]}"
 
 
 if __name__ == "__main__":

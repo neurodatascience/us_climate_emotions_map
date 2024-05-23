@@ -73,12 +73,12 @@ def create_response_threshold_control():
 
 def create_drawer_state():
     """Create the state/cluster for the drawer."""
-    return dmc.Text("State placeholder", size="md")
+    return dmc.Text(id="drawer-state", size="md")
 
 
 def create_drawer_sample_size():
     """Create the sample size for the drawer."""
-    return dmc.Text("Sample size placeholder", size="md")
+    return dmc.Text(id="drawer-sample-size", size="md")
 
 
 def create_sample_description_drawer():
