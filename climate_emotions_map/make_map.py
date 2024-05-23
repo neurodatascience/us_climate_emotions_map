@@ -43,6 +43,7 @@ def make_map(
     opinion_colormap: str | None = None,
     impact_colormap: str | None = "OrRd",
     clicked_state_marker: dict | None = None,
+    impact_marker_size_scale: float = 1.0,
 ) -> go.Figure:
     """Generate choropleth map showing opinion and/or impact data.
 
@@ -68,6 +69,8 @@ def make_map(
     clicked_state_marker : dict | None, optional
         Configuration for the clicked state (e.g., highlighting color). By
         default it will make the outline thicker and yellow.
+    impact_marker_size_scale : float, optional
+        Scale factor for the impact marker size, by default 1.0
 
     Returns
     -------
@@ -219,7 +222,7 @@ def make_map(
                 locations=[row["state_abbreviated"]],
                 locationmode="USA-states",
                 marker={
-                    "size": row[col_color_impact],
+                    "size": row[col_color_impact] * impact_marker_size_scale,
                     "color": px.colors.sample_colorscale(
                         impact_colormap,
                         (row[col_color_impact] - vmin_impact)
