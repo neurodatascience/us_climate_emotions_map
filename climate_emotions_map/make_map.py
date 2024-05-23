@@ -7,6 +7,7 @@ survey_states = GEOJSON_OBJECTS["survey_states.json"]
 
 opinions_state = SURVEY_DATA["opinions_state.tsv"]
 samplesizes_state = SURVEY_DATA["samplesizes_state.tsv"]
+sampledesc_state = SURVEY_DATA["sampledesc_state.tsv"]
 
 impacts_state = SURVEY_DATA["impacts_state.tsv"]
 
@@ -201,9 +202,10 @@ def make_map2(
     sub_question: int,
     outcome: str,
     clicked_state: str,
-    opinions_or_impacts: str,  # TODO
-    number_of_impacts: int,  # TODO
+    impact: str | None = None,
+    impact_gradient=True,
     opinion_colormap: str | None = None,
+    impact_colormap: str | None = "OrRd",
     clicked_state_marker: dict | None = None,
 ):
     # constants
@@ -218,24 +220,46 @@ def make_map2(
     # "state" (i.e. state or cluster), "single_state", "state_abbreviated"
     state_abbrevs_long = get_state_abbrevs_in_long_format()
 
-    # get the question data and change percentage to be between 0 and 100
-    df_opinions_to_plot = opinions_state.loc[
+    # get the question data
+    df_opinions = opinions_state.loc[
         (opinions_state["question"] == question)
         & (opinions_state["sub_question"] == str(sub_question))
         & (opinions_state["outcome"] == outcome)
-    ].copy(deep=True)
-    df_opinions_to_plot[col_color] *= 100
+    ]
 
-    if len(df_opinions_to_plot) == 0:
+    if len(df_opinions) == 0:
         raise RuntimeError(
             f"No data found for question {question} ({type(question)})"
             f", sub_question {sub_question} ({type(sub_question)})"
             f", outcome {outcome} ({type(outcome)})"
         )
 
+    # might be overwritten if gradient should be impacts instead
+    df_to_plot = df_opinions
+    colormap = opinion_colormap
+
+    # get impact data if requested
+    if impact is not None:
+        df_impacts = sampledesc_state.loc[
+            (sampledesc_state["demographic_variable"] == impact)
+            & (sampledesc_state["category"] == "Yes")
+        ]
+        if len(df_impacts) == 0:
+            raise RuntimeError(
+                f"No impact data found for {impact} ({type(impact)})"
+            )
+
+        if impact_gradient:
+            df_to_plot = df_impacts
+            colormap = impact_colormap
+
+    # change percentage to be between 0 and 100
+    df_to_plot = df_to_plot.copy(deep=True)
+    df_to_plot[col_color] *= 100
+
     # get minimum/maximum values for scaling the colormap
-    vmin = df_opinions_to_plot[col_color].min()
-    vmax = df_opinions_to_plot[col_color].max()
+    vmin = df_to_plot[col_color].min()
+    vmax = df_to_plot[col_color].max()
 
     # initialize the figure
     fig = go.Figure()
@@ -243,28 +267,26 @@ def make_map2(
     # plot the question data on a map
     # do not show the hoverboxes here because for some reason they are not centered properly
     fig.add_choropleth(
-        locations=df_opinions_to_plot[col_location],
+        locations=df_to_plot[col_location],
         geojson=survey_states,
-        z=df_opinions_to_plot[col_color],
+        z=df_to_plot[col_color],
         zmin=vmin,
         zmax=vmax,
-        colorscale=opinion_colormap,
+        colorscale=colormap,
         colorbar_title=col_color.capitalize(),
         name="main_map",
         hoverinfo="none",  # no hoverbox but click events are still emitted (?)
     )
 
     # add outline for clicked state
-    df_opinions_to_plot_clicked = df_opinions_to_plot[
-        df_opinions_to_plot[col_location] == clicked_state
-    ]
+    df_to_plot_clicked = df_to_plot[df_to_plot[col_location] == clicked_state]
     fig.add_choropleth(
-        locations=df_opinions_to_plot_clicked[col_location],
+        locations=df_to_plot_clicked[col_location],
         geojson=survey_states,
-        z=df_opinions_to_plot_clicked[col_color],
+        z=df_to_plot_clicked[col_color],
         zmin=vmin,
         zmax=vmax,
-        colorscale=opinion_colormap,
+        colorscale=colormap,
         hoverinfo="skip",
         name="clicked_state",
         marker=clicked_state_marker,
@@ -273,7 +295,7 @@ def make_map2(
 
     # add hover information
     df_hover_data = state_abbrevs_long.merge(
-        df_opinions_to_plot,
+        df_to_plot.drop(columns="n", errors="ignore"),
         on=col_location,
     ).merge(
         samplesizes_state,
@@ -331,9 +353,8 @@ if __name__ == "__main__":
         sub_question=1,
         outcome="3+",
         clicked_state=clicked_state,
-        opinions_or_impacts="opinions",
-        number_of_impacts=4,
-        opinion_colormap="Viridis",
+        impact="wildfire",
+        impact_gradient=True,
     )
 
     fig.show()
