@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 from data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
 
@@ -203,7 +204,7 @@ def make_map2(
     outcome: str,
     clicked_state: str,
     impact: str | None = None,
-    impact_gradient=True,
+    show_impact_as_gradient=True,
     opinion_colormap: str | None = None,
     impact_colormap: str | None = "OrRd",
     clicked_state_marker: dict | None = None,
@@ -211,6 +212,8 @@ def make_map2(
     # constants
     col_location = "state"
     col_color = "percentage"
+    col_color_opinion = f"{col_color} (opinion)"
+    col_color_impact = f"{col_color} (impact)"
 
     # default values
     if clicked_state_marker is None:
@@ -234,9 +237,8 @@ def make_map2(
             f", outcome {outcome} ({type(outcome)})"
         )
 
-    # might be overwritten if gradient should be impacts instead
-    df_to_plot = df_opinions
-    colormap = opinion_colormap
+    df_to_plot = df_opinions.rename(columns={col_color: col_color_opinion})
+    df_to_plot[col_color_opinion] *= 100
 
     # get impact data if requested
     if impact is not None:
@@ -249,17 +251,24 @@ def make_map2(
                 f"No impact data found for {impact} ({type(impact)})"
             )
 
-        if impact_gradient:
-            df_to_plot = df_impacts
-            colormap = impact_colormap
+        df_to_plot = df_to_plot.merge(
+            df_impacts[[col_location, col_color]].rename(
+                columns={col_color: col_color_impact}
+            ),
+            on=col_location,
+        )
+        df_to_plot[col_color_impact] *= 100
 
-    # change percentage to be between 0 and 100
-    df_to_plot = df_to_plot.copy(deep=True)
-    df_to_plot[col_color] *= 100
+    if impact is not None and show_impact_as_gradient:
+        col_gradient = col_color_impact
+        colormap = impact_colormap
+    else:
+        col_gradient = col_color_opinion
+        colormap = opinion_colormap
 
     # get minimum/maximum values for scaling the colormap
-    vmin = df_to_plot[col_color].min()
-    vmax = df_to_plot[col_color].max()
+    vmin = df_to_plot[col_gradient].min()
+    vmax = df_to_plot[col_gradient].max()
 
     # initialize the figure
     fig = go.Figure()
@@ -269,11 +278,11 @@ def make_map2(
     fig.add_choropleth(
         locations=df_to_plot[col_location],
         geojson=survey_states,
-        z=df_to_plot[col_color],
+        z=df_to_plot[col_gradient],
         zmin=vmin,
         zmax=vmax,
         colorscale=colormap,
-        colorbar_title=col_color.capitalize(),
+        colorbar_title=col_gradient.capitalize(),
         name="main_map",
         hoverinfo="none",  # no hoverbox but click events are still emitted (?)
     )
@@ -283,7 +292,7 @@ def make_map2(
     fig.add_choropleth(
         locations=df_to_plot_clicked[col_location],
         geojson=survey_states,
-        z=df_to_plot_clicked[col_color],
+        z=df_to_plot_clicked[col_gradient],
         zmin=vmin,
         zmax=vmax,
         colorscale=colormap,
@@ -295,27 +304,61 @@ def make_map2(
 
     # add hover information
     df_hover_data = state_abbrevs_long.merge(
-        df_to_plot.drop(columns="n", errors="ignore"),
+        df_to_plot,
         on=col_location,
     ).merge(
         samplesizes_state,
         on=col_location,
     )
+    # if gradient only
+    customdata_cols = [col_location, "n"]
+    hovertemplate_extra = ""
+    # if gradient and scatter dots
+    if impact is not None and not show_impact_as_gradient:
+        customdata_cols.append(col_color_impact)
+        hovertemplate_extra = (
+            f"<br>{col_color_impact.capitalize()}: %{{customdata[2]:.2f}}"
+        )
     fig.add_choropleth(
         locations=df_hover_data["state_abbreviated"],
         locationmode="USA-states",
-        customdata=df_hover_data[[col_location, "n"]],
-        z=df_hover_data[col_color],
+        customdata=df_hover_data[customdata_cols],
+        z=df_hover_data[col_gradient],
         marker=dict(opacity=0),
         name="hover_info",
         hovertemplate=(
             "<b>%{customdata[0]}</b>"
             "<br>Sample size: %{customdata[1]}"
-            f"<br>{col_color.capitalize()}: %{{z:.2f}}"
+            f"<br>{col_gradient.capitalize()}: %{{z:.2f}}"
+            f"{hovertemplate_extra}"
             "<extra></extra>"
         ),
         showscale=False,
     )
+
+    # add dots for impact data
+    if impact is not None and not show_impact_as_gradient:
+        vmin_impact = df_hover_data[col_color_impact].min()
+        vmax_impact = df_hover_data[col_color_impact].max()
+
+        # add dots one at a time to control color/size
+        for _, row in df_hover_data.iterrows():
+            fig.add_scattergeo(
+                locations=[row["state_abbreviated"]],
+                locationmode="USA-states",
+                marker={
+                    "size": row[col_color_impact],
+                    "color": px.colors.sample_colorscale(
+                        impact_colormap,
+                        (row[col_color_impact] - vmin_impact)
+                        / (vmax_impact - vmin_impact),
+                    ),
+                },
+                hoverinfo="skip",
+                name="impact_scatter",
+                mode="markers",
+                showlegend=False,
+            )
 
     # add state abbreviation labels
     fig.add_scattergeo(
@@ -325,6 +368,7 @@ def make_map2(
         mode="text",
         hoverinfo="skip",
         name="abbr_labels",
+        showlegend=False,
     )
 
     # do not show base map
@@ -354,7 +398,7 @@ if __name__ == "__main__":
         outcome="3+",
         clicked_state=clicked_state,
         impact="wildfire",
-        impact_gradient=True,
+        show_impact_as_gradient=False,
     )
 
     fig.show()
