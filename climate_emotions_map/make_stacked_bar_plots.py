@@ -132,9 +132,7 @@ def plot_bars(
     )
     fig.update_yaxes(showgrid=False, title=None)
     # TODO: Hide y axis tick label?
-    fig.update_layout(
-        margin=LAYOUTS["margin"], title=LAYOUTS["title"]
-    )  # , yaxis_title=None, xaxis_title=None)
+    fig.update_layout(margin=LAYOUTS["margin"], title=LAYOUTS["title"])
     # Add percentage sign to the bar text
     fig.update_traces(texttemplate="%{x}%")
     return fig
