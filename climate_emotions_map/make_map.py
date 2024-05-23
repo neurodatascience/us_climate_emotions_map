@@ -1,6 +1,4 @@
-import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
 
@@ -12,8 +10,20 @@ sampledesc_state = SURVEY_DATA["sampledesc_state.tsv"]
 
 state_abbreviations = DATA_DICTIONARIES["state_abbreviations.tsv"]
 
+impact_emoji_map = {
+    "drought": "🏜️",
+    "flood": "💧",
+    "heat": "🥵",
+    "hurricane": "🌀",
+    "smoke": "🏭",
+    "tornado": "🌪️",
+    "wildfire": "🔥",
+}
 
-def get_state_abbrevs_in_long_format(state_abbreviations: pd.DataFrame = state_abbreviations):
+
+def get_state_abbrevs_in_long_format(
+    state_abbreviations: pd.DataFrame = state_abbreviations,
+):
     # put the state abbreviations in a format where there's one row per state
     # i.e., flatten out the clusters
     # but still keep the "state" column as the original state/cluster name
@@ -31,7 +41,11 @@ def get_state_abbrevs_in_long_format(state_abbreviations: pd.DataFrame = state_a
         # so we can have one row per state - whether the state is in a cluster or not
         states.extend([row["state"]] * len(state_list))
     state_abbrevs_long = pd.DataFrame(
-        data={"state": states, "single_state": single_state, "state_abbreviated": abbrevs}
+        data={
+            "state": states,
+            "single_state": single_states,
+            "state_abbreviated": abbrevs,
+        }
     )
     return state_abbrevs_long
 
@@ -219,25 +233,19 @@ def make_map(
 
     # add dots for impact data
     if impact is not None and not show_impact_as_gradient:
-        vmin_impact = df_hover_data[col_color_impact].min()
-        vmax_impact = df_hover_data[col_color_impact].max()
 
-        # add dots one at a time to control color/size
+        # add markers one at a time to control size
         for _, row in df_hover_data.iterrows():
             fig.add_scattergeo(
                 locations=[row["state_abbreviated"]],
                 locationmode="USA-states",
-                marker={
+                text=[impact_emoji_map[impact]],
+                mode="text",
+                textfont={
                     "size": row[col_color_impact] * impact_marker_size_scale,
-                    "color": px.colors.sample_colorscale(
-                        impact_colormap,
-                        (row[col_color_impact] - vmin_impact)
-                        / (vmax_impact - vmin_impact),
-                    ),
                 },
                 hoverinfo="skip",
                 name="impact_scatter",
-                mode="markers",
                 showlegend=False,
             )
 
@@ -263,21 +271,25 @@ def make_map(
     return fig
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # pick a random state/cluster to highlight
-    states = state_abbreviations["state"].tolist()
-    clicked_state = np.random.choice(states)
-    # clicked_state = "Colorado, New Mexico (Cluster E)"  # example cluster
-    print(f"clicked_state: {clicked_state}")
+#     import numpy as np
+#     import plotly.express as px
 
-    fig = make_map(
-        question="q2",
-        sub_question=1,
-        outcome="3+",
-        clicked_state=clicked_state,
-        impact="wildfire",
-        show_impact_as_gradient=False,
-    )
 
-    fig.show()
+#     # pick a random state/cluster to highlight
+#     states = state_abbreviations["state"].tolist()
+#     clicked_state = np.random.choice(states)
+#     # clicked_state = "Colorado, New Mexico (Cluster E)"  # example cluster
+#     print(f"clicked_state: {clicked_state}")
+
+#     fig = make_map(
+#         question="q2",
+#         sub_question=1,
+#         outcome="3+",
+#         clicked_state=clicked_state,
+#         impact="tornado",
+#         show_impact_as_gradient=False,
+#     )
+
+#     fig.show()
