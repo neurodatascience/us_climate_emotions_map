@@ -141,7 +141,7 @@ def get_categories_dict(df: pd.DataFrame) -> dict:
 
 def get_demographic_variable_to_display(demographic_variable: str):
     if demographic_variable == "hh_origin":
-        demographic_variable = "household origin"
+        demographic_variable = "SES of household of origin"
     elif demographic_variable == "q2":
         demographic_variable = (
             "How sure are you that climate change is or is not happening?"
