@@ -199,9 +199,9 @@ def make_descriptive_plot(
     return bar_plot
 
 
-def make_impact_plot_traces(data: pd.DataFrame):
-    data_impact = data.loc[
-        data[COL_DEMOGRAPHIC_VARIABLE].isin(IMPACT_VARIABLES)
+def make_impact_plot_traces(df: pd.DataFrame):
+    data_impact = df.loc[
+        df[COL_DEMOGRAPHIC_VARIABLE].isin(IMPACT_VARIABLES)
     ].copy()
     data_impact[COL_DEMOGRAPHIC_VARIABLE] = pd.Categorical(
         data_impact[COL_DEMOGRAPHIC_VARIABLE], categories=IMPACT_VARIABLES
@@ -275,20 +275,18 @@ def make_descriptive_plots(state: str | None = None) -> go.Figure:
     return fig
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # print(get_categories_dict(SAMPLEDESC_WHOLESAMPLE))
+#     # # whole sample
+#     # fig = make_descriptive_plots()
 
-    # # whole sample
-    # fig = make_descriptive_plots()
+#     # specific state
+#     import numpy as np
 
-    # specific state
-    import numpy as np
+#     states: list = SAMPLEDESC_STATE["state"].unique().tolist()
+#     states.append(None)
+#     state = np.random.choice(states)
+#     print(f"state: {state}")
+#     fig = make_descriptive_plots(state=state)
 
-    states: list = SAMPLEDESC_STATE["state"].unique().tolist()
-    states.append(None)
-    state = np.random.choice(states)
-    print(f"state: {state}")
-    fig = make_descriptive_plots(state=state)
-
-    fig.show()
+#     fig.show()
