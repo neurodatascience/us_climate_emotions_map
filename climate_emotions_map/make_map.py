@@ -13,7 +13,7 @@ sampledesc_state = SURVEY_DATA["sampledesc_state.tsv"]
 state_abbreviations = DATA_DICTIONARIES["state_abbreviations.tsv"]
 
 
-def get_state_abbrevs_in_long_format(state_abbreviations=state_abbreviations):
+def get_state_abbrevs_in_long_format(state_abbreviations: pd.DataFrame = state_abbreviations):
     # put the state abbreviations in a format where there's one row per state
     # i.e., flatten out the clusters
     # but still keep the "state" column as the original state/cluster name
@@ -21,14 +21,17 @@ def get_state_abbrevs_in_long_format(state_abbreviations=state_abbreviations):
     single_states = []
     abbrevs = []
     for _, row in state_abbreviations.iterrows():
+        # a row would look like this Alaska, Idaho, Montana, Wyoming (Cluster F) and we don't want the cluster name too
         state_list = row["state"].split(" (")[0].split(", ")
         single_states.extend(state_list)
         abbrev_list = row["state_abbreviated"].split(", ")
         abbrevs.extend(iter(abbrev_list))
+        # values in the "states" column can either be single states or clusters of several states.
+        # for clusters, we have to repeat the cluster name once for each state in the cluster
+        # so we can have one row per state - whether the state is in a cluster or not
         states.extend([row["state"]] * len(state_list))
     state_abbrevs_long = pd.DataFrame(
-        data=np.array([states, single_states, abbrevs]).T,
-        columns=["state", "single_state", "state_abbreviated"],
+        data={"state": states, "single_state": single_state, "state_abbreviated": abbrevs}
     )
     return state_abbrevs_long
 
@@ -109,6 +112,9 @@ def make_map(
             f", outcome {outcome} ({type(outcome)})"
         )
 
+    # We have to rename the column `col_color` (e.g. "percentage") with a suffix for `opinion`
+    # because we later merge `opinion` and `impact` data on `col_color` in the same table
+    # and we want to differentiate between the two
     df_to_plot = df_opinions.rename(columns={col_color: col_color_opinion})
     df_to_plot[col_color_opinion] *= 100
 
@@ -145,7 +151,7 @@ def make_map(
     # initialize the figure
     fig = go.Figure()
 
-    # plot the question data on a map
+    # plot the `col_gradient` data on a map
     # do not show the hoverboxes here because for some reason they are not centered properly
     fig.add_choropleth(
         locations=df_to_plot[col_location],
