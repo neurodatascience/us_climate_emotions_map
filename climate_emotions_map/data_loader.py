@@ -73,3 +73,4 @@ def load_data_dictionaries() -> dict[str, pd.DataFrame]:
 
 SURVEY_DATA = load_survey_data()
 DATA_DICTIONARIES = load_data_dictionaries()
+NATIONAL_SAMPLE_SIZE = SURVEY_DATA["samplesizes_State.tsv"]["n"].sum()

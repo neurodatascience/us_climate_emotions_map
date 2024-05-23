@@ -5,8 +5,8 @@ import os
 import dash_mantine_components as dmc
 from dash import Dash, Input, Output, callback
 
+from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
 from .layout import construct_layout
-from .utility import SURVEY_DATA
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
 os.environ["REACT_VERSION"] = "18.2.0"
@@ -51,7 +51,7 @@ def updater_drawer_sample_size(value):
     """Callback function for updating the sample size in the drawer."""
     df = SURVEY_DATA["samplesizes_state.tsv"]
     if value is None:
-        return f"Sample size: {df['n'].sum()}"
+        return f"Sample size: {NATIONAL_SAMPLE_SIZE}"
     else:
         return f"Sample size: {df[df['state'] == value]['n'].values[0]}"
 
