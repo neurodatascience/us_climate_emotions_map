@@ -1,65 +1,57 @@
 import pandas as pd
 import plotly.express as px
+from data_loader import SURVEY_DATA  # TODO: Use relative import .data_loader
 
-# paths to the data files
-opinions_whole_tsv = "opinions_wholesample.tsv"
-opinions_state_tsv = "opinions_state.tsv"
-opinions_party_tsv = "opinions_party.tsv"
+# subquestion_dict_tsv = "subquestion_dictionary.tsv"
+# outcome_dict = "outcome_dictionary.tsv"
 
-subquestion_dict_tsv = "subquestion_dictionary.tsv"
-outcome_dict = "outcome_dictionary.tsv"
+# # load the data
+# data_dir = "../../data/"
 
-# load the data
-data_dir = "../../data/"
-opinions_whole_df = pd.read_csv(
-    f"{data_dir}/survey_results/{opinions_whole_tsv}", sep="\t"
-)
-opinions_state_df = pd.read_csv(
-    f"{data_dir}/survey_results/{opinions_state_tsv}", sep="\t"
-)
-opinions_party_df = pd.read_csv(
-    f"{data_dir}/survey_results/{opinions_party_tsv}", sep="\t"
-)
-
-subquestion_dict_df = pd.read_csv(
-    f"{data_dir}/data_dictionaries/{subquestion_dict_tsv}", sep="\t"
-)
-outcome_dict_df = pd.read_csv(
-    f"{data_dir}/data_dictionaries/{outcome_dict}", sep="\t"
-)
+# subquestion_dict_df = pd.read_csv(
+#     f"{data_dir}/data_dictionaries/{subquestion_dict_tsv}", sep="\t"
+# )
+# outcome_dict_df = pd.read_csv(
+#     f"{data_dir}/data_dictionaries/{outcome_dict}", sep="\t"
+# )
 
 
 available_threshold_dict = {"3+": ["1", "2"], "4+": ["1", "2", "3"]}
 
-agg_outcome_label = "agg"
-na_outcome_label = "NA"
+AGG_OUTCOME_LABEL = "agg"
+NA_OUTCOME_LABEL = "NA"
 
 
-def load_df(state, stratify):
+def load_opinions_df(state: str | None, stratify: bool) -> pd.DataFrame | None:
+    """Return the opinions data for the whole sample, stratified by state, or stratified by party."""
     if state is None and not stratify:
-        return opinions_whole_df
-    elif state is not None:
-        return opinions_state_df
-    elif stratify:
-        return opinions_party_df
-    else:
-        return None
+        return SURVEY_DATA["opinions_wholesample.tsv"]
+    if state is not None:
+        return SURVEY_DATA["opinions_state.tsv"]
+    if stratify:
+        return SURVEY_DATA["opinions_party.tsv"]
+    return None
 
 
-def aggregate_outcome_subset(df, agg_outcomes, stata_col=None):
-    """aggregate a subset of outcomes into a single outcome. This is used only with thresholding."""
-    if stata_col is None:
+def aggregate_outcome_subset(
+    df: pd.DataFrame, agg_outcomes: list, strata_col: str = None
+):
+    """
+    Aggregate a subset of outcomes into a single outcome.
+    This is used only when the response data is thresholded at a specific endorsement level.
+    """
+    if strata_col is None:
         agg_percent = df[df["outcome"].isin(agg_outcomes)]["percentage"].sum()
         agg_df = pd.DataFrame([{"percentage": agg_percent}])
     else:
         agg_df = (
             df[df["outcome"].isin(agg_outcomes)]
-            .groupby([stata_col])["percentage"]
+            .groupby([strata_col])["percentage"]
             .sum()
         )
         agg_df = pd.DataFrame(agg_df).reset_index()
 
-    agg_df["outcome"] = agg_outcome_label
+    agg_df["outcome"] = AGG_OUTCOME_LABEL
     agg_df["question"] = df["question"].unique()[0]
     agg_df["sub_question"] = df["sub_question"].unique()[0]
 
@@ -72,16 +64,19 @@ def aggregate_outcome_subset(df, agg_outcomes, stata_col=None):
     return df
 
 
-def fill_na_percentage(df, stata_col=None):
-    """Fill in the missing percentage values for the NA outcome. This is used only with thresholding."""
-    if stata_col is None:
+def fill_na_percentage(df: pd.DataFrame, strata_col: str = None):
+    """
+    Fill in the missing percentage values for the NA outcome.
+    This is used only when the response data is thresholded at a specific endorsement level.
+    """
+    if strata_col is None:
         na_percent = 1 - df["percentage"].sum()
         na_df = pd.DataFrame([{"percentage": na_percent}])
     else:
-        na_df = 1 - df.groupby([stata_col])["percentage"].sum()
+        na_df = 1 - df.groupby([strata_col])["percentage"].sum()
         na_df = pd.DataFrame(na_df).reset_index()
 
-    na_df["outcome"] = na_outcome_label
+    na_df["outcome"] = NA_OUTCOME_LABEL
     na_df["question"] = df["question"].unique()[0]
     na_df["sub_question"] = df["sub_question"].unique()[0]
     df = pd.concat([df, na_df])
@@ -96,7 +91,7 @@ def plot_bars(
     title="opinions",
     round_values=True,
     sort_order="descending",
-):
+) -> px.bar:
     """Make a stacked bar plot of the opinions of the whole sample, split by state and party."""
 
     if round_values:
@@ -116,22 +111,24 @@ def plot_bars(
         pass
 
     fig = px.bar(plot_df, x=x, y=y, color=color, title=title, text_auto=True)
-    fig.show()
+    return fig
+    # fig.show()
 
 
 def run(
-    question,
-    subquestion,
-    state=None,
-    stratify=False,
-    threshold=False,
-    binarize_threshold=False,
-):
-    """Make plots for a given question, subquestion, and state.
+    question: str,
+    subquestion: str,
+    state: str | None = None,
+    stratify: bool = False,
+    threshold: str | None = None,
+    binarize_threshold: bool = False,
+) -> px.bar:
+    """
+    Make plots for a given question, subquestion, and state.
     Optionally stratify by party and/or categorize by a threshold.
     """
 
-    df = load_df(state, stratify)
+    df = load_opinions_df(state, stratify)
 
     assert (
         question in df["question"].unique()
@@ -169,7 +166,7 @@ def run(
 
     if threshold:
         assert (
-            threshold in available_threshold_dict.keys()
+            threshold in available_threshold_dict
         ), f"Threshold {threshold} not found in available thresholds."
 
         print(f"Thresholding at {threshold}.")
@@ -197,13 +194,13 @@ def run(
             q_df = fill_na_percentage(q_df, strata)
 
             cat_order = {
-                "outcome": [threshold, na_outcome_label, agg_outcome_label]
+                "outcome": [threshold, NA_OUTCOME_LABEL, AGG_OUTCOME_LABEL]
             }
 
         else:
             # fill in the missing percentage values as the NA outcome
             q_df = fill_na_percentage(q_df, strata)
-            cat_order = {"outcome": [threshold, na_outcome_label]}
+            cat_order = {"outcome": [threshold, NA_OUTCOME_LABEL]}
 
         q_df["outcome"] = pd.Categorical(q_df["outcome"], cat_order["outcome"])
         q_df = q_df.sort_values(by="outcome")
@@ -217,16 +214,20 @@ def run(
 
     print(f"possible_outcomes: {q_df['outcome'].unique()}")
 
-    plot_bars(
+    stacked_bar = plot_bars(
         q_df, x="percentage", y=y, round_values=True, sort_order=sort_order
     )
+    return stacked_bar
 
 
-# Example run
-run(
-    question="q4",
-    subquestion="1",
-    stratify=True,
-    threshold="3+",
-    binarize_threshold=False,
-)
+if __name__ == "__main__":
+    # Example run
+    fig = run(
+        question="q15",
+        subquestion="1",
+        state="Wisconsin",
+        stratify=False,
+        threshold="3+",
+        binarize_threshold=True,
+    )
+    fig.show()
