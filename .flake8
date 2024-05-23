@@ -10,19 +10,16 @@ exclude =
 
 --select = D,E,F,W,C90,CFQ
 --extend-select=B950
-# Ignore error of "W503 line break before binary operator" as it conflicts with black auto-formatting
-# See: https://stackoverflow.com/questions/73568036/flake8-line-break-before-binary-operator-how-to-fix-it
---extend-ignore=E712
 
 max-line-length = 79
-
-# Otherwise, limits readability of comparing against booleans in pandas
-# (e.g., https://github.com/astral-sh/ruff/issues/1852)
-# ignore = E712
 
 ; ignore =
 ; per-file-ignores =
 
 # for compatibility with black
 # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
-extend-ignore = E203, E501
+#
+# E712 - otherwise, limits readability of comparing against booleans in pandas
+# (e.g., https://github.com/astral-sh/ruff/issues/1852)
+# NOTE: --extend-ignore is important here b/c it appends to the default list (whereas ignore overrides it)
+extend-ignore = E203, E501, E712
