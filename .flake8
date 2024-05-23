@@ -18,6 +18,8 @@ max-line-length = 79
 
 # E203, E501: for compatibility with black
 # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
-# E712: otherwise, limits readability of comparing against booleans in pandas
+#
+# E712 - otherwise, limits readability of comparing against booleans in pandas
 # (e.g., https://github.com/astral-sh/ruff/issues/1852)
+# NOTE: --extend-ignore is important here b/c it appends to the default list (whereas ignore overrides it)
 extend-ignore = E203, E501, E712
