@@ -6,8 +6,15 @@ import dash_mantine_components as dmc
 from dash import Dash, Input, Output, callback, ctx, no_update
 from dash.exceptions import PreventUpdate
 
+from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
-from .layout import construct_layout
+from .layout import (
+    DEFAULT_QUESTION,
+    NO_THRESHOLD_OPTION_VALUE,
+    OPINION_COLORMAP,
+    construct_layout,
+)
+from .make_map import make_map
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
 os.environ["REACT_VERSION"] = "18.2.0"
@@ -49,7 +56,7 @@ def disable_state_select_and_party_switch_interaction(
         if selected_state is not None:
             return no_update, no_update, False, True
         return no_update, no_update, False, False
-    return PreventUpdate
+    raise PreventUpdate
 
 
 @callback(
@@ -83,6 +90,56 @@ def update_drawer_sample_size(value):
     if value is None:
         return f"Sample size: {NATIONAL_SAMPLE_SIZE}"
     return f"Sample size: {df[df['state'] == value]['n'].values[0]}"
+
+
+@callback(
+    Output("us-map", "figure"),
+    [
+        Input("question-select", "value"),
+        Input("response-threshold-control", "value"),
+    ],
+    prevent_initial_call=True,
+)
+def update_map_opinion_data(question_value, threshold):
+    """
+    Update the map with the opinion data for the selected question (value encodes a question-subquestion pairing)
+    and response threshold, if a threshold is selected.
+    """
+    question, subquestion = utils.extract_question_subquestion(question_value)
+    if threshold != NO_THRESHOLD_OPTION_VALUE:
+        figure = make_map(
+            question=question,
+            sub_question=subquestion,
+            outcome=threshold,
+            opinion_colormap=OPINION_COLORMAP,
+        )
+        return figure
+    raise PreventUpdate
+
+
+@callback(
+    Output("response-threshold-control", "value"),
+    [
+        Input("question-select", "value"),
+        Input("response-threshold-control", "value"),
+    ],
+    prevent_initial_call=True,
+)
+def reset_response_threshold_control(question_value, threshold):
+    """
+    Reset the response threshold to the default threshold when a new question is selected
+    AND the currently selected threshold is the option to show all Likert responses (i.e., no threshold).
+
+    # TODO: Revisit if we want this, or if the map should always show 3+ data.
+    # One downside is that if a user wants to see stacked bars with all responses,
+    # they would have to re-select 'no threshold' every time after switching questions.
+    """
+    if (
+        ctx.triggered_id == "question-select"
+        and threshold == NO_THRESHOLD_OPTION_VALUE
+    ):
+        return DEFAULT_QUESTION["outcome"]
+    raise PreventUpdate
 
 
 if __name__ == "__main__":

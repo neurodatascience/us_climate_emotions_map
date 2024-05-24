@@ -45,3 +45,9 @@ def get_question_options():
         data.append(data_group)
 
     return data
+
+
+def extract_question_subquestion(value: str) -> tuple[str, str]:
+    """Extract the question and subquestion from a value in the question dropdown."""
+    question, sub_question = value.split("_")
+    return question, sub_question

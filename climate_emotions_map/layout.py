@@ -7,10 +7,15 @@ from . import utility as utils
 from .make_map import make_map
 
 DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
+NO_THRESHOLD_OPTION_VALUE = "all"
+OPINION_COLORMAP = "OrRd"
 
 
 def create_question_dropdown():
-    """Create the dropdown for subquestions grouped by question."""
+    """
+    Create the dropdown for subquestions grouped by question.
+    NOTE: 'value' must be a string for DMC, so we use f-strings to concatenate the question and subquestion.
+    """
     return dmc.Select(
         id="question-select",
         label="Select a question",  # "Select a sub-question"?
@@ -59,10 +64,16 @@ def create_response_threshold_control():
     segmented_control = dmc.SegmentedControl(
         id="response-threshold-control",
         data=[
-            {"label": "Any endorsement level", "value": "all"},
             {"label": "3+ (moderately and above)", "value": "3+"},
             {"label": "4+ (very much and above)", "value": "4+"},
+            {
+                "label": "Any endorsement level",
+                "value": NO_THRESHOLD_OPTION_VALUE,
+            },
         ],
+        # TODO: check if this is needed. It should use the first item in 'data' as the default.
+        # With 'value' set, sometimes it jumps back to the default for no reason?
+        value=DEFAULT_QUESTION["outcome"],
         orientation="vertical",
         fullWidth=True,
     )
@@ -179,7 +190,7 @@ def create_map_plot():
                 question=DEFAULT_QUESTION["question"],
                 sub_question=DEFAULT_QUESTION["sub_question"],
                 outcome=DEFAULT_QUESTION["outcome"],
-                opinion_colormap="OrRd",
+                opinion_colormap=OPINION_COLORMAP,
             ),
             # vh = % of viewport height
             # TODO: Revisit once plot margins are adjusted
