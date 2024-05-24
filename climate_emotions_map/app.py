@@ -10,7 +10,7 @@ from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
 from .layout import construct_layout
 from .make_map import make_map
-from .utility import (
+from .utility import (  # IMPACT_COLORMAP,
     DEFAULT_QUESTION,
     NO_THRESHOLD_OPTION_VALUE,
     OPINION_COLORMAP,
@@ -119,15 +119,21 @@ def update_map_subtitle(question_value):
     [
         Input("question-select", "value"),
         Input("response-threshold-control", "value"),
+        Input("state-select", "value"),
+        Input("impact-select", "value"),
     ],
     prevent_initial_call=True,
 )
-def update_map_opinion_data(question_value, threshold):
+def update_map(question_value, threshold, state, impact):
     """
     Update the map with the opinion data for the selected question (value encodes a question-subquestion pairing)
     and response threshold, if a threshold is selected.
+
+    Also updates the map with the impact data if a specific impact is selected.
     """
     question, subquestion = utils.extract_question_subquestion(question_value)
+    # TODO: Add logic to display impact data on map with opinion data from *last* selected question
+    # Or, can do this directly in make_map
     if threshold == NO_THRESHOLD_OPTION_VALUE:
         raise PreventUpdate
 
@@ -135,7 +141,12 @@ def update_map_opinion_data(question_value, threshold):
         question=question,
         sub_question=subquestion,
         outcome=threshold,
+        clicked_state=state,
+        impact=impact,
         opinion_colormap=OPINION_COLORMAP,
+        show_impact_as_gradient=False,
+        impact_marker_size_scale=0.6,
+        # impact_colormap=IMPACT_COLORMAP,
     )
 
 
