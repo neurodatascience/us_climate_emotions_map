@@ -77,7 +77,7 @@ def update_drawer_state(value):
     Output("drawer-sample-size", "children"),
     [Input("state-select", "value")],
 )
-def updater_drawer_sample_size(value):
+def update_drawer_sample_size(value):
     """Callback function for updating the sample size in the drawer."""
     df = SURVEY_DATA["samplesizes_state.tsv"]
     if value is None:
