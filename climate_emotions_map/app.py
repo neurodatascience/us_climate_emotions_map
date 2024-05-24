@@ -39,8 +39,7 @@ def update_drawer_state(value):
     """Callback function for updating the state in the drawer."""
     if value is None:
         return "National"
-    else:
-        return f"State: {value}"
+    return f"State: {value}"
 
 
 @callback(
@@ -52,8 +51,7 @@ def updater_drawer_sample_size(value):
     df = SURVEY_DATA["samplesizes_state.tsv"]
     if value is None:
         return f"Sample size: {NATIONAL_SAMPLE_SIZE}"
-    else:
-        return f"Sample size: {df[df['state'] == value]['n'].values[0]}"
+    return f"Sample size: {df[df['state'] == value]['n'].values[0]}"
 
 
 if __name__ == "__main__":
