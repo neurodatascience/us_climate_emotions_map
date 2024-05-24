@@ -6,6 +6,7 @@ from dash import dcc
 from . import utility as utils
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
+from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (
     DEFAULT_QUESTION,
     GLOBAL_THRESHOLD_LABELS,
@@ -261,6 +262,26 @@ def create_map_plot():
     return us_map
 
 
+def create_stacked_bar_plots():
+    """Create component to hold the stacked bar plot(s) for a subquestion."""
+    figure = dmc.Container(
+        dcc.Graph(
+            id="stacked-bar-plot",
+            figure=make_stacked_bar(
+                question=DEFAULT_QUESTION["question"],
+                subquestion=DEFAULT_QUESTION["sub_question"],
+                state=None,
+                stratify=False,
+                threshold=DEFAULT_QUESTION["outcome"],
+                binarize_threshold=True,
+            ),
+            style={"height": "20vh"},
+        ),
+        size="xl",
+    )
+    return figure
+
+
 def create_main():
     """Create the main content of the dashboard."""
     return dmc.AppShellMain(
@@ -273,6 +294,7 @@ def create_main():
                     create_question_title(),
                     create_impact_dropdown(),
                     create_map_plot(),
+                    create_stacked_bar_plots(),
                 ],
             )
         ]

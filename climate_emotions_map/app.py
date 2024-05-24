@@ -11,6 +11,7 @@ from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
 from .layout import construct_layout
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
+from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,
     DEFAULT_QUESTION,
     NO_THRESHOLD_OPTION_VALUE,
@@ -186,6 +187,39 @@ def reset_response_threshold_control(question_value, threshold):
     ):
         return DEFAULT_QUESTION["outcome"]
     raise PreventUpdate
+
+
+@callback(
+    Output("stacked-bar-plot", "figure"),
+    [
+        Input("question-select", "value"),
+        Input("state-select", "value"),
+        Input("party-stratify-switch", "checked"),
+        Input("response-threshold-control", "value"),
+    ],
+    prevent_initial_call=True,
+)
+def update_stacked_bar_plots(
+    question_value, state, is_party_stratify_checked, threshold
+):
+    """Update the stacked bar plots based on the selected question."""
+    question, subquestion = utils.extract_question_subquestion(question_value)
+
+    # TODO: Make no threshold value None instead of "all"?
+    if threshold == NO_THRESHOLD_OPTION_VALUE:
+        threshold = None
+
+    figure = make_stacked_bar(
+        question=question,
+        subquestion=subquestion,
+        state=state,
+        stratify=is_party_stratify_checked,
+        threshold=threshold,
+        binarize_threshold=True,
+    )
+    return figure
+
+    # raise PreventUpdate
 
 
 if __name__ == "__main__":
