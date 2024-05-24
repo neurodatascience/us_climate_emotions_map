@@ -5,6 +5,7 @@ Example usage: After importing SURVEY_DATA in another script, the dataframe for 
 opinions_party.tsv data file can be accessed with SURVEY_DATA["opinions_party.tsv"].
 """
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -28,6 +29,13 @@ def load_data_dictionary(file: str) -> pd.DataFrame:
 def remove_ignored_rows(df: pd.DataFrame) -> pd.DataFrame:
     """Remove rows from a dataframe that have a value of TRUE in the "ignore" column."""
     return df[df["ignore"] == False]
+
+
+def load_geojson_object(file: str) -> dict:
+    """Load a geojson file into a dataframe."""
+    return json.loads(
+        (Path(__file__).parents[1] / "code" / "assets" / file).read_text(),
+    )
 
 
 def load_survey_data() -> dict[str, pd.DataFrame]:
@@ -71,5 +79,19 @@ def load_data_dictionaries() -> dict[str, pd.DataFrame]:
     return data_frames
 
 
+def load_geojson_objects() -> dict:
+    """Load the available GeoJSON files."""
+    geojson_files = [
+        "us_states.json",
+        "survey_states.json",
+    ]
+    geojson_objects = {}
+    for file in geojson_files:
+        geojson_objects[file] = load_geojson_object(file)
+    return geojson_objects
+
+
 SURVEY_DATA = load_survey_data()
 DATA_DICTIONARIES = load_data_dictionaries()
+NATIONAL_SAMPLE_SIZE = SURVEY_DATA["samplesizes_state.tsv"]["n"].sum()
+GEOJSON_OBJECTS = load_geojson_objects()
