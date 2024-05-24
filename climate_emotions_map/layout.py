@@ -113,6 +113,7 @@ def create_sample_descriptive_plot():
 def create_sample_description_drawer():
     """Create the toggleable drawer for sample description."""
     # TODO: Make drawer slide in faster, and remove trap focus (?) so that user can interact with rest of app
+    # TODO: Make "View Sample Description" button also able to close the drawer
     return dmc.Container(
         [
             dmc.Button(
@@ -128,12 +129,15 @@ def create_sample_description_drawer():
                 id="drawer",
                 padding="md",
                 transitionProps={
-                    "transition": "slide-right",
+                    "transition": "slide-left",
                     "duration": 550,
                     "timingFunction": "ease",
                 },
-                # TODO: Revisit once plot margins are adjusted
+                # TODO: Revisit size once plot margins are adjusted
                 size="30%",
+                position="right",
+                # Allow user to interact with content in rest of the app when the drawer is open
+                withOverlay=False,
             ),
         ]
     )
