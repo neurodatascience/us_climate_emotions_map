@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import pandas as pd
 import plotly.graph_objects as go
-from data_loader import SURVEY_DATA
 from plotly.subplots import make_subplots
+
+from .data_loader import SURVEY_DATA
 
 SAMPLEDESC_WHOLESAMPLE: pd.DataFrame = SURVEY_DATA[
     "sampledesc_wholesample.tsv"

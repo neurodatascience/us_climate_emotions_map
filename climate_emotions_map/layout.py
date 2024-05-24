@@ -4,6 +4,7 @@ import dash_mantine_components as dmc
 from dash import dcc
 
 from . import utility as utils
+from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .utility import (
     DEFAULT_QUESTION,
@@ -96,15 +97,33 @@ def create_drawer_sample_size():
     return dmc.Text(id="drawer-sample-size", size="md")
 
 
+def create_sample_descriptive_plot():
+    """Create the component holding the subplots of sample descriptive statistics."""
+    return dcc.Graph(
+        id="sample-descriptive-plot",
+        figure=make_descriptive_plots(
+            state=None,
+        ),
+        # TODO: Revisit once we've made plot margins smaller (or create a param for this, maybe)
+        # TODO: Fix margins to prevent text from being cut off; make kwargs work
+        style={"height": "90vh"},
+    )
+
+
 def create_sample_description_drawer():
     """Create the toggleable drawer for sample description."""
+    # TODO: Make drawer slide in faster, and remove trap focus (?) so that user can interact with rest of app
     return dmc.Container(
         [
             dmc.Button(
                 "View Sample Description", id="drawer-button", variant="subtle"
             ),
             dmc.Drawer(
-                children=[create_drawer_state(), create_drawer_sample_size()],
+                children=[
+                    create_drawer_state(),
+                    create_drawer_sample_size(),
+                    create_sample_descriptive_plot(),
+                ],
                 title=dmc.Title("Sample Description", order=3, fw=300),
                 id="drawer",
                 padding="md",
@@ -113,6 +132,8 @@ def create_sample_description_drawer():
                     "duration": 550,
                     "timingFunction": "ease",
                 },
+                # TODO: Revisit once plot margins are adjusted
+                size="30%",
             ),
         ]
     )
