@@ -196,6 +196,22 @@ def create_question_title():
     )
 
 
+def create_impact_dropdown():
+    """Create the dropdown for selecting the impact to display."""
+    return dmc.Flex(
+        dmc.Select(
+            id="impact-select",
+            label="View distribution of self-reported severe weather event",
+            placeholder="Select a severe weather event",
+            data=utils.get_impact_options(),
+            clearable=True,
+            searchable=True,
+            nothingFoundMessage="No matches",
+        ),
+        justify="flex-end",
+    )
+
+
 def create_map_plot():
     """Create the component holding the cloropleth map plot of US states."""
     # TODO: Ensure that state click events are handled properly
@@ -230,6 +246,7 @@ def create_main():
                 fluid=True,
                 children=[
                     create_question_title(),
+                    create_impact_dropdown(),
                     create_map_plot(),
                 ],
             )

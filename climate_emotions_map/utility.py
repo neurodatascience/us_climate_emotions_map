@@ -5,6 +5,7 @@ from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
 NO_THRESHOLD_OPTION_VALUE = "all"
 OPINION_COLORMAP = "OrRd"
+# IMPACT_COLORMAP = "magma_r"
 # TODO: Do not hardcode these labels. They should be read from a data dictionary
 GLOBAL_THRESHOLD_LABELS = {
     "3+": "moderately and above",
@@ -82,3 +83,11 @@ def create_question_subtitle(question: str, subquestion: str) -> str:
     q_text = q_df.query(f'question=="{question}"')["full_text"].values[0]
     # TODO: Revisit format for long subquestions - add newline?
     return f'{q_text} "{sq_text}"'
+
+
+def get_impact_options() -> list[dict]:
+    """Get the options for the impact dropdown."""
+    return [
+        {"label": impact, "value": impact}
+        for impact in DATA_DICTIONARIES["impacts_list.tsv"]["impact"]
+    ]
