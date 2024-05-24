@@ -9,6 +9,7 @@ from dash.exceptions import PreventUpdate
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
 from .layout import construct_layout
+from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .utility import (  # IMPACT_COLORMAP,
     DEFAULT_QUESTION,
@@ -90,6 +91,18 @@ def update_drawer_sample_size(value):
     if value is None:
         return f"Sample size: {NATIONAL_SAMPLE_SIZE}"
     return f"Sample size: {df[df['state'] == value]['n'].values[0]}"
+
+
+@callback(
+    Output("sample-descriptive-plot", "figure"),
+    Input("state-select", "value"),
+    prevent_initial_call=True,
+)
+def update_sample_descriptive_plot(state):
+    """Update the sample descriptive plot based on the selected state."""
+    return make_descriptive_plots(
+        state=state,
+    )
 
 
 @callback(
