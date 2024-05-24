@@ -5,10 +5,12 @@ from dash import dcc
 
 from . import utility as utils
 from .make_map import make_map
-
-DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
-NO_THRESHOLD_OPTION_VALUE = "all"
-OPINION_COLORMAP = "OrRd"
+from .utility import (
+    DEFAULT_QUESTION,
+    GLOBAL_THRESHOLD_LABELS,
+    NO_THRESHOLD_OPTION_VALUE,
+    OPINION_COLORMAP,
+)
 
 
 def create_question_dropdown():
@@ -64,8 +66,8 @@ def create_response_threshold_control():
     segmented_control = dmc.SegmentedControl(
         id="response-threshold-control",
         data=[
-            {"label": "3+ (moderately and above)", "value": "3+"},
-            {"label": "4+ (very much and above)", "value": "4+"},
+            {"label": f"3+ ({GLOBAL_THRESHOLD_LABELS['3+']})", "value": "3+"},
+            {"label": f"4+ ({GLOBAL_THRESHOLD_LABELS['4+']})", "value": "4+"},
             {
                 "label": "Any endorsement level",
                 "value": NO_THRESHOLD_OPTION_VALUE,
@@ -173,9 +175,24 @@ def create_header():
 
 def create_question_title():
     """Create the title for the main content of the dashboard."""
-    # TODO: This will be updated in a callback to reflect the selected question and subquestion.
-    return dmc.Title(
-        "This is the question: This is the subquestion", order=3, fw=300
+    return dmc.Stack(
+        children=[
+            dmc.Title(
+                id="map-title",
+                children=utils.create_map_title(DEFAULT_QUESTION["outcome"]),
+                order=3,
+                fw=300,
+            ),
+            dmc.Text(
+                id="map-subtitle",
+                children=utils.create_question_subtitle(
+                    question=DEFAULT_QUESTION["question"],
+                    subquestion=DEFAULT_QUESTION["sub_question"],
+                ),
+                size="lg",
+            ),
+        ],
+        gap="0",
     )
 
 

@@ -2,6 +2,15 @@
 
 from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
+DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
+NO_THRESHOLD_OPTION_VALUE = "all"
+OPINION_COLORMAP = "OrRd"
+# TODO: Do not hardcode these labels. They should be read from a data dictionary
+GLOBAL_THRESHOLD_LABELS = {
+    "3+": "moderately and above",
+    "4+": "very much and above",
+}
+
 
 def get_state_options():
     """Get the options for the state dropdown."""
@@ -51,3 +60,25 @@ def extract_question_subquestion(value: str) -> tuple[str, str]:
     """Extract the question and subquestion from a value in the question dropdown."""
     question, sub_question = value.split("_")
     return question, sub_question
+
+
+def create_map_title(threshold: str) -> str:
+    """Create a statement for the map title based on the selected threshold."""
+    return f"Estimated % of adolescents and young adults who agree {GLOBAL_THRESHOLD_LABELS[threshold]} with the following:"
+
+
+def create_question_subtitle(question: str, subquestion: str) -> str:
+    """Get the full text to display for a question-subquestion pair as the subtitle for the map plot."""
+    q_df = DATA_DICTIONARIES.get("question_dictionary.tsv")
+    sq_df = DATA_DICTIONARIES.get("subquestion_dictionary.tsv")
+
+    sq_text = sq_df.query(
+        f'question=="{question}" & sub_question=="{subquestion}"'
+    )["full_text"].values[0]
+    if sq_df.query(f'question=="{question}"').shape[0] == 1:
+        # If there is only one subquestion, return the subquestion text assuming it is the same as the question text
+        return sq_text
+
+    q_text = q_df.query(f'question=="{question}"')["full_text"].values[0]
+    # TODO: Revisit format for long subquestions - add newline?
+    return f'{q_text} "{sq_text}"'

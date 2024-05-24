@@ -8,13 +8,13 @@ from dash.exceptions import PreventUpdate
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
-from .layout import (
+from .layout import construct_layout
+from .make_map import make_map
+from .utility import (
     DEFAULT_QUESTION,
     NO_THRESHOLD_OPTION_VALUE,
     OPINION_COLORMAP,
-    construct_layout,
 )
-from .make_map import make_map
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
 os.environ["REACT_VERSION"] = "18.2.0"
@@ -90,6 +90,28 @@ def update_drawer_sample_size(value):
     if value is None:
         return f"Sample size: {NATIONAL_SAMPLE_SIZE}"
     return f"Sample size: {df[df['state'] == value]['n'].values[0]}"
+
+
+@callback(
+    Output("map-title", "children"),
+    Input("response-threshold-control", "value"),
+)
+def update_map_title(threshold):
+    """Update the map title based on the selected threshold."""
+    # TODO: Revisit if we want to fix the threshold for the opinion data for the map
+    if threshold == NO_THRESHOLD_OPTION_VALUE:
+        raise PreventUpdate
+    return utils.create_map_title(threshold)
+
+
+@callback(
+    Output("map-subtitle", "children"),
+    Input("question-select", "value"),
+)
+def update_map_subtitle(question_value):
+    """Update the map subtitle based on the selected question."""
+    question, subquestion = utils.extract_question_subquestion(question_value)
+    return utils.create_question_subtitle(question, subquestion)
 
 
 @callback(
