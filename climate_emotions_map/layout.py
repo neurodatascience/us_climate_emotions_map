@@ -1,10 +1,12 @@
 """Generate the layout for the dashboard."""
 
 import dash_mantine_components as dmc
+from dash import dcc
 
 from . import utility as utils
+from .make_map import make_map
 
-DEFAULT_QUESTION = {"question": "q2", "sub_question": 1}
+DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
 
 
 def create_question_dropdown():
@@ -166,6 +168,30 @@ def create_question_title():
     )
 
 
+def create_map_plot():
+    """Create the component holding the cloropleth map plot of US states."""
+    # TODO: Ensure that state click events are handled properly
+    us_map = dmc.Container(
+        # TODO: Make map margins smaller (or create a param for this, maybe), and make figure height larger (?)
+        dcc.Graph(
+            id="us-map",
+            figure=make_map(
+                question=DEFAULT_QUESTION["question"],
+                sub_question=DEFAULT_QUESTION["sub_question"],
+                outcome=DEFAULT_QUESTION["outcome"],
+                opinion_colormap="OrRd",
+            ),
+            # vh = % of viewport height
+            # TODO: Revisit once plot margins are adjusted
+            style={"height": "65vh"},
+        ),
+        # sets max width
+        # TODO: Revisit once plot margins are adjusted
+        size="lg",
+    )
+    return us_map
+
+
 def create_main():
     """Create the main content of the dashboard."""
     return dmc.AppShellMain(
@@ -173,8 +199,10 @@ def create_main():
             dmc.Container(
                 my=25,
                 mx="xs",
+                fluid=True,
                 children=[
                     create_question_title(),
+                    create_map_plot(),
                 ],
             )
         ]
