@@ -128,15 +128,15 @@ def update_map_opinion_data(question_value, threshold):
     and response threshold, if a threshold is selected.
     """
     question, subquestion = utils.extract_question_subquestion(question_value)
-    if threshold != NO_THRESHOLD_OPTION_VALUE:
-        figure = make_map(
-            question=question,
-            sub_question=subquestion,
-            outcome=threshold,
-            opinion_colormap=OPINION_COLORMAP,
-        )
-        return figure
-    raise PreventUpdate
+    if threshold == NO_THRESHOLD_OPTION_VALUE:
+        raise PreventUpdate
+
+    return make_map(
+        question=question,
+        sub_question=subquestion,
+        outcome=threshold,
+        opinion_colormap=OPINION_COLORMAP,
+    )
 
 
 @callback(
