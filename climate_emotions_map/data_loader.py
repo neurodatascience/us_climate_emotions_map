@@ -93,4 +93,5 @@ def load_geojson_objects() -> dict:
 
 SURVEY_DATA = load_survey_data()
 DATA_DICTIONARIES = load_data_dictionaries()
+NATIONAL_SAMPLE_SIZE = SURVEY_DATA["samplesizes_state.tsv"]["n"].sum()
 GEOJSON_OBJECTS = load_geojson_objects()
