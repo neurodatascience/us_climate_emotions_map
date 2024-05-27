@@ -96,8 +96,6 @@ def create_sample_descriptive_plot():
 
 def create_sample_description_drawer():
     """Create the toggleable drawer for sample description."""
-    # TODO: Make drawer slide in faster, and remove trap focus (?) so that user can interact with rest of app
-    # TODO: Make "View Sample Description" button also able to close the drawer
     return dmc.Container(
         [
             dmc.Button(
