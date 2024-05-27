@@ -12,10 +12,7 @@ from .layout import construct_layout
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
-from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
-    DEFAULT_QUESTION,
-    NO_THRESHOLD_OPTION_VALUE,
-)
+from .utility import DEFAULT_QUESTION  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
 os.environ["REACT_VERSION"] = "18.2.0"
@@ -106,23 +103,35 @@ def update_sample_descriptive_plot(state):
 
 
 @callback(
-    Output("map-title", "children"),
-    Input("response-threshold-control", "value"),
+    Output("impact-select", "value"),
+    Input("question-select", "value"),
 )
-def update_map_title(threshold):
-    """Update the map title based on the selected threshold."""
-    # TODO: Revisit if we want to fix the threshold for the opinion data for the map
-    if threshold == NO_THRESHOLD_OPTION_VALUE:
-        raise PreventUpdate
-    return utils.create_map_title(threshold)
+def reset_impact_select(question_value):
+    """Reset the impact select dropdown when a new question is selected."""
+    return None
+
+
+@callback(
+    Output("map-title", "children"),
+    Input("impact-select", "value"),
+)
+def update_map_title(impact):
+    """Update the map title when a specific impact is selected (or if the selection is cleared)."""
+    return utils.create_map_title(impact)
 
 
 @callback(
     Output("map-subtitle", "children"),
-    Input("question-select", "value"),
+    [
+        Input("question-select", "value"),
+        Input("impact-select", "value"),
+    ],
 )
-def update_map_subtitle(question_value):
-    """Update the map subtitle based on the selected question."""
+def update_map_subtitle(question_value, impact):
+    """Update the map subtitle based on the selected question and whether an impact is selected."""
+    if impact is not None:
+        return ""
+
     question, subquestion = utils.extract_question_subquestion(question_value)
     return utils.create_question_subtitle(question, subquestion)
 
@@ -131,29 +140,24 @@ def update_map_subtitle(question_value):
     Output("us-map", "figure"),
     [
         Input("question-select", "value"),
-        Input("response-threshold-control", "value"),
         Input("state-select", "value"),
         Input("impact-select", "value"),
     ],
     prevent_initial_call=True,
 )
-def update_map(question_value, threshold, state, impact):
+def update_map(question_value, state, impact):
     """
     Update the map with the opinion data for the selected question (value encodes a question-subquestion pairing)
-    and response threshold, if a threshold is selected.
+    at the set default threshold.
 
     Also updates the map with the impact data if a specific impact is selected.
     """
     question, subquestion = utils.extract_question_subquestion(question_value)
-    # TODO: Add logic to display impact data on map with opinion data from *last* selected question
-    # Or, can do this directly in make_map
-    if threshold == NO_THRESHOLD_OPTION_VALUE:
-        raise PreventUpdate
 
     return make_map(
         question=question,
         sub_question=subquestion,
-        outcome=threshold,
+        outcome=DEFAULT_QUESTION["outcome"],
         clicked_state=state,
         impact=impact,
         # opinion_colormap=OPINION_COLORMAP,
@@ -163,49 +167,28 @@ def update_map(question_value, threshold, state, impact):
 
 
 @callback(
-    Output("response-threshold-control", "value"),
-    [
-        Input("question-select", "value"),
-        Input("response-threshold-control", "value"),
-    ],
-    prevent_initial_call=True,
-)
-def reset_response_threshold_control(question_value, threshold):
-    """
-    Reset the response threshold to the default threshold when a new question is selected
-    AND the currently selected threshold is the option to show all Likert responses (i.e., no threshold).
-
-    # TODO: Revisit if we want this, or if the map should always show 3+ data.
-    # One downside is that if a user wants to see stacked bars with all responses,
-    # they would have to re-select 'no threshold' every time after switching questions.
-    """
-    if (
-        ctx.triggered_id == "question-select"
-        and threshold == NO_THRESHOLD_OPTION_VALUE
-    ):
-        return DEFAULT_QUESTION["outcome"]
-    raise PreventUpdate
-
-
-@callback(
     Output("stacked-bar-plot", "figure"),
     [
         Input("question-select", "value"),
         Input("state-select", "value"),
         Input("party-stratify-switch", "checked"),
-        Input("response-threshold-control", "value"),
+        Input("response-threshold-control", "checked"),
     ],
     prevent_initial_call=True,
 )
 def update_stacked_bar_plots(
-    question_value, state, is_party_stratify_checked, threshold
+    question_value,
+    state,
+    is_party_stratify_checked,
+    show_all_responses_checked,
 ):
     """Update the stacked bar plots based on the selected question."""
     question, subquestion = utils.extract_question_subquestion(question_value)
 
-    # TODO: Make no threshold value None instead of "all"?
-    if threshold == NO_THRESHOLD_OPTION_VALUE:
+    if show_all_responses_checked:
         threshold = None
+    elif not show_all_responses_checked:
+        threshold = DEFAULT_QUESTION["outcome"]
 
     figure = make_stacked_bar(
         question=question,
