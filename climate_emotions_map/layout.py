@@ -7,11 +7,10 @@ from . import utility as utils
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
-from .utility import (
+from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
     DEFAULT_QUESTION,
     GLOBAL_THRESHOLD_LABELS,
     NO_THRESHOLD_OPTION_VALUE,
-    OPINION_COLORMAP,
 )
 
 
@@ -249,7 +248,7 @@ def create_map_plot():
                 question=DEFAULT_QUESTION["question"],
                 sub_question=DEFAULT_QUESTION["sub_question"],
                 outcome=DEFAULT_QUESTION["outcome"],
-                opinion_colormap=OPINION_COLORMAP,
+                # opinion_colormap=OPINION_COLORMAP,
             ),
             # vh = % of viewport height
             # TODO: Revisit once plot margins are adjusted

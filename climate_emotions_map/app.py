@@ -12,10 +12,9 @@ from .layout import construct_layout
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
-from .utility import (  # IMPACT_COLORMAP,
+from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
     DEFAULT_QUESTION,
     NO_THRESHOLD_OPTION_VALUE,
-    OPINION_COLORMAP,
 )
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
@@ -157,9 +156,8 @@ def update_map(question_value, threshold, state, impact):
         outcome=threshold,
         clicked_state=state,
         impact=impact,
-        opinion_colormap=OPINION_COLORMAP,
-        show_impact_as_gradient=False,
-        impact_marker_size_scale=0.6,
+        # opinion_colormap=OPINION_COLORMAP,
+        show_impact_as_gradient=True,
         # impact_colormap=IMPACT_COLORMAP,
     )
 
@@ -218,8 +216,6 @@ def update_stacked_bar_plots(
         binarize_threshold=True,
     )
     return figure
-
-    # raise PreventUpdate
 
 
 if __name__ == "__main__":

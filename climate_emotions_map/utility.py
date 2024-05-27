@@ -4,13 +4,15 @@ from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
 NO_THRESHOLD_OPTION_VALUE = "all"
-OPINION_COLORMAP = "OrRd"
-# IMPACT_COLORMAP = "magma_r"
 # TODO: Do not hardcode these labels. They should be read from a data dictionary
 GLOBAL_THRESHOLD_LABELS = {
     "3+": "moderately and above",
     "4+": "very much and above",
 }
+
+# We have not yet decided on the best colormaps to use
+# OPINION_COLORMAP = "OrRd"
+# IMPACT_COLORMAP = "magma_r"
 
 
 def get_state_options():
