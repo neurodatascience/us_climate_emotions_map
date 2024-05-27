@@ -8,9 +8,8 @@ from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
+    DEFAULT_MAP_TITLE,
     DEFAULT_QUESTION,
-    GLOBAL_THRESHOLD_LABELS,
-    NO_THRESHOLD_OPTION_VALUE,
 )
 
 
@@ -49,6 +48,11 @@ def create_state_dropdown():
     )
 
 
+def create_barplot_options_heading():
+    label = dmc.Text("Bar chart options", size="sm", fw=500)
+    return label
+
+
 def create_party_switch():
     """Create the switch for stratifying data by party affiliation."""
     return dmc.Switch(
@@ -59,31 +63,11 @@ def create_party_switch():
 
 
 def create_response_threshold_control():
-    """Create the segmented control for selecting the endorsement threshold to display."""
-    label = dmc.Text(
-        "Display results for responses rated:", size="sm"
-    )  # "response endorsements of"?
-
-    segmented_control = dmc.SegmentedControl(
+    """Create the switch that controls whether to binarize the response data (in stacked bar plots) by an endorsement threshold."""
+    return dmc.Switch(
         id="response-threshold-control",
-        data=[
-            {"label": f"3+ ({GLOBAL_THRESHOLD_LABELS['3+']})", "value": "3+"},
-            {"label": f"4+ ({GLOBAL_THRESHOLD_LABELS['4+']})", "value": "4+"},
-            {
-                "label": "Any endorsement level",
-                "value": NO_THRESHOLD_OPTION_VALUE,
-            },
-        ],
-        # TODO: check if this is needed. It should use the first item in 'data' as the default.
-        # With 'value' set, sometimes it jumps back to the default for no reason?
-        value=DEFAULT_QUESTION["outcome"],
-        orientation="vertical",
-        fullWidth=True,
-    )
-
-    return dmc.Stack(
-        gap=5,
-        children=[label, segmented_control],
+        label="Show all endorsement levels",
+        checked=False,
     )
 
 
@@ -153,6 +137,7 @@ def create_navbar():
             children=[
                 create_question_dropdown(),
                 create_state_dropdown(),
+                create_barplot_options_heading(),
                 create_party_switch(),
                 create_response_threshold_control(),
                 create_sample_description_drawer(),
@@ -204,7 +189,7 @@ def create_question_title():
         children=[
             dmc.Title(
                 id="map-title",
-                children=utils.create_map_title(DEFAULT_QUESTION["outcome"]),
+                children=DEFAULT_MAP_TITLE,
                 order=3,
                 fw=300,
             ),

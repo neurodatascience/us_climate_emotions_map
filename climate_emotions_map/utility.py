@@ -3,12 +3,8 @@
 from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
-NO_THRESHOLD_OPTION_VALUE = "all"
-# TODO: Do not hardcode these labels. They should be read from a data dictionary
-GLOBAL_THRESHOLD_LABELS = {
-    "3+": "moderately and above",
-    "4+": "very much and above",
-}
+# TODO: Revisit title
+DEFAULT_MAP_TITLE = "Map: Percent (%) of adolescents and young adults who endorse the following question/statement:"
 
 # We have not yet decided on the best colormaps to use
 # OPINION_COLORMAP = "OrRd"
@@ -65,9 +61,12 @@ def extract_question_subquestion(value: str) -> tuple[str, str]:
     return question, sub_question
 
 
-def create_map_title(threshold: str) -> str:
-    """Create a statement for the map title based on the selected threshold."""
-    return f"Estimated % of adolescents and young adults who agree {GLOBAL_THRESHOLD_LABELS[threshold]} with the following:"
+def create_map_title(impact: str = None) -> str:
+    """Create a statement for the map title based on whether a weather impact has been selected."""
+    if impact is None:
+        return DEFAULT_MAP_TITLE
+
+    return f"Map: Percent (%) of adolescents and young adults who reported experiencing the following in the last year: {impact}"
 
 
 def create_question_subtitle(question: str, subquestion: str) -> str:
