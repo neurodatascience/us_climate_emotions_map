@@ -120,6 +120,7 @@ def create_sample_description_drawer():
                 position="right",
                 # Allow user to interact with content in rest of the app when the drawer is open
                 withOverlay=False,
+                lockScroll=False,
             ),
         ]
     )
