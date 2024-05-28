@@ -4,7 +4,6 @@ import os
 
 import dash_mantine_components as dmc
 from dash import Dash, Input, Output, callback, ctx, no_update
-from dash.exceptions import PreventUpdate
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
@@ -50,11 +49,10 @@ def disable_state_select_and_party_switch_interaction(
     if ctx.triggered_id == "party-stratify-switch":
         # Deselect any state
         return None, is_party_stratify_checked, no_update, no_update
-    if ctx.triggered_id == "state-select":
-        if selected_state is not None:
-            return no_update, no_update, False, True
-        return no_update, no_update, False, False
-    raise PreventUpdate
+
+    if selected_state is not None:
+        return no_update, no_update, False, True
+    return no_update, no_update, False, False
 
 
 @callback(
