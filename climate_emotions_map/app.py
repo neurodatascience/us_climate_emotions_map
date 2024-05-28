@@ -1,15 +1,13 @@
 """Main file to run the Dash app."""
 
-import os
-
 import dash_mantine_components as dmc
-from dash import Dash, Input, Output, callback, _dash_renderer
+from dash import Dash, Input, Output, _dash_renderer, callback
 
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
 from .layout import construct_layout
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
-_dash_renderer._set_react_version('18.2.0')
+_dash_renderer._set_react_version("18.2.0")
 
 app = Dash(
     __name__,
