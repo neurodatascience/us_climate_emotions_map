@@ -112,7 +112,7 @@ def create_sample_description_drawer():
                 padding="md",
                 transitionProps={
                     "transition": "slide-left",
-                    "duration": 550,
+                    "duration": 375,
                     "timingFunction": "ease",
                 },
                 # TODO: Revisit size once plot margins are adjusted
