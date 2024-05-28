@@ -1,7 +1,7 @@
 """Main file to run the Dash app."""
 
 import dash_mantine_components as dmc
-from dash import Dash, Input, Output, callback, ctx, , _dash_renderer, no_update
+from dash import Dash, Input, Output, _dash_renderer, callback, ctx, no_update
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
