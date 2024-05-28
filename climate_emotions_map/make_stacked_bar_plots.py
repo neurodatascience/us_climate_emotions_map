@@ -1,8 +1,7 @@
 import pandas as pd
 import plotly.express as px
 
-# TODO: Use relative import .data_loader
-from data_loader import DATA_DICTIONARIES, SURVEY_DATA
+from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 available_threshold_dict = {"3+": ["1", "2"], "4+": ["1", "2", "3"]}
 
@@ -154,7 +153,7 @@ def get_subquestion_text(question: str, subquestion: str):
     return question_text.values[0]
 
 
-def run(
+def make_stacked_bar(
     question: str,
     subquestion: str,
     state: str | None = None,
@@ -283,7 +282,7 @@ def run(
 
 if __name__ == "__main__":
     # Example run
-    fig = run(
+    fig = make_stacked_bar(
         question="q2",
         subquestion="1",
         state=None,

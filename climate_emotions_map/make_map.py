@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
-from data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
+
+from .data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
 
 survey_states = GEOJSON_OBJECTS["survey_states.json"]
 
@@ -52,7 +53,7 @@ def get_state_abbrevs_in_long_format(
 
 def make_map(
     question: str,
-    sub_question: int,
+    sub_question: str,
     outcome: str,
     clicked_state: str | None = None,
     impact: str | None = None,
@@ -68,7 +69,7 @@ def make_map(
     ----------
     question : str
         The question to plot (for opinion data).
-    sub_question : int
+    sub_question : str
         The subquestion to plot (for opinion data).
     outcome : str
         The outcome to plot (for opinion data).
@@ -115,7 +116,7 @@ def make_map(
     # get the question data
     df_opinions = opinions_state.loc[
         (opinions_state["question"] == question)
-        & (opinions_state["sub_question"] == str(sub_question))
+        & (opinions_state["sub_question"] == sub_question)
         & (opinions_state["outcome"] == outcome)
     ]
 
@@ -285,7 +286,7 @@ def make_map(
 
 #     fig = make_map(
 #         question="q2",
-#         sub_question=1,
+#         sub_question="1",
 #         outcome="3+",
 #         clicked_state=clicked_state,
 #         impact="tornado",
