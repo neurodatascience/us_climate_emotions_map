@@ -60,11 +60,13 @@ def disable_state_select_and_party_switch_interaction(
 @callback(
     Output("drawer", "opened"),
     Input("drawer-button", "n_clicks"),
+    Input("drawer", "opened"),
     prevent_initial_call=True,
 )
-def drawer_demo(n_clicks):
+def drawer_toggle(n_clicks, opened):
     """Callback function for toggling drawer visibility."""
-    return True
+    if ctx.triggered_id == "drawer-button":
+        return not opened
 
 
 @callback(
