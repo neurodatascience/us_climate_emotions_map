@@ -92,6 +92,30 @@ def load_geojson_objects() -> dict:
 
 
 SURVEY_DATA = load_survey_data()
+# NOTE: column dtypes for opinions data TSVs
+# Input:
+# df = SURVEY_DATA["opinions_wholesample.tsv"]
+# print(df.dtypes)
+#
+# Output:
+# question         object
+# sub_question     object
+# outcome          object
+# percentage      float64
+# dtype: object
+
 DATA_DICTIONARIES = load_data_dictionaries()
+# NOTE: column dtypes for data dictionary TSVs
+# Input:
+# df = DATA_DICTIONARIES["subquestion_dictionary.tsv"]
+# print(df.dtypes)
+#
+# Output:
+# question        object
+# sub_question    object
+# full_text       object
+# ignore            bool
+# dtype: object
+
 NATIONAL_SAMPLE_SIZE = SURVEY_DATA["samplesizes_state.tsv"]["n"].sum()
 GEOJSON_OBJECTS = load_geojson_objects()
