@@ -1,7 +1,16 @@
 """Main file to run the Dash app."""
 
 import dash_mantine_components as dmc
-from dash import Dash, Input, Output, _dash_renderer, callback, ctx, no_update
+from dash import (
+    Dash,
+    Input,
+    Output,
+    State,
+    _dash_renderer,
+    callback,
+    ctx,
+    no_update,
+)
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
@@ -56,11 +65,12 @@ def disable_state_select_and_party_switch_interaction(
 @callback(
     Output("drawer", "opened"),
     Input("drawer-button", "n_clicks"),
+    State("drawer", "opened"),
     prevent_initial_call=True,
 )
-def drawer_demo(n_clicks):
+def drawer_toggle(n_clicks, opened):
     """Callback function for toggling drawer visibility."""
-    return True
+    return not opened
 
 
 @callback(

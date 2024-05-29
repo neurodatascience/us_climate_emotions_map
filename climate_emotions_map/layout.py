@@ -112,7 +112,7 @@ def create_sample_description_drawer():
                 padding="md",
                 transitionProps={
                     "transition": "slide-left",
-                    "duration": 550,
+                    "duration": 375,
                     "timingFunction": "ease",
                 },
                 # TODO: Revisit size once plot margins are adjusted
@@ -120,6 +120,7 @@ def create_sample_description_drawer():
                 position="right",
                 # Allow user to interact with content in rest of the app when the drawer is open
                 withOverlay=False,
+                lockScroll=False,
             ),
         ]
     )
