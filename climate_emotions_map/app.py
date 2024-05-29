@@ -1,9 +1,16 @@
 """Main file to run the Dash app."""
 
-import os
-
 import dash_mantine_components as dmc
-from dash import Dash, Input, Output, State, callback, ctx, no_update
+from dash import (
+    Dash,
+    Input,
+    Output,
+    State,
+    _dash_renderer,
+    callback,
+    ctx,
+    no_update,
+)
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
@@ -14,7 +21,7 @@ from .make_stacked_bar_plots import make_stacked_bar
 from .utility import DEFAULT_QUESTION  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
-os.environ["REACT_VERSION"] = "18.2.0"
+_dash_renderer._set_react_version("18.2.0")
 
 app = Dash(
     __name__,
