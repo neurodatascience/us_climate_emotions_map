@@ -3,7 +3,7 @@
 import os
 
 import dash_mantine_components as dmc
-from dash import Dash, Input, Output, callback, ctx, no_update
+from dash import Dash, Input, Output, State, callback, ctx, no_update
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
@@ -58,13 +58,12 @@ def disable_state_select_and_party_switch_interaction(
 @callback(
     Output("drawer", "opened"),
     Input("drawer-button", "n_clicks"),
-    Input("drawer", "opened"),
+    State("drawer", "opened"),
     prevent_initial_call=True,
 )
 def drawer_toggle(n_clicks, opened):
     """Callback function for toggling drawer visibility."""
-    if ctx.triggered_id == "drawer-button":
-        return not opened
+    return not opened
 
 
 @callback(
