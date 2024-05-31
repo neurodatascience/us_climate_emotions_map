@@ -149,6 +149,41 @@ def create_navbar():
     )
 
 
+def create_design_credit():
+    """Create the text hovercard for web app developer details."""
+    short_credit = dmc.Text(
+        children="Web app built by members of the ORIGAMI Lab",
+        size="sm",
+        c="dimmed",
+    )
+
+    long_credit = dmc.Text(
+        children=[
+            dmc.Text(
+                "Alyssa Dai, Nikhil Bhagwat, Rémi Gau, Arman Jahanpour, Kendra Oudyk, Sebastian Urchs, Michelle Wang"
+            ),
+            dmc.Anchor(
+                "ORIGAMI Lab, PI: Jean-Baptiste Poline",
+                href="https://neurodatascience.github.io/",
+                target="_blank",
+            ),
+        ],
+        size="xs",
+        c="dimmed",
+    )
+
+    return dmc.HoverCard(
+        withArrow=True,
+        width=350,
+        offset=3,
+        shadow="sm",
+        children=[
+            dmc.HoverCardTarget(children=short_credit),
+            dmc.HoverCardDropdown(children=long_credit),
+        ],
+    )
+
+
 def create_header():
     """Create the header for the dashboard."""
     return dmc.AppShellHeader(
@@ -174,6 +209,7 @@ def create_header():
                         dmc.GridCol(
                             dmc.Group(
                                 justify="flex-end",
+                                children=[create_design_credit()],
                                 # TODO: Add GitHub link? Not sure if needed/wanted.
                                 # TODO: Add link to paper
                             ),
