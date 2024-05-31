@@ -8,8 +8,8 @@ from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
-    DEFAULT_MAP_TITLE,
     DEFAULT_QUESTION,
+    SECTION_TITLES,
 )
 
 
@@ -99,7 +99,9 @@ def create_sample_description_drawer():
     return dmc.Container(
         [
             dmc.Button(
-                "View Sample Description", id="drawer-button", variant="subtle"
+                "View Sample Characteristics",
+                id="drawer-button",
+                variant="subtle",
             ),
             dmc.Drawer(
                 children=[
@@ -107,7 +109,9 @@ def create_sample_description_drawer():
                     create_drawer_sample_size(),
                     create_sample_descriptive_plot(),
                 ],
-                title=dmc.Title("Sample Description", order=3, fw=300),
+                title=dmc.Title(
+                    SECTION_TITLES["demographics"], order=3, fw=300
+                ),
                 id="drawer",
                 padding="md",
                 transitionProps={
@@ -160,7 +164,7 @@ def create_header():
                     children=[
                         dmc.GridCol(
                             children=dmc.Anchor(
-                                "US Climate Emotions Map 2024",
+                                SECTION_TITLES["app"],
                                 size="xl",
                                 href="/",
                                 underline=False,
@@ -183,12 +187,12 @@ def create_header():
 
 
 def create_question_title():
-    """Create the title for the main content of the dashboard."""
+    """Create the title for the map section of the dashboard."""
     return dmc.Stack(
         children=[
             dmc.Title(
                 id="map-title",
-                children=DEFAULT_MAP_TITLE,
+                children=SECTION_TITLES["map_opinions"],
                 order=3,
                 fw=300,
             ),
