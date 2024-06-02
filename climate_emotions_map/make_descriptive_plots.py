@@ -243,7 +243,7 @@ def wrap_df_column_values(series: pd.Series, width: int) -> pd.DataFrame:
     return series
 
 
-def make_impact_plot_traces(df: pd.DataFrame):
+def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=15):
     data_impact = df.loc[
         df[COL_DEMOGRAPHIC_VARIABLE].isin(IMPACT_VARIABLES)
     ].copy()
@@ -260,7 +260,7 @@ def make_impact_plot_traces(df: pd.DataFrame):
                     data_category[COL_DEMOGRAPHIC_VARIABLE].apply(
                         get_demographic_variable_to_display
                     ),
-                    width=15,
+                    width=text_wrap_width,
                 ),
                 y=data_category[COL_PERCENTAGE] * 100,
                 text=[
@@ -282,7 +282,12 @@ def make_impact_plot_traces(df: pd.DataFrame):
     return traces
 
 
-def make_descriptive_plots(state: str | None = None) -> go.Figure:
+def make_descriptive_plots(
+    state: str | None = None, margins=None, text_wrap_width=15
+) -> go.Figure:
+
+    if margins is None:
+        margins = {"l": 0, "r": 0, "t": 20, "b": 0}
 
     # get data to plot
     if state is None:
@@ -315,7 +320,9 @@ def make_descriptive_plots(state: str | None = None) -> go.Figure:
         row, col = SUBPLOT_POSITIONS[demographic_variable]
 
         if demographic_variable == IMPACTS_LABEL:
-            traces = make_impact_plot_traces(data)
+            traces = make_impact_plot_traces(
+                data, text_wrap_width=text_wrap_width
+            )
         else:
             traces = make_descriptive_plot_traces(data, demographic_variable)
             if demographic_variable != Q2_LABEL:
@@ -350,7 +357,7 @@ def make_descriptive_plots(state: str | None = None) -> go.Figure:
 
     fig.update_layout(
         showlegend=False,
-        margin={"l": 0, "r": 0, "t": 20, "b": 0},
+        margin=margins,
     )
 
     return fig
