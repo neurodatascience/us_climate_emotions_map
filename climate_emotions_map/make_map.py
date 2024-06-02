@@ -1,7 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-
-from .data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
+from data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
 
 survey_states = GEOJSON_OBJECTS["survey_states.json"]
 
@@ -58,10 +57,12 @@ def make_map(
     clicked_state: str | None = None,
     impact: str | None = None,
     show_impact_as_gradient=True,
-    opinion_colormap: str | None = None,
-    impact_colormap: str | None = "OrRd",
+    opinion_colormap: str | None = "Greens",
+    impact_colormap: str | None = "Oranges",
     clicked_state_marker: dict | None = None,
     impact_marker_size_scale: float = 1.0,
+    colormap_range_padding=10,
+    margins=None,
 ) -> go.Figure:
     """Generate choropleth map showing opinion and/or impact data.
 
@@ -81,14 +82,18 @@ def make_map(
         Whether to show impact information in the base map (replacing opinion
         data) instead of as an additional scatter plot, by default True
     opinion_colormap : str | None, optional
-        Colormap for the opinion data, by default None
+        Colormap for the opinion data, by default "Greens"
     impact_colormap : str | None, optional
-        Colormap for the impact data, by default "OrRd"
+        Colormap for the impact data, by default "Oranges"
     clicked_state_marker : dict | None, optional
         Configuration for the clicked state (e.g., highlighting color). By
-        default it will make the outline thicker and yellow.
+        default it will make the outline thicker and yellow
     impact_marker_size_scale : float, optional
         Scale factor for the impact marker size, by default 1.0
+    colormap_range_padding : int, optional
+        Padding for the colormap vmin/vmax range, by default 10
+    margins : dict | None, optional
+        Margins for the Plotly figure, by default 30 everywhere
 
     Returns
     -------
@@ -108,6 +113,8 @@ def make_map(
     # default values
     if clicked_state_marker is None:
         clicked_state_marker = dict(line=dict(width=4, color="yellow"))
+    if margins is None:
+        margins = {"l": 30, "r": 30, "t": 30, "b": 30}
 
     # get the state abbreviations in long format
     # "state" (i.e. state or cluster), "single_state", "state_abbreviated"
@@ -160,8 +167,8 @@ def make_map(
         colormap = opinion_colormap
 
     # get minimum/maximum values for scaling the colormap
-    vmin = df_to_plot[col_gradient].min()
-    vmax = df_to_plot[col_gradient].max()
+    vmin = max(0, df_to_plot[col_gradient].min() - colormap_range_padding)
+    vmax = min(100, df_to_plot[col_gradient].max() + colormap_range_padding)
 
     # initialize the figure
     fig = go.Figure()
@@ -264,9 +271,10 @@ def make_map(
     # do not show base map
     fig.update_geos(visible=False)
 
-    # zoom in to the US
+    # zoom in to the US and adjust margins
     fig.update_layout(
         geo_scope="usa",
+        margin=margins,
     )
 
     return fig
@@ -275,8 +283,6 @@ def make_map(
 # if __name__ == "__main__":
 
 #     import numpy as np
-#     import plotly.express as px
-
 
 #     # pick a random state/cluster to highlight
 #     states = state_abbreviations["state"].tolist()
@@ -285,12 +291,12 @@ def make_map(
 #     print(f"clicked_state: {clicked_state}")
 
 #     fig = make_map(
-#         question="q2",
+#         question="q9b",
 #         sub_question="1",
 #         outcome="3+",
 #         clicked_state=clicked_state,
-#         impact="tornado",
-#         show_impact_as_gradient=False,
+#         # impact="tornado",
+#         show_impact_as_gradient=True,
 #     )
 
 #     fig.show()
