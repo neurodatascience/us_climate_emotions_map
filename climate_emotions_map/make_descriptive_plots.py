@@ -122,13 +122,13 @@ SUBPLOT_POSITIONS = {
     "sex": (1, 1),
     "race": (1, 1),
     "ethnicity": (1, 1),
-    "party": (1, 1),
-    "student": (1, 1),
-    "employed": (1, 1),
-    "location": (1, 1),
-    "hh_origin": (1, 1),
-    IMPACTS_LABEL: (4, 1),
-    Q2_LABEL: (5, 1),
+    "party": (1, 2),
+    "student": (1, 2),
+    "employed": (1, 2),
+    "location": (1, 2),
+    "hh_origin": (1, 2),
+    IMPACTS_LABEL: (3, 1),
+    Q2_LABEL: (4, 1),
 }
 
 
@@ -292,27 +292,31 @@ def make_descriptive_plots(state: str | None = None) -> go.Figure:
 
     # initialize figure
     fig = make_subplots(
-        rows=5,
-        cols=1,
+        rows=4,
+        cols=2,
         specs=[
-            [{"rowspan": 3}],
-            [None],
-            [None],
-            [{"rowspan": 1}],
-            [{"rowspan": 1}],
+            [{"rowspan": 2}, {"rowspan": 2}],
+            [None, None],
+            # [None, None],
+            [{"rowspan": 1, "colspan": 2}, None],
+            [{"rowspan": 1, "colspan": 2}, None],
         ],
         subplot_titles=[
             "Demographic information",
+            "More demographic information",
             get_demographic_variable_to_display(IMPACTS_LABEL),
             get_demographic_variable_to_display(Q2_LABEL),
         ],
     )
 
     # add plots
-    demographic_variable_labels = []
+    demographic_variable_labels_by_col = {}
     for demographic_variable in reversed(SUBPLOT_POSITIONS.keys()):
 
         row, col = SUBPLOT_POSITIONS[demographic_variable]
+        if col not in demographic_variable_labels_by_col:
+            demographic_variable_labels_by_col[col] = []
+        demographic_variable_labels = demographic_variable_labels_by_col[col]
 
         if demographic_variable == IMPACTS_LABEL:
             traces = make_impact_plot_traces(data)
@@ -346,7 +350,7 @@ def make_descriptive_plots(state: str | None = None) -> go.Figure:
                 row=row,
                 col=col,
             )
-            fig.update_xaxes(range=[0, 100], row=row, col=col)
+            # fig.update_xaxes(range=[0, 100], row=row, col=col)
 
     fig.update_layout(
         showlegend=False,
