@@ -63,6 +63,7 @@ def load_survey_data() -> dict[str, pd.DataFrame]:
 def load_data_dictionaries() -> dict[str, pd.DataFrame]:
     """Load the data dictionaries for the survey data."""
     data_files = [
+        "demographics_dictionary.tsv",
         "impacts_list.tsv",
         "outcome_dictionary.tsv",
         "question_dictionary.tsv",
