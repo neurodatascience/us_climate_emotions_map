@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from functools import partial
+from textwrap import wrap
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -22,6 +23,9 @@ IMPACTS_LABEL = "impact"
 IMPACT_VARIABLES = sorted(
     ["drought", "flood", "heat", "hurricane", "smoke", "tornado", "wildfire"]
 )
+
+# special handling of q2
+Q2_LABEL = "q2"
 
 # order in the lists determines order in the plots
 CATEGORY_ORDERS = {
@@ -96,7 +100,7 @@ CATEGORY_ORDERS = {
         "No",
         "Yes",
     ],
-    "q2": [
+    Q2_LABEL: [
         "Very sure it is not happening",
         "Moderately sure it is not happening",
         "Slightly sure it is not happening",
@@ -124,7 +128,7 @@ SUBPLOT_POSITIONS = {
     "location": (1, 1),
     "hh_origin": (1, 1),
     IMPACTS_LABEL: (4, 1),
-    "q2": (5, 1),
+    Q2_LABEL: (5, 1),
 }
 
 
@@ -179,15 +183,16 @@ def make_descriptive_plot_traces(
     df[COL_CATEGORY] = pd.Categorical(
         df[COL_CATEGORY], categories=CATEGORY_ORDERS[demographic_variable]
     )
-    df = df.sort_values(COL_CATEGORY)  # , ascending=not reverse)
+    df = df.sort_values(COL_CATEGORY, ascending=not reverse)
 
     bar_plot_trace_without_text = partial(
         go.Bar,
         x=df[COL_PERCENTAGE] * 100,
-        y=(
-            [get_demographic_variable_to_display(demographic_variable)]
-            * len(df[COL_CATEGORY].apply(get_category_to_display))
-        ),
+        # y=(
+        #     [get_demographic_variable_to_display(demographic_variable)]
+        #     * len(df[COL_CATEGORY].apply(get_category_to_display))
+        # ),
+        y=df[COL_CATEGORY].apply(get_category_to_display),
         hoverinfo="none",
         customdata=list(
             zip(
@@ -196,16 +201,6 @@ def make_descriptive_plot_traces(
             )
         ),
         orientation="h",
-        # textposition="inside",
-        # text=[
-        #     f"{n} ({percentage*100:.1f}%)"
-        #     for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
-        # ],
-        # hovertemplate=(
-        #     f"<b>{get_demographic_variable_to_display(demographic_variable)}</b>"
-        #     "<br>%{x}: %{y} (%{customdata:.1f}%)"
-        #     "<extra></extra>"
-        # ),
         name=demographic_variable,
         offsetgroup=0,
     )
@@ -216,27 +211,36 @@ def make_descriptive_plot_traces(
         bar_plot_trace_without_text(
             textposition="inside",
             text=[
-                f"{get_category_to_display(category)}: {percentage*100:.1f}% ({n})"
-                for n, percentage, category in zip(
-                    df[COL_N], df[COL_PERCENTAGE], df[COL_CATEGORY]
-                )
+                f"{percentage*100:.1f}% ({n})"
+                for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
             ],
-            hovertemplate=(
-                # f"<b>{get_demographic_variable_to_display(demographic_variable)}</b>"
-                "<b>%{customdata[1]}</b>: %{x:.2f}% (%{customdata[0]})"
-                "<extra></extra>"
-            ),
+            # hovertemplate=(
+            #     # f"<b>{get_demographic_variable_to_display(demographic_variable)}</b>"
+            #     "<b>%{customdata[1]}</b>: %{x:.2f}% (%{customdata[0]})"
+            #     "<extra></extra>"
+            # ),
         ),
     )
 
-    # traces.append(
-    #     bar_plot_trace_without_text(
-    #         textposition="outside",
-    #         text=df[COL_CATEGORY].apply(get_category_to_display),
-    #         marker_color="rgba(0,0,0,0)",
-    #     )
-    # )
+    traces.append(
+        bar_plot_trace_without_text(
+            textposition="outside",
+            text=df[COL_CATEGORY].apply(get_category_to_display),
+            marker_color="rgba(0,0,0,0)",
+        )
+    )
     return traces
+
+
+def wrap_df_column_values(series: pd.Series, width: int) -> pd.DataFrame:
+    """Wraps string values of a column which are longer than the specified character length."""
+    series = series.map(
+        lambda value: "<br>".join(
+            wrap(text=value, width=width, break_long_words=False)
+        ),
+        na_action="ignore",
+    )
+    return series
 
 
 def make_impact_plot_traces(df: pd.DataFrame):
@@ -252,17 +256,26 @@ def make_impact_plot_traces(df: pd.DataFrame):
         data_category = data_impact.loc[data_impact[COL_CATEGORY] == category]
         traces.append(
             go.Bar(
-                x=data_category[COL_DEMOGRAPHIC_VARIABLE].apply(
-                    get_demographic_variable_to_display
+                x=wrap_df_column_values(
+                    data_category[COL_DEMOGRAPHIC_VARIABLE].apply(
+                        get_demographic_variable_to_display
+                    ),
+                    width=15,
                 ),
-                y=data_category[COL_N],
-                customdata=data_category[COL_PERCENTAGE] * 100,
-                hovertemplate=(
-                    "<b>%{x}</b>"
-                    f"<br>{category}: %{{y}} (%{{customdata:.1f}}%)"
-                    "<extra></extra>"
-                ),
-                constraintext="outside",
+                y=data_category[COL_PERCENTAGE] * 100,
+                text=[
+                    f"{percentage*100:.1f}% ({n})"
+                    for percentage, n in zip(
+                        data_category[COL_PERCENTAGE], data_category[COL_N]
+                    )
+                ],
+                # customdata=data_category[COL_PERCENTAGE] * 100,
+                # hovertemplate=(
+                #     "<b>%{x}</b>"
+                #     f"<br>{category}: %{{y}} (%{{customdata:.1f}}%)"
+                #     "<extra></extra>"
+                # ),
+                hoverinfo="none",
                 name=category,
             )
         )
@@ -287,61 +300,58 @@ def make_descriptive_plots(state: str | None = None) -> go.Figure:
             [None],
             [{"rowspan": 1}],
             [{"rowspan": 1}],
-            # [{"colspan": 2}, None, {"colspan": 2}, None, {"colspan": 2}, None],
-            # [{"colspan": 3}, None, None, {"colspan": 3}, None, None],
-            # [{"colspan": 3}, None, None, {"colspan": 3}, None, None],
-            # [{"colspan": 3}, None, None, {"colspan": 3}, None, None],
-            # [{"colspan": 6}, None, None, None, None, None],
-            # [{"colspan": 6}, None, None, None, None, None],
         ],
         subplot_titles=[
             "Demographic information",
             get_demographic_variable_to_display(IMPACTS_LABEL),
-            get_demographic_variable_to_display("q2"),
+            get_demographic_variable_to_display(Q2_LABEL),
         ],
-        # subplot_titles=[
-        #     get_demographic_variable_to_display(demographic_variable)
-        #     for demographic_variable in SUBPLOT_POSITIONS.keys()
-        # ],
     )
 
     # add plots
+    demographic_variable_labels = []
     for demographic_variable in reversed(SUBPLOT_POSITIONS.keys()):
 
         row, col = SUBPLOT_POSITIONS[demographic_variable]
 
         if demographic_variable == IMPACTS_LABEL:
             traces = make_impact_plot_traces(data)
-            horizontal = False
         else:
             traces = make_descriptive_plot_traces(data, demographic_variable)
-            horizontal = True
+            if demographic_variable != Q2_LABEL:
+                demographic_variable_labels.extend(
+                    [demographic_variable] * len(traces[0].y)
+                )
 
         for trace in traces:
             fig.add_trace(trace, row=row, col=col)
 
-        if horizontal:
+        if not demographic_variable == IMPACTS_LABEL:
+            if demographic_variable == Q2_LABEL:
+                tickvals = ["" for _ in CATEGORY_ORDERS[demographic_variable]]
+                ticktext = tickvals
+            else:
+                df_y_ticks = pd.DataFrame(demographic_variable_labels)
+                df_y_ticks = (
+                    df_y_ticks.reset_index().groupby(0).mean().reset_index()
+                )
+                # print(df_y_ticks)
+                tickvals = df_y_ticks["index"]
+                ticktext = df_y_ticks[0].apply(
+                    get_demographic_variable_to_display
+                )
             fig.update_yaxes(
-                # ticklabelposition="inside",
-                # tickfont={"color": "rgba(0,0,0,0)"},
+                tickvals=tickvals,
+                ticktext=ticktext,
                 row=row,
                 col=col,
             )
             fig.update_xaxes(range=[0, 100], row=row, col=col)
 
-    # fig.update_yaxes(
-    #     tickmode="array",
-    #     ticklabelposition="inside",
-    #     tickvals=y,
-    #     ticktext=y,
-    #     row=row,
-    #     col=col,
-    # )
-
-    # turn off legend
-    fig.update_layout(showlegend=False)
-
-    fig.update_layout(margin={"l": 30, "r": 30, "t": 30, "b": 30})
+    fig.update_layout(
+        showlegend=False,
+        margin={"l": 0, "r": 0, "t": 20, "b": 0},
+    )
 
     return fig
 
