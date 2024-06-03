@@ -165,7 +165,9 @@ def get_demographic_variable_to_display(demographic_variable: str):
     return demographic_variable_to_display
 
 
-def get_category_to_display(category: str):
+def get_category_to_display(category: str, demographic_variable: str):
+    if demographic_variable == "student":
+        category = {"yes": "student", "no": "non-student"}[category.lower()]
     return category.capitalize()
 
 
@@ -199,11 +201,15 @@ def make_descriptive_plot_traces(
     bar_plot_trace_without_text = partial(
         go.Bar,
         x=df[COL_PERCENTAGE] * 100,
-        y=df[COL_CATEGORY].apply(get_category_to_display),
+        y=df[COL_CATEGORY].apply(
+            lambda x: get_category_to_display(x, demographic_variable)
+        ),
         customdata=list(
             zip(
                 df[COL_N],
-                df[COL_CATEGORY].apply(get_category_to_display),
+                df[COL_CATEGORY].apply(
+                    lambda x: get_category_to_display(x, demographic_variable)
+                ),
             )
         ),
         orientation="h",
@@ -230,7 +236,9 @@ def make_descriptive_plot_traces(
     traces.append(
         bar_plot_trace_without_text(
             textposition="outside",
-            text=df[COL_CATEGORY].apply(get_category_to_display),
+            text=df[COL_CATEGORY].apply(
+                lambda x: get_category_to_display(x, demographic_variable)
+            ),
             marker_color="rgba(0,0,0,0)",
             hoverinfo="skip",
         )
