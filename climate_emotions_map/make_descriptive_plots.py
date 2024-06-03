@@ -2,8 +2,10 @@
 from functools import partial
 from textwrap import wrap
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.colors import sample_colorscale
 from plotly.subplots import make_subplots
 
 from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
@@ -174,6 +176,7 @@ def get_category_to_display(category: str, demographic_variable: str):
 def make_descriptive_plot_traces(
     df: pd.DataFrame,
     demographic_variable: str,
+    marker_color=None,
     reverse=True,
 ) -> go.Bar:
     """
@@ -230,6 +233,7 @@ def make_descriptive_plot_traces(
                 "<b>%{customdata[1]}</b>: %{x:.2f}% (%{customdata[0]})"
                 "<extra></extra>"
             ),
+            marker_color=marker_color,
         ),
     )
 
@@ -251,7 +255,9 @@ def wrap_text_label(text: str, width: int) -> pd.DataFrame:
     return "<br>".join(wrap(text=text, width=width, break_long_words=False))
 
 
-def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=10):
+def make_impact_plot_traces(
+    df: pd.DataFrame, marker_color=None, text_wrap_width=10
+):
     data_impact = df.loc[
         df[COL_DEMOGRAPHIC_VARIABLE].isin(IMPACT_VARIABLES)
     ].copy()
@@ -284,6 +290,7 @@ def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=10):
                     ": %{y:.2f}% (%{customdata[1]})"
                     "<extra></extra>"
                 ),
+                marker_color=marker_color,
                 hoverinfo="none",
                 name=category,
             )
@@ -321,19 +328,25 @@ def make_descriptive_plots(
         vertical_spacing=0.04,
     )
 
+    colorscale_step = 1 / (len(row_heights) - 1)
+    colors = sample_colorscale(
+        "turbo", np.arange(0, 1 + colorscale_step, colorscale_step)
+    )
+
     # add plots
     demographic_variable_labels = []
     for demographic_variable in SUBPLOT_POSITIONS.keys():
 
         row, col = SUBPLOT_POSITIONS[demographic_variable]
+        color = colors[row - 1]
 
         if demographic_variable == IMPACTS_LABEL:
             traces = make_impact_plot_traces(
-                data, text_wrap_width=text_wrap_width
+                data, text_wrap_width=text_wrap_width, marker_color=color
             )
         else:
             traces = make_descriptive_plot_traces(
-                data, demographic_variable, reverse=True
+                data, demographic_variable, reverse=True, marker_color=color
             )
             if demographic_variable != Q2_LABEL:
                 demographic_variable_labels.extend(
