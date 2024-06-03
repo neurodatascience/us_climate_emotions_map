@@ -133,17 +133,6 @@ SUBPLOT_POSITIONS = {
     "hh_origin": (9, 1),
     IMPACTS_LABEL: (10, 1),
     Q2_LABEL: (11, 1),
-    # "age": (1, 1),
-    # "sex": (3, 1),
-    # "race": (5, 1),
-    # "ethnicity": (8, 1),
-    # "party": (10, 1),
-    # "student": (13, 1),
-    # "employed": (15, 1),
-    # "location": (18, 1),
-    # "hh_origin": (21, 1),
-    # IMPACTS_LABEL: (26, 1),
-    # Q2_LABEL: (30, 1),
 }
 
 
@@ -210,12 +199,7 @@ def make_descriptive_plot_traces(
     bar_plot_trace_without_text = partial(
         go.Bar,
         x=df[COL_PERCENTAGE] * 100,
-        # y=(
-        #     [get_demographic_variable_to_display(demographic_variable)]
-        #     * len(df[COL_CATEGORY].apply(get_category_to_display))
-        # ),
         y=df[COL_CATEGORY].apply(get_category_to_display),
-        # hoverinfo="none",
         customdata=list(
             zip(
                 df[COL_N],
@@ -237,7 +221,6 @@ def make_descriptive_plot_traces(
                 for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
             ],
             hovertemplate=(
-                # f"<b>{get_demographic_variable_to_display(demographic_variable)}</b>"
                 "<b>%{customdata[1]}</b>: %{x:.2f}% (%{customdata[0]})"
                 "<extra></extra>"
             ),
@@ -318,53 +301,9 @@ def make_descriptive_plots(
 
     # initialize figure
     fig = make_subplots(
-        # rows=36,
         rows=len(row_heights),
         cols=1,
         row_heights=row_heights,
-        # specs=[
-        #     [{"rowspan": 2}],
-        #     [None],
-        #     [{"rowspan": 2}],
-        #     [None],
-        #     [{"rowspan": 3}],
-        #     [None],
-        #     [None],
-        #     [{"rowspan": 2}],
-        #     [None],
-        #     [{"rowspan": 3}],
-        #     [None],
-        #     [None],
-        #     [{"rowspan": 2}],
-        #     [None],
-        #     [{"rowspan": 3}],
-        #     [None],
-        #     [None],
-        #     [{"rowspan": 3}],
-        #     [None],
-        #     [None],
-        #     [{"rowspan": 5}],
-        #     [None],
-        #     [None],
-        #     [None],
-        #     [None],
-        #     [{"rowspan": 4}],
-        #     [None],
-        #     [None],
-        #     [None],
-        #     [{"rowspan": 7}],
-        #     [None],
-        #     [None],
-        #     [None],
-        #     [None],
-        #     [None],
-        #     [None],
-        # ],
-        # subplot_titles=[
-        #     "Demographic information",
-        #     get_demographic_variable_to_display(IMPACTS_LABEL),
-        #     get_demographic_variable_to_display(Q2_LABEL),
-        # ],
         subplot_titles=[
             get_demographic_variable_to_display(demographic_variable)
             for demographic_variable in SUBPLOT_POSITIONS
@@ -397,19 +336,7 @@ def make_descriptive_plots(
         if not demographic_variable == IMPACTS_LABEL:
             tickvals = ["" for _ in CATEGORY_ORDERS[demographic_variable]]
             ticktext = tickvals
-            # if demographic_variable == Q2_LABEL:
-            #     tickvals = ["" for _ in CATEGORY_ORDERS[demographic_variable]]
-            #     ticktext = tickvals
-            # else:
-            #     df_y_ticks = pd.DataFrame(demographic_variable_labels)
-            #     df_y_ticks = (
-            #         df_y_ticks.reset_index().groupby(0).mean().reset_index()
-            #     )
-            #     # print(df_y_ticks)
-            #     tickvals = df_y_ticks["index"]
-            #     ticktext = df_y_ticks[0].apply(
-            #         get_demographic_variable_to_display
-            #     )
+
             fig.update_yaxes(
                 tickvals=tickvals,
                 ticktext=ticktext,
@@ -425,17 +352,6 @@ def make_descriptive_plots(
             )
             fig.update_layout(bargap=0)
 
-            # # # fig.update_annotations(dict(text="%", x=50, y=1), row=row, col=col)
-            # fig.add_annotation(
-            #     x=99,
-            #     y=-0.5,
-            #     text="(%)",
-            #     ax=0,
-            #     ay=0,
-            #     font=dict(size=10),
-            #     row=row,
-            #     col=col,
-            # )
         else:
             fig.update_yaxes(
                 range=[0, 100],
