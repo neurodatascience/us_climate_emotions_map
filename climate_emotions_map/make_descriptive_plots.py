@@ -254,13 +254,12 @@ def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=10):
     traces = []
     for category in ["Yes"]:
         data_category = data_impact.loc[data_impact[COL_CATEGORY] == category]
+        x = data_category[COL_DEMOGRAPHIC_VARIABLE].apply(
+            get_demographic_variable_to_display
+        )
         traces.append(
             go.Bar(
-                x=(
-                    data_category[COL_DEMOGRAPHIC_VARIABLE]
-                    .apply(get_demographic_variable_to_display)
-                    .apply(lambda x: wrap_text_label(x, width=text_wrap_width))
-                ),
+                x=x.apply(lambda x: wrap_text_label(x, width=text_wrap_width)),
                 y=data_category[COL_PERCENTAGE] * 100,
                 text=[
                     f"{percentage*100:.1f}% ({n})"
@@ -268,10 +267,10 @@ def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=10):
                         data_category[COL_PERCENTAGE], data_category[COL_N]
                     )
                 ],
-                customdata=data_category[COL_PERCENTAGE] * 100,
+                customdata=list(zip(x, data_category[COL_N])),
                 hovertemplate=(
-                    "<b>%{x}</b>"
-                    f"<br>{category}: %{{y}} (%{{customdata:.1f}}%)"
+                    "<b>%{customdata[0]}</b>"
+                    ": %{y:.2f}% (%{customdata[1]})"
                     "<extra></extra>"
                 ),
                 hoverinfo="none",
