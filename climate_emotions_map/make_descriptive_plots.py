@@ -158,10 +158,10 @@ def get_demographic_variable_to_display(demographic_variable: str):
     )
     if demographic_variable in DEMOGRAPHIC_VARIABLES_WITH_ASTERISK:
         demographic_variable_to_display = f"{demographic_variable_to_display}*"
-    if demographic_variable == Q2_LABEL:
-        demographic_variable_to_display = wrap_text_label(
-            demographic_variable_to_display, width=38
-        )
+    # if demographic_variable == Q2_LABEL:
+    #     demographic_variable_to_display = wrap_text_label(
+    #         demographic_variable_to_display, width=38
+    #     )
     return demographic_variable_to_display
 
 
@@ -222,10 +222,10 @@ def make_descriptive_plot_traces(
     traces.append(
         bar_plot_trace_without_text(
             textposition="inside",
-            text=[
-                f"{percentage*100:.1f}% ({n})"
-                for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
-            ],
+            # text=[
+            #     f"{percentage*100:.1f}% ({n})"
+            #     for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
+            # ],
             hovertemplate=(
                 "<b>%{customdata[1]}</b>: %{x:.2f}% (%{customdata[0]})"
                 "<extra></extra>"
@@ -269,12 +269,15 @@ def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=10):
             go.Bar(
                 x=x.apply(lambda x: wrap_text_label(x, width=text_wrap_width)),
                 y=data_category[COL_PERCENTAGE] * 100,
-                text=[
-                    f"{percentage*100:.1f}% ({n})"
-                    for percentage, n in zip(
-                        data_category[COL_PERCENTAGE], data_category[COL_N]
-                    )
-                ],
+                # text=[
+                #     f"{percentage*100:.1f}% ({n})"
+                #     for percentage, n in zip(
+                #         data_category[COL_PERCENTAGE], data_category[COL_N]
+                #     )
+                # ],
+                text=x.apply(
+                    lambda x: wrap_text_label(x, width=text_wrap_width)
+                ),
                 customdata=list(zip(x, data_category[COL_N])),
                 hovertemplate=(
                     "<b>%{customdata[0]}</b>"
@@ -289,7 +292,7 @@ def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=10):
 
 
 def make_descriptive_plots(
-    state: str | None = None, margins=None, text_wrap_width=13
+    state: str | None = None, margins=None, text_wrap_width=14
 ) -> go.Figure:
 
     if margins is None:
@@ -367,6 +370,12 @@ def make_descriptive_plots(
                 row=row,
                 col=col,
             )
+            fig.update_xaxes(
+                tickvals=[],
+                ticktext=[],
+                row=row,
+                col=col,
+            )
 
         fig.update_yaxes(
             tickfont=dict(size=10),
@@ -383,10 +392,7 @@ def make_descriptive_plots(
         showlegend=False,
         margin=margins,
         template="plotly_white",
-        # autosize=False,
-        # height=1000,
-        # width=500,
-        font=dict(size=12),
+        font=dict(size=10),
     )
     fig.update_annotations(font_size=12)
 
