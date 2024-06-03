@@ -4,8 +4,9 @@ from textwrap import wrap
 
 import pandas as pd
 import plotly.graph_objects as go
-from data_loader import DATA_DICTIONARIES, SURVEY_DATA
 from plotly.subplots import make_subplots
+
+from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 DEMOGRAPHICS_DICTIONARY = DATA_DICTIONARIES["demographics_dictionary.tsv"]
 SAMPLEDESC_WHOLESAMPLE: pd.DataFrame = SURVEY_DATA[
@@ -17,6 +18,9 @@ COL_DEMOGRAPHIC_VARIABLE = "demographic_variable"
 COL_CATEGORY = "category"
 COL_N = "n"
 COL_PERCENTAGE = "percentage"
+
+# these need a note explaining the percentage weighting
+DEMOGRAPHIC_VARIABLES_WITH_ASTERISK = ["age", "sex", "race", "ethnicity"]
 
 # special handling of 7 weather impacts
 IMPACTS_LABEL = "impact"
@@ -119,16 +123,27 @@ CATEGORY_ORDERS.update(
 
 SUBPLOT_POSITIONS = {
     "age": (1, 1),
-    "sex": (1, 1),
-    "race": (1, 1),
-    "ethnicity": (1, 1),
-    "party": (1, 1),
-    "student": (1, 1),
-    "employed": (1, 1),
-    "location": (1, 1),
-    "hh_origin": (1, 1),
-    IMPACTS_LABEL: (4, 1),
-    Q2_LABEL: (5, 1),
+    "sex": (2, 1),
+    "race": (3, 1),
+    "ethnicity": (4, 1),
+    "party": (5, 1),
+    "student": (6, 1),
+    "employed": (7, 1),
+    "location": (8, 1),
+    "hh_origin": (9, 1),
+    IMPACTS_LABEL: (10, 1),
+    Q2_LABEL: (11, 1),
+    # "age": (1, 1),
+    # "sex": (3, 1),
+    # "race": (5, 1),
+    # "ethnicity": (8, 1),
+    # "party": (10, 1),
+    # "student": (13, 1),
+    # "employed": (15, 1),
+    # "location": (18, 1),
+    # "hh_origin": (21, 1),
+    # IMPACTS_LABEL: (26, 1),
+    # Q2_LABEL: (30, 1),
 }
 
 
@@ -147,11 +162,18 @@ def get_categories_dict(df: pd.DataFrame) -> dict:
 
 
 def get_demographic_variable_to_display(demographic_variable: str):
-    return (
+    demographic_variable_to_display = (
         DEMOGRAPHICS_DICTIONARY.set_index(COL_DEMOGRAPHIC_VARIABLE)
         .loc[demographic_variable]
         .item()
     )
+    if demographic_variable in DEMOGRAPHIC_VARIABLES_WITH_ASTERISK:
+        demographic_variable_to_display = f"{demographic_variable_to_display}*"
+    if demographic_variable == Q2_LABEL:
+        demographic_variable_to_display = wrap_text_label(
+            demographic_variable_to_display, width=38
+        )
+    return demographic_variable_to_display
 
 
 def get_category_to_display(category: str):
@@ -193,7 +215,7 @@ def make_descriptive_plot_traces(
         #     * len(df[COL_CATEGORY].apply(get_category_to_display))
         # ),
         y=df[COL_CATEGORY].apply(get_category_to_display),
-        hoverinfo="none",
+        # hoverinfo="none",
         customdata=list(
             zip(
                 df[COL_N],
@@ -214,11 +236,11 @@ def make_descriptive_plot_traces(
                 f"{percentage*100:.1f}% ({n})"
                 for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
             ],
-            # hovertemplate=(
-            #     # f"<b>{get_demographic_variable_to_display(demographic_variable)}</b>"
-            #     "<b>%{customdata[1]}</b>: %{x:.2f}% (%{customdata[0]})"
-            #     "<extra></extra>"
-            # ),
+            hovertemplate=(
+                # f"<b>{get_demographic_variable_to_display(demographic_variable)}</b>"
+                "<b>%{customdata[1]}</b>: %{x:.2f}% (%{customdata[0]})"
+                "<extra></extra>"
+            ),
         ),
     )
 
@@ -227,23 +249,18 @@ def make_descriptive_plot_traces(
             textposition="outside",
             text=df[COL_CATEGORY].apply(get_category_to_display),
             marker_color="rgba(0,0,0,0)",
+            hoverinfo="skip",
         )
     )
     return traces
 
 
-def wrap_df_column_values(series: pd.Series, width: int) -> pd.DataFrame:
+def wrap_text_label(text: str, width: int) -> pd.DataFrame:
     """Wraps string values of a column which are longer than the specified character length."""
-    series = series.map(
-        lambda value: "<br>".join(
-            wrap(text=value, width=width, break_long_words=False)
-        ),
-        na_action="ignore",
-    )
-    return series
+    return "<br>".join(wrap(text=text, width=width, break_long_words=False))
 
 
-def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=15):
+def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=10):
     data_impact = df.loc[
         df[COL_DEMOGRAPHIC_VARIABLE].isin(IMPACT_VARIABLES)
     ].copy()
@@ -256,11 +273,10 @@ def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=15):
         data_category = data_impact.loc[data_impact[COL_CATEGORY] == category]
         traces.append(
             go.Bar(
-                x=wrap_df_column_values(
-                    data_category[COL_DEMOGRAPHIC_VARIABLE].apply(
-                        get_demographic_variable_to_display
-                    ),
-                    width=text_wrap_width,
+                x=(
+                    data_category[COL_DEMOGRAPHIC_VARIABLE]
+                    .apply(get_demographic_variable_to_display)
+                    .apply(lambda x: wrap_text_label(x, width=text_wrap_width))
                 ),
                 y=data_category[COL_PERCENTAGE] * 100,
                 text=[
@@ -269,12 +285,12 @@ def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=15):
                         data_category[COL_PERCENTAGE], data_category[COL_N]
                     )
                 ],
-                # customdata=data_category[COL_PERCENTAGE] * 100,
-                # hovertemplate=(
-                #     "<b>%{x}</b>"
-                #     f"<br>{category}: %{{y}} (%{{customdata:.1f}}%)"
-                #     "<extra></extra>"
-                # ),
+                customdata=data_category[COL_PERCENTAGE] * 100,
+                hovertemplate=(
+                    "<b>%{x}</b>"
+                    f"<br>{category}: %{{y}} (%{{customdata:.1f}}%)"
+                    "<extra></extra>"
+                ),
                 hoverinfo="none",
                 name=category,
             )
@@ -283,7 +299,7 @@ def make_impact_plot_traces(df: pd.DataFrame, text_wrap_width=15):
 
 
 def make_descriptive_plots(
-    state: str | None = None, margins=None, text_wrap_width=15
+    state: str | None = None, margins=None, text_wrap_width=13
 ) -> go.Figure:
 
     if margins is None:
@@ -295,27 +311,70 @@ def make_descriptive_plots(
     else:
         data = SAMPLEDESC_STATE.loc[SAMPLEDESC_STATE["state"] == state]
 
+    row_heights = [
+        n_categories + 0.5
+        for n_categories in [2, 2, 3, 2, 3, 2, 3, 3, 5, 5, 8]
+    ]
+
     # initialize figure
     fig = make_subplots(
-        rows=5,
+        # rows=36,
+        rows=len(row_heights),
         cols=1,
-        specs=[
-            [{"rowspan": 3}],
-            [None],
-            [None],
-            [{"rowspan": 1}],
-            [{"rowspan": 1}],
-        ],
+        row_heights=row_heights,
+        # specs=[
+        #     [{"rowspan": 2}],
+        #     [None],
+        #     [{"rowspan": 2}],
+        #     [None],
+        #     [{"rowspan": 3}],
+        #     [None],
+        #     [None],
+        #     [{"rowspan": 2}],
+        #     [None],
+        #     [{"rowspan": 3}],
+        #     [None],
+        #     [None],
+        #     [{"rowspan": 2}],
+        #     [None],
+        #     [{"rowspan": 3}],
+        #     [None],
+        #     [None],
+        #     [{"rowspan": 3}],
+        #     [None],
+        #     [None],
+        #     [{"rowspan": 5}],
+        #     [None],
+        #     [None],
+        #     [None],
+        #     [None],
+        #     [{"rowspan": 4}],
+        #     [None],
+        #     [None],
+        #     [None],
+        #     [{"rowspan": 7}],
+        #     [None],
+        #     [None],
+        #     [None],
+        #     [None],
+        #     [None],
+        #     [None],
+        # ],
+        # subplot_titles=[
+        #     "Demographic information",
+        #     get_demographic_variable_to_display(IMPACTS_LABEL),
+        #     get_demographic_variable_to_display(Q2_LABEL),
+        # ],
         subplot_titles=[
-            "Demographic information",
-            get_demographic_variable_to_display(IMPACTS_LABEL),
-            get_demographic_variable_to_display(Q2_LABEL),
+            get_demographic_variable_to_display(demographic_variable)
+            for demographic_variable in SUBPLOT_POSITIONS
         ],
+        vertical_spacing=0.04,
     )
 
     # add plots
     demographic_variable_labels = []
-    for demographic_variable in reversed(SUBPLOT_POSITIONS.keys()):
+    for demographic_variable in SUBPLOT_POSITIONS.keys():
 
         row, col = SUBPLOT_POSITIONS[demographic_variable]
 
@@ -324,7 +383,9 @@ def make_descriptive_plots(
                 data, text_wrap_width=text_wrap_width
             )
         else:
-            traces = make_descriptive_plot_traces(data, demographic_variable)
+            traces = make_descriptive_plot_traces(
+                data, demographic_variable, reverse=True
+            )
             if demographic_variable != Q2_LABEL:
                 demographic_variable_labels.extend(
                     [demographic_variable] * len(traces[0].y)
@@ -334,47 +395,93 @@ def make_descriptive_plots(
             fig.add_trace(trace, row=row, col=col)
 
         if not demographic_variable == IMPACTS_LABEL:
-            if demographic_variable == Q2_LABEL:
-                tickvals = ["" for _ in CATEGORY_ORDERS[demographic_variable]]
-                ticktext = tickvals
-            else:
-                df_y_ticks = pd.DataFrame(demographic_variable_labels)
-                df_y_ticks = (
-                    df_y_ticks.reset_index().groupby(0).mean().reset_index()
-                )
-                # print(df_y_ticks)
-                tickvals = df_y_ticks["index"]
-                ticktext = df_y_ticks[0].apply(
-                    get_demographic_variable_to_display
-                )
+            tickvals = ["" for _ in CATEGORY_ORDERS[demographic_variable]]
+            ticktext = tickvals
+            # if demographic_variable == Q2_LABEL:
+            #     tickvals = ["" for _ in CATEGORY_ORDERS[demographic_variable]]
+            #     ticktext = tickvals
+            # else:
+            #     df_y_ticks = pd.DataFrame(demographic_variable_labels)
+            #     df_y_ticks = (
+            #         df_y_ticks.reset_index().groupby(0).mean().reset_index()
+            #     )
+            #     # print(df_y_ticks)
+            #     tickvals = df_y_ticks["index"]
+            #     ticktext = df_y_ticks[0].apply(
+            #         get_demographic_variable_to_display
+            #     )
             fig.update_yaxes(
                 tickvals=tickvals,
                 ticktext=ticktext,
                 row=row,
                 col=col,
             )
-            fig.update_xaxes(range=[0, 100], row=row, col=col)
+            fig.update_xaxes(
+                range=[0, 105],
+                tickvals=[0, 20, 40, 60, 80, 100],
+                ticktext=["0", "20", "40", "60", "80", "100 (%)"],
+                row=row,
+                col=col,
+            )
+            fig.update_layout(bargap=0)
+
+            # # # fig.update_annotations(dict(text="%", x=50, y=1), row=row, col=col)
+            # fig.add_annotation(
+            #     x=99,
+            #     y=-0.5,
+            #     text="(%)",
+            #     ax=0,
+            #     ay=0,
+            #     font=dict(size=10),
+            #     row=row,
+            #     col=col,
+            # )
+        else:
+            fig.update_yaxes(
+                range=[0, 100],
+                tickvals=[0, 20, 40, 60, 80, 100],
+                ticktext=["0", "20", "40", "60", "80", "(%)"],
+                row=row,
+                col=col,
+            )
+
+        fig.update_yaxes(
+            tickfont=dict(size=10),
+            row=row,
+            col=col,
+        )
+        fig.update_xaxes(
+            tickfont=dict(size=10),
+            row=row,
+            col=col,
+        )
 
     fig.update_layout(
         showlegend=False,
         margin=margins,
+        template="plotly_white",
+        # autosize=False,
+        # height=1000,
+        # width=500,
+        font=dict(size=12),
     )
+    fig.update_annotations(font_size=12)
 
     return fig
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # whole sample
-    fig = make_descriptive_plots()
+#     # whole sample
+#     fig = make_descriptive_plots()
 
-    # # specific state
-    # import numpy as np
+#     # # specific state
+#     # import numpy as np
 
-    # states: list = SAMPLEDESC_STATE["state"].unique().tolist()
-    # states.append(None)
-    # state = np.random.choice(states)
-    # print(f"state: {state}")
-    # fig = make_descriptive_plots(state=state)
+#     # states: list = SAMPLEDESC_STATE["state"].unique().tolist()
+#     # states.append(None)
+#     # state = np.random.choice(states)
+#     # print(f"state: {state}")
+#     # fig = make_descriptive_plots(state=state)
 
-    fig.show()
+#     fig.show()
