@@ -1,39 +1,22 @@
 import pandas as pd
 import plotly.express as px
 
-# from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
+from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
-# -------------------------------------------------------
-# data paths
-data_dir = "../data/"
-
-opinions_whole_tsv = "opinions_wholesample.tsv"
-opinions_state_tsv = "opinions_state.tsv"
-opinions_party_tsv = "opinions_party.tsv"
-
-subquestion_dict_tsv = "subquestion_dictionary.tsv"
-outcome_dict = "outcome_dictionary.tsv"
-
-opinions_whole_df = pd.read_csv(
-    f"{data_dir}/survey_results/{opinions_whole_tsv}", sep="\t"
-)
-opinions_state_df = pd.read_csv(
-    f"{data_dir}/survey_results/{opinions_state_tsv}", sep="\t"
-)
-opinions_party_df = pd.read_csv(
-    f"{data_dir}/survey_results/{opinions_party_tsv}", sep="\t"
-)
-
-subquestion_dict_df = pd.read_csv(
-    f"{data_dir}/data_dictionaries/{subquestion_dict_tsv}", sep="\t"
-)
-outcome_dict_df = pd.read_csv(
-    f"{data_dir}/data_dictionaries/{outcome_dict}", sep="\t"
-)
-# -------------------------------------------------------
+THEME = "plotly_white"
+LAYOUTS = {
+    "margin": {"l": 30, "r": 30, "t": 30, "b": 20},
+    "title": {  # figure title position properties, see https://plotly.com/python/reference/layout/#layout-title
+        "yanchor": "bottom",
+        "yref": "paper",  # TODO: fix alignment...
+        # "pad": {"t": 10},
+        "y": 1,
+    },
+    # NOTE: to debug the title layout, use the "plotly" theme to make the plot area visible
+}
 
 # Figure parameters
-fig_kw = {
+default_fig_kw = {
     "fontsize": 10,
     "width": 1200,
     "height": 500,
@@ -72,33 +55,43 @@ ternary_palette = ["#f8961e", "#d5bdaf", "#43aa8b"]
 
 
 # Global labels
+# Label used for custom outcome created to aggregate over unaccounted for outcome proportions for 3+ and 4+ thresholds
+# (i.e., for subquestions that have >5 response options)
 agg_outcome_label = "other"
+# Label used for custom outcome created to fill in the missing proportion when binarizing data based on a threshold
 na_outcome_label = "NA"
 
 # Pre-defined thresholds
 available_threshold_dict = {"3+": ["1", "2"], "4+": ["1", "2", "3"]}
 
+PARTY_ORDER = ["Democrat", "Independent/Other", "Republican"]
 
-def load_df(state, stratify):
+
+def load_df(state: str | None, stratify: bool) -> pd.DataFrame | None:
+    """Return the opinions data for the whole sample, stratified by state, or stratified by party."""
     if state is None and not stratify:
-        return opinions_whole_df
-    elif state is not None:
-        return opinions_state_df
-    elif stratify:
-        return opinions_party_df
-    else:
-        return None
+        return SURVEY_DATA["opinions_wholesample.tsv"]
+    if state is not None:
+        return SURVEY_DATA["opinions_state.tsv"]
+    if stratify:
+        return SURVEY_DATA["opinions_party.tsv"]
+    return None
 
 
-def aggregate_outcome_subset(df, agg_outcomes, stata_col=None):
-    """aggregate a subset of outcomes into a single outcome. This is used only with thresholding."""
-    if stata_col is None:
+def aggregate_outcome_subset(
+    df: pd.DataFrame, agg_outcomes: list, strata_col: str = None
+):
+    """
+    Aggregate a subset of outcomes into a single outcome.
+    This is used only when the response data is thresholded at a specific endorsement level.
+    """
+    if strata_col is None:
         agg_percent = df[df["outcome"].isin(agg_outcomes)]["percentage"].sum()
         agg_df = pd.DataFrame([{"percentage": agg_percent}])
     else:
         agg_df = (
             df[df["outcome"].isin(agg_outcomes)]
-            .groupby([stata_col])["percentage"]
+            .groupby([strata_col])["percentage"]
             .sum()
         )
         agg_df = pd.DataFrame(agg_df).reset_index()
@@ -116,20 +109,49 @@ def aggregate_outcome_subset(df, agg_outcomes, stata_col=None):
     return df
 
 
-def fill_na_percentage(df, stata_col=None):
-    """Fill in the missing percentage values for the NA outcome. This is used only with thresholding."""
-    if stata_col is None:
-        na_percent = 1 - df["percentage"].sum()
-        na_df = pd.DataFrame([{"percentage": na_percent}])
-    else:
-        na_df = 1 - df.groupby([stata_col])["percentage"].sum()
-        na_df = pd.DataFrame(na_df).reset_index()
+# def fill_na_percentage(df: pd.DataFrame, strata_col: str = None):
+#     """Fill in the missing percentage values for the NA outcome. This is used only with thresholding."""
+#     if strata_col is None:
+#         na_percent = 1 - df["percentage"].sum()
+#         na_df = pd.DataFrame([{"percentage": na_percent}])
+#     else:
+#         na_df = 1 - df.groupby([strata_col])["percentage"].sum()
+#         na_df = pd.DataFrame(na_df).reset_index()
 
-    na_df["outcome"] = na_outcome_label
-    na_df["question"] = df["question"].unique()[0]
-    na_df["sub_question"] = df["sub_question"].unique()[0]
-    df = pd.concat([df, na_df])
-    return df
+#     na_df["outcome"] = na_outcome_label
+#     na_df["question"] = df["question"].unique()[0]
+#     na_df["sub_question"] = df["sub_question"].unique()[0]
+#     df = pd.concat([df, na_df])
+#     return df
+
+
+def fill_na_percentage(df: pd.DataFrame, strata_col: str = None):
+    """
+    Fill in the missing percentage values for the NA outcome.
+    This is used only when the response data is thresholded at a specific endorsement level.
+    """
+    df_inverted = df.copy()
+    df_inverted["percentage"] = 1 - df_inverted["percentage"]
+    df_inverted["outcome"] = "NA"
+
+    # Combine the original and the percentage-inverted DataFrames
+    result_df = (
+        pd.concat([df, df_inverted]).sort_index().reset_index(drop=True)
+    )
+
+    return result_df
+
+
+def get_subquestion_text(question: str, subquestion: str):
+    """Get the full text for a subquestion."""
+    dict_df = DATA_DICTIONARIES["subquestion_dictionary.tsv"]
+    question_text = dict_df.loc[
+        (dict_df["question"] == question)
+        & (dict_df["sub_question"] == subquestion),
+        "full_text",
+    ]
+
+    return question_text.values[0]
 
 
 def plot_bars(
@@ -137,25 +159,29 @@ def plot_bars(
     x="percentage",
     y="question",
     color="outcome",
-    title="opinions",
+    title=None,  # "opinions"
     round_values=True,
     sort_order="descending",
     facet_row=None,
-    palette=cool_warm_default,
+    palette=None,  # TODO: Make the default None
     annot_col="outcome",
     fig_kw=None,
-):
+) -> px.bar:
     """Make a stacked bar plot of the opinions of the whole sample, split by state and party."""
+
+    # TODO: Refactor?
+    question = plot_df["question"].unique()[0]
 
     if round_values:
         plot_df[x] = plot_df[x].round(3) * 100
 
     # sort by subquestion
+    # TODO: Fix ordering of subquestions based on endorsement
     if facet_row is not None:
         plot_df[facet_row] = plot_df[facet_row].astype(int)
         plot_df = plot_df.sort_values(by=facet_row, ascending=True)
 
-        # resize fig height to accommodate more facels
+        # resize fig height to accommodate more facets
         n_facets = len(plot_df[facet_row].unique())
         fig_kw["height"] = fig_kw["height"] * n_facets * 0.5
 
@@ -172,7 +198,7 @@ def plot_bars(
     # TODO: replace the placeholder with the actual annotation text column
     # ----------------------------------------------------------------------
     if annot_col is not None:
-        plot_df["annote_text"] = (
+        plot_df["annotate_text"] = (
             "placeholder: "
             + plot_df[annot_col].astype(str)
             + "<br>"
@@ -183,7 +209,7 @@ def plot_bars(
     # ----------------------------------------------------------------------
 
     else:
-        plot_df["annote_text"] = plot_df[x].astype(str) + "%"
+        plot_df["annotate_text"] = plot_df[x].astype(str) + "%"
 
     # plot
 
@@ -193,7 +219,7 @@ def plot_bars(
 
     # set stratify order
     if y == "party":
-        category_orders[y] = ["Democrat", "Independent/Other", "Republican"]
+        category_orders[y] = PARTY_ORDER
 
     if facet_row is not None:
         fig = px.bar(
@@ -202,15 +228,24 @@ def plot_bars(
             y=y,
             color=color,
             title=title,
-            facet_row=facet_row,
-            text="annote_text",
+            facet_col=facet_row,
+            facet_col_wrap=1,
+            facet_row_spacing=0.05,
+            text="annotate_text",
             category_orders=category_orders,
             color_discrete_sequence=palette,
-            width=fig_kw["width"],
+            # width=fig_kw["width"],
             height=fig_kw["height"],
+            template=THEME,
         )
+
+        # Update facet titles with subquestion text
         fig.for_each_annotation(
-            lambda a: a.update(text=a.text.replace(facet_row, "sub_q"))
+            lambda a: a.update(
+                text=get_subquestion_text(
+                    question, subquestion=a.text.split("=")[-1]
+                )
+            )
         )
 
     else:
@@ -220,19 +255,35 @@ def plot_bars(
             y=y,
             color=color,
             title=title,
-            text="annote_text",
+            text="annotate_text",
             category_orders=category_orders,
             color_discrete_sequence=palette,
-            width=fig_kw["width"],
+            # width=fig_kw["width"],
             height=fig_kw["height"],
+            template=THEME,
         )
 
-    fig.update_traces(texttemplate="%{text}", textposition="inside")
-    fig.update_traces(
-        marker_line_width=fig_kw["marker_line_width"],
-        marker_line_color=fig_kw["marker_line_color"],
+    fig.update_xaxes(
+        showgrid=False,
+        # showline=False,
+        zeroline=False,
+        title=None,
+        # showticklabels=False
     )
+    fig.update_yaxes(showgrid=False, title=None)
+    fig.update_layout(margin=LAYOUTS["margin"])
 
+    fig.update_traces(
+        texttemplate="%{text}",
+        textposition="inside",
+        insidetextanchor="middle",
+    )
+    # fig.update_traces(
+    #     marker_line_width=fig_kw["marker_line_width"],
+    #     marker_line_color=fig_kw["marker_line_color"],
+    # )
+
+    # TODO: Refactor
     # remove y-axis labels if only one y value (i.e. question)
     if plot_df[y].nunique() == 1:
         fig.update_yaxes(
@@ -245,20 +296,37 @@ def plot_bars(
     )
     fig.update_layout(showlegend=False)
 
-    fig.show()
+    return fig
 
 
-def run(
-    question,
-    subquestion,
-    state=None,
-    stratify=False,
-    threshold=False,
-    binarize_threshold=False,
-    fig_kw=None,
-):
-    """Make plots for a given question, subquestion, and state.
+def make_stacked_bar(
+    question: str,
+    subquestion: str,
+    state: str | None = None,
+    stratify: bool = False,
+    threshold: str | None = None,
+    binarize_threshold: bool = False,
+    fig_kw: dict = None,
+) -> px.bar:
+    """
+    Make plots for a given question, subquestion, and state.
     Optionally stratify by party and/or categorize by a threshold.
+
+    Parameters
+    ----------
+    question : str
+        The question ID (e.g. "q1").
+    subquestion : str
+        The subquestion ID (e.g. "1"), or "all" to plot all subquestions as facets.
+    state : str, optional
+        The state to filter the data by. The default is None. NOTE: This is expected to be None if stratify is True.
+    stratify : bool, optional
+        Whether to stratify the data by party. The default is False.
+    threshold : str, optional
+        The outcome ID for the Likert endorsement level to threshold at (e.g. "3+"). The default is None.
+    binarize_threshold : bool, optional
+        Whether to binarize the data based on the threshold, meaning that the stacked bar will include two segments, one
+        representing the threshold and another segment representing 100% - the proportion for the threshold. The default is False.
     """
 
     df = load_df(state, stratify)
@@ -267,7 +335,10 @@ def run(
     assert (
         question in df["question"].unique()
     ), f"Question {question} not found in data."
-    q_df = df[(df["question"] == question)].copy()
+    # TODO: Remove temporary workaround for "noanswer" subquestion
+    q_df = df.loc[
+        (df["question"] == question) & (df["sub_question"] != "noanswer")
+    ].copy()
 
     # check subquestion
     if subquestion == "all":
@@ -279,7 +350,7 @@ def run(
             subquestion
             in df[df["question"] == question]["sub_question"].unique()
         ), f"Subquestion {subquestion} not found in data."
-        q_df = q_df[(q_df["sub_question"] == subquestion)].copy()
+        q_df = q_df.loc[(q_df["sub_question"] == subquestion)].copy()
 
     print(f"n_subquestions: {len(q_df['sub_question'].unique())}")
 
@@ -306,7 +377,7 @@ def run(
 
     if threshold:
         assert (
-            threshold in available_threshold_dict.keys()
+            threshold in available_threshold_dict
         ), f"Threshold {threshold} not found in available thresholds."
 
         print(f"Thresholding at {threshold}.")
@@ -362,6 +433,8 @@ def run(
 
         n_outcomes = len(q_df["outcome"].unique())
         print(f"n_outcomes: {n_outcomes}")
+
+        # TODO: Refactor using a dictionary
         if n_outcomes == 5:
             palette = cool_warm_5
         elif n_outcomes == 7:
@@ -371,7 +444,7 @@ def run(
 
     print(f"possible_outcomes: {q_df['outcome'].unique()}")
 
-    plot_bars(
+    return plot_bars(
         q_df,
         x="percentage",
         y=y,
@@ -382,17 +455,25 @@ def run(
         fig_kw=fig_kw,
     )
 
-    return q_df
+    # return q_df
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # Example run
-    q_df = run(
-        question="q5",
-        subquestion="all",
-        stratify=True,
-        threshold=False,
-        binarize_threshold=True,
-        fig_kw=fig_kw,
-    )
+#     # Example run
+#     fig = make_stacked_bar(
+#         question="q5",
+#         subquestion="all",
+#         stratify=False,
+#         threshold="3+",
+#         binarize_threshold=True,
+#         fig_kw=default_fig_kw,
+#         # fig_kw={
+#         #     "fontsize": 10,
+#         #     "width": 800,
+#         #     "height": 300,
+#         #     "marker_line_width": 1,
+#         #     "marker_line_color": "black",
+#         # }
+#     )
+#     fig.show()
