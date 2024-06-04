@@ -6,6 +6,7 @@ from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 THEME = "plotly_white"
 LAYOUTS = {
     "margin": {"l": 30, "r": 30, "t": 30, "b": 20},
+    # TODO: Remove
     "title": {  # figure title position properties, see https://plotly.com/python/reference/layout/#layout-title
         "yanchor": "bottom",
         "yref": "paper",  # TODO: fix alignment...
@@ -26,32 +27,45 @@ default_fig_kw = {
 
 
 # Custom palettes
-cool_warm_default = [
-    "#f94144",
-    "#f3722c",
-    "#f8961e",
-    "#f9844a",
-    "#f9c74f",
-    "#90be6d",
-    "#43aa8b",
-    "#4d908e",
-    "#577590",
-    "#277da1",
-]
+PALETTES_BY_LENGTH = {
+    5: ["#f94144", "#f3722c", "#f8961e", "#43aa8b", "#577590"],
+    7: [
+        "#f94144",
+        "#f3722c",
+        "#f8961e",
+        "#90be6d",
+        "#43aa8b",
+        "#4d908e",
+        "#577590",
+    ],
+    2: ["#f8961e", "#43aa8b"],
+    3: ["#f8961e", "#d5bdaf", "#43aa8b"],
+}
 
-cool_warm_5 = ["#f94144", "#f3722c", "#f8961e", "#43aa8b", "#577590"]
-cool_warm_7 = [
-    "#f94144",
-    "#f3722c",
-    "#f8961e",
-    "#90be6d",
-    "#43aa8b",
-    "#4d908e",
-    "#577590",
-]
-
-binary_palette = ["#f8961e", "#43aa8b"]
-ternary_palette = ["#f8961e", "#d5bdaf", "#43aa8b"]
+# cool_warm_default = [
+#     "#f94144",
+#     "#f3722c",
+#     "#f8961e",
+#     "#f9844a",
+#     "#f9c74f",
+#     "#90be6d",
+#     "#43aa8b",
+#     "#4d908e",
+#     "#577590",
+#     "#277da1",
+# ]
+# cool_warm_5 = ["#f94144", "#f3722c", "#f8961e", "#43aa8b", "#577590"]
+# cool_warm_7 = [
+#     "#f94144",
+#     "#f3722c",
+#     "#f8961e",
+#     "#90be6d",
+#     "#43aa8b",
+#     "#4d908e",
+#     "#577590",
+# ]
+# binary_palette = ["#f8961e", "#43aa8b"]
+# ternary_palette = ["#f8961e", "#d5bdaf", "#43aa8b"]
 
 
 # Global labels
@@ -159,19 +173,15 @@ def plot_bars(
     x="percentage",
     y="question",
     color="outcome",
-    title=None,  # "opinions"
+    title=None,  # "opinions" - TODO: remove this argument?
     round_values=True,
     sort_order="descending",
     facet_row=None,
-    palette=None,  # TODO: Make the default None
+    palette=None,
     annot_col="outcome",
     fig_kw=None,
 ) -> px.bar:
     """Make a stacked bar plot of the opinions of the whole sample, split by state and party."""
-
-    # TODO: Refactor?
-    question = plot_df["question"].unique()[0]
-
     if round_values:
         plot_df[x] = plot_df[x].round(3) * 100
 
@@ -239,15 +249,20 @@ def plot_bars(
             template=THEME,
         )
 
-        # Update facet titles with subquestion text
-        fig.for_each_annotation(
-            lambda a: a.update(
-                text=get_subquestion_text(
-                    question, subquestion=a.text.split("=")[-1]
-                )
-            )
-        )
+        # # Update facet titles with subquestion text
+        # fig.for_each_annotation(
+        #     lambda a: a.update(
+        #         text=get_subquestion_text(
+        #             question, subquestion=a.text.split("=")[-1]
+        #         ),
+        #         # Ensure that facet title is left-aligned
+        #         xanchor="left",
+        #         x=0,
+        #         xref="paper",
+        #     )
+        # )
 
+    # TODO: See if we can remove the else block
     else:
         fig = px.bar(
             plot_df,
@@ -268,6 +283,7 @@ def plot_bars(
         # showline=False,
         zeroline=False,
         title=None,
+        # TODO: See if we want to remove the x tick labels
         # showticklabels=False
     )
     fig.update_yaxes(showgrid=False, title=None)
@@ -283,14 +299,11 @@ def plot_bars(
     #     marker_line_color=fig_kw["marker_line_color"],
     # )
 
-    # TODO: Refactor
+    # TODO: Can maybe remove conditional
     # remove y-axis labels if only one y value (i.e. question)
     if plot_df[y].nunique() == 1:
-        fig.update_yaxes(
-            tickmode="array",
-            tickvals=plot_df[y],
-            ticktext=[""] * len(plot_df[y]),
-        )
+        fig.update_yaxes(showticklabels=False)
+
     fig.update_layout(
         uniformtext_minsize=fig_kw["fontsize"], uniformtext_mode="hide"
     )
@@ -306,6 +319,7 @@ def make_stacked_bar(
     stratify: bool = False,
     threshold: str | None = None,
     binarize_threshold: bool = False,
+    palettes: dict = None,
     fig_kw: dict = None,
 ) -> px.bar:
     """
@@ -327,7 +341,10 @@ def make_stacked_bar(
     binarize_threshold : bool, optional
         Whether to binarize the data based on the threshold, meaning that the stacked bar will include two segments, one
         representing the threshold and another segment representing 100% - the proportion for the threshold. The default is False.
+    # TODO: Expand docstring
     """
+    if palettes is None:
+        palettes = PALETTES_BY_LENGTH
 
     df = load_df(state, stratify)
 
@@ -388,7 +405,7 @@ def make_stacked_bar(
             include_outcomes = [threshold]
 
             # set binary palette
-            palette = binary_palette
+            palette = palettes[2]
 
         else:
             include_outcomes = [threshold] + available_threshold_dict[
@@ -396,7 +413,7 @@ def make_stacked_bar(
             ]
 
             # set palette for binary + "NA" option
-            palette = ternary_palette
+            palette = palettes[3]
 
         print(f"include_outcomes: {include_outcomes}")
         q_df = q_df[q_df["outcome"].isin(include_outcomes)]
@@ -434,17 +451,14 @@ def make_stacked_bar(
         n_outcomes = len(q_df["outcome"].unique())
         print(f"n_outcomes: {n_outcomes}")
 
-        # TODO: Refactor using a dictionary
-        if n_outcomes == 5:
-            palette = cool_warm_5
-        elif n_outcomes == 7:
-            palette = cool_warm_7
-        else:
+        try:
+            palette = palettes[n_outcomes]
+        except KeyError:
             print(f"unknown number of outcomes: {n_outcomes}")
 
     print(f"possible_outcomes: {q_df['outcome'].unique()}")
 
-    return plot_bars(
+    fig = plot_bars(
         q_df,
         x="percentage",
         y=y,
@@ -455,6 +469,26 @@ def make_stacked_bar(
         fig_kw=fig_kw,
     )
 
+    # TODO: See if this needs refactoring
+    # Update facet titles with subquestion text
+    if subquestion == "all":
+        fig.for_each_annotation(
+            lambda a: a.update(
+                text=get_subquestion_text(
+                    question, subquestion=a.text.split("=")[-1]
+                ),
+                # Ensure that facet title is left-aligned
+                xanchor="left",
+                x=0,
+                xref="paper",
+            )
+        )
+        # fig.update_annotations(xanchor="left", x=0, xref="paper")
+    else:
+        # Remove facet title
+        fig.update_annotations(text="")
+
+    return fig
     # return q_df
 
 
