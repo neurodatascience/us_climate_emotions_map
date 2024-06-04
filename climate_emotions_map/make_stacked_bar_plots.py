@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.express as px
 
-from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
+from .data_loader import DATA_DICTIONARIES, SUBQUESTION_ORDER, SURVEY_DATA
 
 THEME = "plotly_white"
 LAYOUTS = {
@@ -146,14 +146,10 @@ def fill_na_percentage(df: pd.DataFrame, strata_col: str = None):
     """
     df_inverted = df.copy()
     df_inverted["percentage"] = 1 - df_inverted["percentage"]
-    df_inverted["outcome"] = "NA"
+    df_inverted["outcome"] = na_outcome_label
 
     # Combine the original and the percentage-inverted DataFrames
-    result_df = (
-        pd.concat([df, df_inverted]).sort_index().reset_index(drop=True)
-    )
-
-    return result_df
+    return pd.concat([df, df_inverted]).sort_index().reset_index(drop=True)
 
 
 def get_subquestion_text(question: str, subquestion: str):
@@ -177,6 +173,7 @@ def plot_bars(
     round_values=True,
     sort_order="descending",
     facet_row=None,
+    facet_order=None,
     palette=None,
     annot_col="outcome",
     fig_kw=None,
@@ -186,10 +183,15 @@ def plot_bars(
         plot_df[x] = plot_df[x].round(3) * 100
 
     # sort by subquestion
-    # TODO: Fix ordering of subquestions based on endorsement
+
     if facet_row is not None:
-        plot_df[facet_row] = plot_df[facet_row].astype(int)
-        plot_df = plot_df.sort_values(by=facet_row, ascending=True)
+        # TODO: Check if this part is necessary - seems to mess things up
+        # order = SUBQUESTION_ORDER[question]  # plot_df["question"].unique()[0]
+        # plot_df[facet_row] = pd.Categorical(plot_df[facet_row], order)
+        # plot_df = plot_df.sort_values(by=facet_row)
+
+        # plot_df[facet_row] = plot_df[facet_row].astype(int)
+        # plot_df = plot_df.sort_values(by=facet_row, ascending=True)
 
         # resize fig height to accommodate more facets
         n_facets = len(plot_df[facet_row].unique())
@@ -224,7 +226,9 @@ def plot_bars(
     # plot
 
     # set facet order
-    facet_order = sorted(plot_df[facet_row].unique())
+    # TODO: Refactor
+    # facet_order = sorted(plot_df[facet_row].unique())
+    # facet_order = SUBQUESTION_ORDER[question]
     category_orders = {facet_row: facet_order}
 
     # set stratify order
@@ -278,6 +282,19 @@ def plot_bars(
             template=THEME,
         )
 
+    # TODO: Revisit to add thicker lines between bars
+    # fig.add_vline(x=0.5, line_color="black")
+    # fig.add_shape(go.layout.Shape(type="line",
+    #     yref="paper",
+    #     xref="x",
+    #     x0=1,
+    #     y0=-2,
+    #     x1=1,
+    #     y1=2,
+    #     line=dict(color="black", width=3),),
+    #     row=i,
+    #     col=j)
+
     fig.update_xaxes(
         showgrid=False,
         # showline=False,
@@ -299,7 +316,6 @@ def plot_bars(
     #     marker_line_color=fig_kw["marker_line_color"],
     # )
 
-    # TODO: Can maybe remove conditional
     # remove y-axis labels if only one y value (i.e. question)
     if plot_df[y].nunique() == 1:
         fig.update_yaxes(showticklabels=False)
@@ -464,6 +480,7 @@ def make_stacked_bar(
         y=y,
         round_values=True,
         facet_row="sub_question",
+        facet_order=SUBQUESTION_ORDER[question],
         sort_order=sort_order,
         palette=palette,
         fig_kw=fig_kw,

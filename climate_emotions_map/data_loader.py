@@ -92,6 +92,27 @@ def load_geojson_objects() -> dict:
     return geojson_objects
 
 
+# TODO: Maybe just save result in a file/fixed dict and load it in the app?
+def get_subquestion_order():
+    """
+    Return the order of subquestions for each question based on descending order of % endorsement
+    for the 3+ outcome, for the whole sample.
+    """
+    df = SURVEY_DATA["opinions_wholesample.tsv"]
+    # TODO: Fix this hack!
+    df_thres = df.loc[
+        (df["outcome"] == "3+") & (df["sub_question"] != "noanswer")
+    ]
+
+    subquestion_order = {}
+    for question, group in df_thres.groupby("question"):
+        subquestion_order[question] = group.sort_values(
+            by="percentage", ascending=False
+        )["sub_question"].tolist()
+
+    return subquestion_order
+
+
 SURVEY_DATA = load_survey_data()
 # NOTE: column dtypes for opinions data TSVs
 # Input:
@@ -104,6 +125,7 @@ SURVEY_DATA = load_survey_data()
 # outcome          object
 # percentage      float64
 # dtype: object
+SUBQUESTION_ORDER = get_subquestion_order()
 
 DATA_DICTIONARIES = load_data_dictionaries()
 # NOTE: column dtypes for data dictionary TSVs
