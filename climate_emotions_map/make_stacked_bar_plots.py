@@ -11,7 +11,7 @@ LAYOUTS = {
     # TODO: Remove
     "title": {  # figure title position properties, see https://plotly.com/python/reference/layout/#layout-title
         "yanchor": "bottom",
-        "yref": "paper",  # TODO: fix alignment...
+        "yref": "paper",
         # "pad": {"t": 10},
         "y": 1,
     },
@@ -99,6 +99,7 @@ def load_df(state: str | None, stratify: bool) -> pd.DataFrame | None:
     return None
 
 
+# TODO: Remove all logic related to aggregating - not needed for the current data
 def aggregate_outcome_subset(
     df: pd.DataFrame, agg_outcomes: list, strata_col: str = None
 ):
@@ -130,8 +131,7 @@ def aggregate_outcome_subset(
     return df
 
 
-# TODO: Remove strata_col argument - not needed
-def fill_na_percentage(df: pd.DataFrame, strata_col: str = None):
+def fill_na_percentage(df: pd.DataFrame):
     """
     Fill in the missing percentage values for the NA outcome.
     This is used only when the response data is thresholded at a specific endorsement level.
@@ -349,7 +349,10 @@ def make_stacked_bar(
     binarize_threshold : bool, optional
         Whether to binarize the data based on the threshold, meaning that the stacked bar will include two segments, one
         representing the threshold and another segment representing 100% - the proportion for the threshold. The default is False.
-    # TODO: Expand docstring
+    palettes : dict, optional
+        A dictionary of color palettes for different numbers of outcomes. The default is None.
+    fig_kw : dict, optional
+        A dictionary of figure parameters. The default is None.
     """
     if fig_kw is None:
         # We need to make a deep copy to avoid modifying the default values!
@@ -440,7 +443,7 @@ def make_stacked_bar(
             )
 
             # fill in the missing percentage values as the NA outcome
-            q_df = fill_na_percentage(q_df, strata)
+            q_df = fill_na_percentage(q_df)
 
             cat_order = {
                 "outcome": [threshold, na_outcome_label, agg_outcome_label]
@@ -448,7 +451,7 @@ def make_stacked_bar(
 
         else:
             # fill in the missing percentage values as the NA outcome
-            q_df = fill_na_percentage(q_df, strata)
+            q_df = fill_na_percentage(q_df)
             cat_order = {"outcome": [threshold, na_outcome_label]}
 
         q_df["outcome"] = pd.Categorical(q_df["outcome"], cat_order["outcome"])
