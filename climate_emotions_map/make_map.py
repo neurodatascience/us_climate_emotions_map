@@ -58,7 +58,7 @@ def make_map(
     clicked_state: str | None = None,
     impact: str | None = None,
     show_impact_as_gradient=True,
-    opinion_colormap: str | None = "Greens",
+    opinion_colormap: str | None = None,
     impact_colormap: str | None = "OrRd",
     clicked_state_marker: dict | None = None,
     impact_marker_size_scale: float = 1.0,
@@ -112,6 +112,14 @@ def make_map(
     col_color_impact = f"{col_color} (impact)"
 
     # default values
+    if opinion_colormap is None:
+        opinion_colormap = [
+            "#FAE776",
+            "#F9C74F",
+            "#F8961E",
+            "#F3722C",
+            "#F94144",
+        ]
     if clicked_state_marker is None:
         clicked_state_marker = dict(line=dict(width=4, color="#2a3f5f"))
     if margins is None:
