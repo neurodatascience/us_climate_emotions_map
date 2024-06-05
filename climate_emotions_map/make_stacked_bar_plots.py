@@ -1,3 +1,5 @@
+import copy
+
 import pandas as pd
 import plotly.express as px
 
@@ -16,15 +18,20 @@ LAYOUTS = {
     # NOTE: to debug the title layout, use the "plotly" theme to make the plot area visible
 }
 
+FACET_LAYOUTS = {
+    "title_fsize": 14,
+    "facet_row_spacing": 40,
+}
+
+# TODO: Revisit
 # Figure parameters
-default_fig_kw = {
+DEFAULT_FIG_KW = {
     "fontsize": 10,
-    "width": 1200,
-    "height": 500,
+    "width": 800,
+    "height": 125,
     "marker_line_width": 1,
     "marker_line_color": "black",
 }
-
 
 # Custom palettes
 PALETTES_BY_LENGTH = {
@@ -123,22 +130,7 @@ def aggregate_outcome_subset(
     return df
 
 
-# def fill_na_percentage(df: pd.DataFrame, strata_col: str = None):
-#     """Fill in the missing percentage values for the NA outcome. This is used only with thresholding."""
-#     if strata_col is None:
-#         na_percent = 1 - df["percentage"].sum()
-#         na_df = pd.DataFrame([{"percentage": na_percent}])
-#     else:
-#         na_df = 1 - df.groupby([strata_col])["percentage"].sum()
-#         na_df = pd.DataFrame(na_df).reset_index()
-
-#     na_df["outcome"] = na_outcome_label
-#     na_df["question"] = df["question"].unique()[0]
-#     na_df["sub_question"] = df["sub_question"].unique()[0]
-#     df = pd.concat([df, na_df])
-#     return df
-
-
+# TODO: Remove strata_col argument - not needed
 def fill_na_percentage(df: pd.DataFrame, strata_col: str = None):
     """
     Fill in the missing percentage values for the NA outcome.
@@ -195,7 +187,7 @@ def plot_bars(
 
         # resize fig height to accommodate more facets
         n_facets = len(plot_df[facet_row].unique())
-        fig_kw["height"] = fig_kw["height"] * n_facets * 0.5
+        fig_kw["height"] = fig_kw["height"] * n_facets  # * 0.5
 
     # sort by outcome
     print(f"sorting in {sort_order} order")
@@ -226,15 +218,13 @@ def plot_bars(
     # plot
 
     # set facet order
-    # TODO: Refactor
-    # facet_order = sorted(plot_df[facet_row].unique())
-    # facet_order = SUBQUESTION_ORDER[question]
     category_orders = {facet_row: facet_order}
 
     # set stratify order
     if y == "party":
         category_orders[y] = PARTY_ORDER
 
+    # if plot_df[facet_row].nunique() > 1:
     if facet_row is not None:
         fig = px.bar(
             plot_df,
@@ -244,7 +234,9 @@ def plot_bars(
             title=title,
             facet_col=facet_row,
             facet_col_wrap=1,
-            facet_row_spacing=0.05,
+            facet_row_spacing=(
+                FACET_LAYOUTS["facet_row_spacing"] / fig_kw["height"]
+            ),
             text="annotate_text",
             category_orders=category_orders,
             color_discrete_sequence=palette,
@@ -301,7 +293,7 @@ def plot_bars(
         zeroline=False,
         title=None,
         # TODO: See if we want to remove the x tick labels
-        # showticklabels=False
+        showticklabels=False,
     )
     fig.update_yaxes(showgrid=False, title=None)
     fig.update_layout(margin=LAYOUTS["margin"])
@@ -359,15 +351,19 @@ def make_stacked_bar(
         representing the threshold and another segment representing 100% - the proportion for the threshold. The default is False.
     # TODO: Expand docstring
     """
+    if fig_kw is None:
+        # We need to make a deep copy to avoid modifying the default values!
+        fig_kw = copy.deepcopy(DEFAULT_FIG_KW)
+
     if palettes is None:
         palettes = PALETTES_BY_LENGTH
 
     df = load_df(state, stratify)
 
     # check question
-    assert (
-        question in df["question"].unique()
-    ), f"Question {question} not found in data."
+    # assert (
+    #     question in df["question"].unique()
+    # ), f"Question {question} not found in data."
     # TODO: Remove temporary workaround for "noanswer" subquestion
     q_df = df.loc[
         (df["question"] == question) & (df["sub_question"] != "noanswer")
@@ -379,10 +375,10 @@ def make_stacked_bar(
 
     else:
         print(f"Plotting subquestion {subquestion}.")
-        assert (
-            subquestion
-            in df[df["question"] == question]["sub_question"].unique()
-        ), f"Subquestion {subquestion} not found in data."
+        # assert (
+        #     subquestion
+        #     in df[df["question"] == question]["sub_question"].unique()
+        # ), f"Subquestion {subquestion} not found in data."
         q_df = q_df.loc[(q_df["sub_question"] == subquestion)].copy()
 
     print(f"n_subquestions: {len(q_df['sub_question'].unique())}")
@@ -391,9 +387,9 @@ def make_stacked_bar(
 
     # Check if looking for particular state
     if state:
-        assert (
-            state in q_df["state"].unique()
-        ), f"State {state} not found in data."
+        # assert (
+        #     state in q_df["state"].unique()
+        # ), f"State {state} not found in data."
 
         print(f"Filtering for state {state}.")
         q_df = q_df[q_df["state"] == state]
@@ -401,7 +397,10 @@ def make_stacked_bar(
     if stratify:
         strata = "party"
         y = strata
-        assert strata in q_df.columns, f"{strata} column not found in data."
+        # assert strata in q_df.columns, f"{strata} column not found in data."
+
+        # Resize fig height to accommodate bars for different parties
+        fig_kw["height"] = fig_kw["height"] * 1.75
 
         print("Stratifying by {strata}.")
 
@@ -409,9 +408,9 @@ def make_stacked_bar(
         strata = None
 
     if threshold:
-        assert (
-            threshold in available_threshold_dict
-        ), f"Threshold {threshold} not found in available thresholds."
+        # assert (
+        #     threshold in available_threshold_dict
+        # ), f"Threshold {threshold} not found in available thresholds."
 
         print(f"Thresholding at {threshold}.")
 
@@ -488,25 +487,24 @@ def make_stacked_bar(
 
     # TODO: See if this needs refactoring
     # Update facet titles with subquestion text
-    if subquestion == "all":
+    if q_df["sub_question"].nunique() > 1:
         fig.for_each_annotation(
             lambda a: a.update(
                 text=get_subquestion_text(
                     question, subquestion=a.text.split("=")[-1]
                 ),
+                font_size=FACET_LAYOUTS["title_fsize"],
                 # Ensure that facet title is left-aligned
                 xanchor="left",
                 x=0,
                 xref="paper",
             )
         )
-        # fig.update_annotations(xanchor="left", x=0, xref="paper")
     else:
         # Remove facet title
         fig.update_annotations(text="")
 
     return fig
-    # return q_df
 
 
 # if __name__ == "__main__":
