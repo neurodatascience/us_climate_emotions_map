@@ -235,9 +235,30 @@ def plot_bars(
     # set facet order
     category_orders = {facet_row: facet_order}
 
+    # Define custom hover data
+    # TODO: Do we need the raw outcomes in the hover data? "outcome" / color column
+    custom_data = ["full_text"]
+    # <extra></extra> hides the secondary box that appears when hovering over the bars
+    hovertemplate = "<br>".join(
+        [
+            "Outcome: %{customdata[0]}",
+            "Percentage: %{x:.1f}%",
+            "<extra></extra>",
+        ]
+    )
+
     # set stratify order
     if y == "party":
         category_orders[y] = PARTY_ORDER
+
+        # Define custom hover data
+        custom_data.append("party")
+        hovertemplate = "<br>".join(
+            [
+                "<b>%{customdata[1]}</b>",
+                hovertemplate,
+            ]
+        )
 
     # if plot_df[facet_row].nunique() > 1:
     if facet_row is not None:
@@ -254,11 +275,16 @@ def plot_bars(
             ),
             text="annotate_text",
             category_orders=category_orders,
+            custom_data=custom_data,
             color_discrete_sequence=palette,
             # width=fig_kw["width"],
             height=fig_kw["height"],
             template=THEME,
         )
+
+        # TODO: Add state/"National" as well?
+        # Update hover data
+        fig.update_traces(hovertemplate=hovertemplate)
 
         # # Update facet titles with subquestion text
         # fig.for_each_annotation(
