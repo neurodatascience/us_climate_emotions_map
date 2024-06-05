@@ -4,7 +4,13 @@ from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
 # TODO: Revisit title
-DEFAULT_MAP_TITLE = "Map: Percent (%) of adolescents and young adults who endorse the following question/statement:"
+SECTION_TITLES = {
+    "app": "US Climate Emotions Map",
+    "map_opinions": "Map: Percent (%) of adolescents and young adults who endorse the following question/statement:",
+    "map_impacts": "Map: Percent (%) of adolescents and young adults who reported experiencing the following in the last year",
+    "bar_charts": "Climate emotions and thoughts of adolescents and young adults",
+    "demographics": "Sample Characteristics",
+}
 
 # We have not yet decided on the best colormaps to use
 # OPINION_COLORMAP = "OrRd"
@@ -64,9 +70,9 @@ def extract_question_subquestion(value: str) -> tuple[str, str]:
 def create_map_title(impact: str = None) -> str:
     """Create a statement for the map title based on whether a weather impact has been selected."""
     if impact is None:
-        return DEFAULT_MAP_TITLE
+        return SECTION_TITLES["map_opinions"]
 
-    return f"Map: Percent (%) of adolescents and young adults who reported experiencing the following in the last year: {impact}"
+    return f"{SECTION_TITLES['map_impacts']}: {impact}"
 
 
 def create_question_subtitle(question: str, subquestion: str) -> str:
