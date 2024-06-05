@@ -44,3 +44,31 @@ To launch the app locally:
 ```bash
 python -m climate_emotions_map.app
 ```
+
+## Deployment
+
+This dashboard will be deployed as a docker container.
+Because the data are not public, we will provide them to the docker
+container as a volume. The Makefile helps you set this up.
+
+First setup:
+```bash
+make setup
+```
+
+This will
+- initialize the submodule with the data if you haven't already
+- create a new docker volume called `climate_data`
+- copy the data from the submodule to the volume so we can reuse it
+
+Deploy the app:
+```bash
+docker compose up -d
+```
+
+This will:
+- build the docker image
+- mount the `climate_data` volume to the app
+- start the dashboard in the docker container
+
+You can then interact with the app at `localhost:8050` as before.
