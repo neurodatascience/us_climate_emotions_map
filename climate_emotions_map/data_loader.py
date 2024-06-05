@@ -23,6 +23,9 @@ def load_data_dictionary(file: str) -> pd.DataFrame:
     return pd.read_csv(
         Path(__file__).parents[1] / "data" / "data_dictionaries" / file,
         sep="\t",
+        # Some data dictionaries have "None" as a meaningful value, so we have to prevent it
+        # from being interpreted as a NaN by pandas
+        keep_default_na=False,
     )
 
 
