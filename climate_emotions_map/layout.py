@@ -1,16 +1,18 @@
 """Generate the layout for the dashboard."""
 
 import dash_mantine_components as dmc
-from dash import dcc
+from dash import dcc, html
 
 from . import utility as utils
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
-    DEFAULT_MAP_TITLE,
     DEFAULT_QUESTION,
+    SECTION_TITLES,
 )
+
+HEADER_HEIGHT = 110
 
 
 def create_question_dropdown():
@@ -99,7 +101,9 @@ def create_sample_description_drawer():
     return dmc.Container(
         [
             dmc.Button(
-                "View Sample Description", id="drawer-button", variant="subtle"
+                "View Sample Characteristics",
+                id="drawer-button",
+                variant="subtle",
             ),
             dmc.Drawer(
                 children=[
@@ -107,7 +111,9 @@ def create_sample_description_drawer():
                     create_drawer_sample_size(),
                     create_sample_descriptive_plot(),
                 ],
-                title=dmc.Title("Sample Description", order=3, fw=300),
+                title=dmc.Title(
+                    SECTION_TITLES["demographics"], order=3, fw=300
+                ),
                 id="drawer",
                 padding="md",
                 transitionProps={
@@ -126,22 +132,82 @@ def create_sample_description_drawer():
     )
 
 
+def create_design_credit():
+    """Create the text hovercard for web app developer details."""
+    short_credit = dmc.Text(
+        children="Built by members of the ORIGAMI Lab",
+        size="xs",
+        c="dimmed",
+    )
+
+    long_credit = dmc.Text(
+        children=[
+            dmc.Text(
+                "Alyssa Dai, Nikhil Bhagwat, Rémi Gau, Arman Jahanpour, Kendra Oudyk, Sebastian Urchs, Michelle Wang"
+            ),
+            dmc.Anchor(
+                "ORIGAMI Lab, PI: Jean-Baptiste Poline",
+                href="https://neurodatascience.github.io/",
+                target="_blank",
+            ),
+        ],
+        size="xs",
+        c="dimmed",
+    )
+
+    return dmc.HoverCard(
+        withArrow=True,
+        width=350,
+        offset=3,
+        shadow="sm",
+        children=[
+            dmc.HoverCardTarget(children=short_credit),
+            dmc.HoverCardDropdown(children=long_credit),
+        ],
+    )
+
+
 def create_navbar():
     """Create the navbar for the dashboard."""
     return dmc.AppShellNavbar(
-        children=dmc.Stack(
+        children=dmc.Flex(
             mt=25,
             px=25,
+            h="100vh",
             gap="lg",
+            direction="column",
             children=[
-                create_question_dropdown(),
-                create_state_dropdown(),
-                create_barplot_options_heading(),
-                create_party_switch(),
-                create_response_threshold_control(),
-                create_sample_description_drawer(),
+                dmc.Stack(
+                    children=[
+                        create_question_dropdown(),
+                        create_state_dropdown(),
+                        create_barplot_options_heading(),
+                        create_party_switch(),
+                        create_response_threshold_control(),
+                        create_sample_description_drawer(),
+                    ],
+                ),
+                dmc.Container(
+                    create_design_credit(),
+                    mt="auto",
+                    pb=25,
+                ),
             ],
-        )
+        ),
+    )
+
+
+def create_app_subtitle():
+    """Create the subtitle for the dashboard."""
+    return dmc.Text(
+        children=[
+            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults" \n(Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ',
+            html.I("Lancet Planetary Health, "),
+            "(volume, issue, tbd)",
+        ],
+        size="sm",
+        c="dimmed",
+        style={"whiteSpace": "pre-wrap"},
     )
 
 
@@ -153,17 +219,24 @@ def create_header():
         children=[
             dmc.Stack(
                 justify="center",
-                h=70,
+                h=HEADER_HEIGHT,
                 children=dmc.Grid(
                     justify="space-between",
                     align="center",
                     children=[
                         dmc.GridCol(
-                            children=dmc.Anchor(
-                                "US Climate Emotions Map 2024",
-                                size="xl",
-                                href="/",
-                                underline=False,
+                            children=dmc.Stack(
+                                gap=5,
+                                justify="center",
+                                children=[
+                                    dmc.Anchor(
+                                        SECTION_TITLES["app"],
+                                        size="xl",
+                                        href="/",
+                                        underline=False,
+                                    ),
+                                    create_app_subtitle(),
+                                ],
                             ),
                             span="content",
                         ),
@@ -171,7 +244,6 @@ def create_header():
                             dmc.Group(
                                 justify="flex-end",
                                 # TODO: Add GitHub link? Not sure if needed/wanted.
-                                # TODO: Add link to paper
                             ),
                             span="auto",
                         ),
@@ -183,12 +255,12 @@ def create_header():
 
 
 def create_question_title():
-    """Create the title for the main content of the dashboard."""
+    """Create the title for the map section of the dashboard."""
     return dmc.Stack(
         children=[
             dmc.Title(
                 id="map-title",
-                children=DEFAULT_MAP_TITLE,
+                children=SECTION_TITLES["map_opinions"],
                 order=3,
                 fw=300,
             ),
@@ -288,6 +360,6 @@ def construct_layout():
     """Generate the overall dashboard layout."""
     return dmc.AppShell(
         children=[create_header(), create_navbar(), create_main()],
-        header={"height": 70},
+        header={"height": HEADER_HEIGHT},
         navbar={"width": 400},
     )
