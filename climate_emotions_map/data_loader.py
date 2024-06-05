@@ -69,6 +69,7 @@ def load_data_dictionaries() -> dict[str, pd.DataFrame]:
         "question_dictionary.tsv",
         "state_abbreviations.tsv",
         "subquestion_dictionary.tsv",
+        "threshold_dictionary.tsv",
     ]
 
     data_frames = {}
