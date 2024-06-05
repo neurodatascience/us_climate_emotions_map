@@ -17,7 +17,6 @@ LAYOUTS = {
     },
     # NOTE: to debug the title layout, use the "plotly" theme to make the plot area visible
 }
-
 FACET_LAYOUTS = {
     "title_fsize": 14,
     "facet_row_spacing": 40,
@@ -35,7 +34,9 @@ DEFAULT_FIG_KW = {
 
 # Custom palettes
 PALETTES_BY_LENGTH = {
+    # cool_warm_5
     5: ["#f94144", "#f3722c", "#f8961e", "#43aa8b", "#577590"],
+    # cool_warm_7
     7: [
         "#f94144",
         "#f3722c",
@@ -45,7 +46,9 @@ PALETTES_BY_LENGTH = {
         "#4d908e",
         "#577590",
     ],
+    # binary_palette
     2: ["#f8961e", "#43aa8b"],
+    # ternary_palette
     3: ["#f8961e", "#d5bdaf", "#43aa8b"],
 }
 
@@ -61,26 +64,13 @@ PALETTES_BY_LENGTH = {
 #     "#577590",
 #     "#277da1",
 # ]
-# cool_warm_5 = ["#f94144", "#f3722c", "#f8961e", "#43aa8b", "#577590"]
-# cool_warm_7 = [
-#     "#f94144",
-#     "#f3722c",
-#     "#f8961e",
-#     "#90be6d",
-#     "#43aa8b",
-#     "#4d908e",
-#     "#577590",
-# ]
-# binary_palette = ["#f8961e", "#43aa8b"]
-# ternary_palette = ["#f8961e", "#d5bdaf", "#43aa8b"]
-
 
 # Global labels
 # Label used for custom outcome created to aggregate over unaccounted for outcome proportions for 3+ and 4+ thresholds
 # (i.e., for subquestions that have >5 response options)
-agg_outcome_label = "other"
+AGG_OUTCOME_LABEL = "other"
 # Label used for custom outcome created to fill in the missing proportion when binarizing data based on a threshold
-na_outcome_label = "not3+"
+NA_OUTCOME_LABEL = "not3+"
 
 # Pre-defined thresholds
 available_threshold_dict = {"3+": ["1", "2"], "4+": ["1", "2", "3"]}
@@ -118,7 +108,7 @@ def aggregate_outcome_subset(
         )
         agg_df = pd.DataFrame(agg_df).reset_index()
 
-    agg_df["outcome"] = agg_outcome_label
+    agg_df["outcome"] = AGG_OUTCOME_LABEL
     agg_df["question"] = df["question"].unique()[0]
     agg_df["sub_question"] = df["sub_question"].unique()[0]
 
@@ -138,7 +128,7 @@ def fill_na_percentage(df: pd.DataFrame):
     """
     df_inverted = df.copy()
     df_inverted["percentage"] = 1 - df_inverted["percentage"]
-    df_inverted["outcome"] = na_outcome_label
+    df_inverted["outcome"] = NA_OUTCOME_LABEL
 
     # Combine the original and the percentage-inverted DataFrames
     return pd.concat([df, df_inverted]).sort_index().reset_index(drop=True)
@@ -455,13 +445,13 @@ def make_stacked_bar(
             q_df = fill_na_percentage(q_df)
 
             cat_order = {
-                "outcome": [threshold, na_outcome_label, agg_outcome_label]
+                "outcome": [threshold, NA_OUTCOME_LABEL, AGG_OUTCOME_LABEL]
             }
 
         else:
             # fill in the missing percentage values as the NA outcome
             q_df = fill_na_percentage(q_df)
-            cat_order = {"outcome": [threshold, na_outcome_label]}
+            cat_order = {"outcome": [threshold, NA_OUTCOME_LABEL]}
 
         q_df["outcome"] = pd.Categorical(q_df["outcome"], cat_order["outcome"])
         q_df = q_df.sort_values(by="outcome")
