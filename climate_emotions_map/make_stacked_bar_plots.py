@@ -1,4 +1,5 @@
 import copy
+from textwrap import wrap
 
 import pandas as pd
 import plotly.express as px
@@ -20,6 +21,7 @@ LAYOUTS = {
 FACET_LAYOUTS = {
     "title_fsize": 14,
     "facet_row_spacing": 40,
+    "wrap_width": 25,
 }
 
 # TODO: Revisit
@@ -87,6 +89,17 @@ def load_df(state: str | None, stratify: bool) -> pd.DataFrame | None:
     if stratify:
         return SURVEY_DATA["opinions_party.tsv"]
     return None
+
+
+def wrap_column_text(column: pd.Series, width: int) -> pd.Series:
+    """Wrap string values of a column which are longer than the specified character length."""
+    column = column.copy()
+    return column.map(
+        lambda value: "<br>".join(
+            wrap(text=str(value), width=width, break_long_words=False)
+        ),
+        na_action="ignore",
+    )
 
 
 # TODO: Remove all logic related to aggregating - not needed for the current data
@@ -192,7 +205,7 @@ def plot_bars(
     # TODO: Maybe refactor to avoid creating new columns every time
     # Get full text labels for each outcome
     # ----------------------------------------------------------------------
-    outcome_dict_df = DATA_DICTIONARIES["outcome_dictionary.tsv"]
+    outcome_dict_df = DATA_DICTIONARIES["outcome_dictionary.tsv"].copy()
     plot_df["key"] = (
         plot_df["question"].astype(str) + "_" + plot_df[annot_col].astype(str)
     )
@@ -203,13 +216,16 @@ def plot_bars(
     full_text_series = outcome_dict_df.set_index("key")["full_text"]
     plot_df["full_text"] = plot_df["key"].map(full_text_series)
     plot_df["annotate_text"] = (
-        plot_df["full_text"] + "<br>" + plot_df[x].round(3).astype(str) + "%"
+        wrap_column_text(
+            column=plot_df["full_text"], width=FACET_LAYOUTS["wrap_width"]
+        )
+        + "<br>"
+        + plot_df[x].round(3).astype(str)
+        + "%"
     )
 
     # Clean up temporary keys
     plot_df.drop(columns=["key"], inplace=True)
-    # IMPORTANT - otherwise the original reference in DATA_DICTIONARIES is modified!
-    outcome_dict_df.drop(columns=["key"], inplace=True)
     # ----------------------------------------------------------------------
     # NOTE: If human-readable labels not wanted, can use the outcomes directly:
     # plot_df["annotate_text"] = plot_df[annot_col] + "<br>" + plot_df[x].astype(str) + "%"
