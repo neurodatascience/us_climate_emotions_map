@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.graph_objects as go
-from data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
+
+from .data_loader import DATA_DICTIONARIES, GEOJSON_OBJECTS, SURVEY_DATA
 
 survey_states = GEOJSON_OBJECTS["survey_states.json"]
 
@@ -58,7 +59,7 @@ def make_map(
     impact: str | None = None,
     show_impact_as_gradient=True,
     opinion_colormap: str | None = "Greens",
-    impact_colormap: str | None = "Oranges",
+    impact_colormap: str | None = "OrRd",
     clicked_state_marker: dict | None = None,
     impact_marker_size_scale: float = 1.0,
     colormap_range_padding=10,
