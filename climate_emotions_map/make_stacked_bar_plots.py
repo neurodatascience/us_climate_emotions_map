@@ -28,8 +28,9 @@ FACET_LAYOUTS = {
 # Default figure parameters
 DEFAULT_FIG_KW = {
     "fontsize": 10,
+    # width not used, controlled instead by the app layout
     "width": 800,
-    "height": 125,
+    "height": 130,
     "marker_line_width": 1,
     "marker_line_color": "black",
 }
@@ -91,15 +92,21 @@ def load_df(state: str | None, stratify: bool) -> pd.DataFrame | None:
     return None
 
 
-def wrap_column_text(column: pd.Series, width: int) -> pd.Series:
+def wrap_column_text(df: pd.DataFrame, column: str, width: int) -> pd.Series:
     """Wrap string values of a column which are longer than the specified character length."""
-    column = column.copy()
-    return column.map(
+    df = df.copy()
+
+    # Create a mask for rows where the percentage < 50
+    mask = df["percentage"] < 50
+
+    # Apply wrapping to only rows where the mask is True
+    # Need to worry about NaNs?
+    df.loc[mask, column] = df.loc[mask, column].apply(
         lambda value: "<br>".join(
             wrap(text=str(value), width=width, break_long_words=False)
-        ),
-        na_action="ignore",
+        )
     )
+    return df[column]
 
 
 # TODO: Remove all logic related to aggregating - not needed for the current data
@@ -217,7 +224,7 @@ def plot_bars(
     plot_df["full_text"] = plot_df["key"].map(full_text_series)
     plot_df["annotate_text"] = (
         wrap_column_text(
-            column=plot_df["full_text"], width=FACET_LAYOUTS["wrap_width"]
+            df=plot_df, column="full_text", width=FACET_LAYOUTS["wrap_width"]
         )
         + "<br>"
         + plot_df[x].round(3).astype(str)
