@@ -113,7 +113,7 @@ def make_map(
 
     # default values
     if clicked_state_marker is None:
-        clicked_state_marker = dict(line=dict(width=4, color="yellow"))
+        clicked_state_marker = dict(line=dict(width=4, color="#2a3f5f"))
     if margins is None:
         margins = {"l": 30, "r": 30, "t": 30, "b": 30}
 
@@ -262,7 +262,10 @@ def make_map(
     fig.add_scattergeo(
         locations=state_abbrevs_long["state_abbreviated"],
         locationmode="USA-states",
-        text=state_abbrevs_long["state_abbreviated"],
+        text=[
+            f"<b>{abbr}</b>"
+            for abbr in state_abbrevs_long["state_abbreviated"]
+        ],
         mode="text",
         hoverinfo="skip",
         name="abbr_labels",
