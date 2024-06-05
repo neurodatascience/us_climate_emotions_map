@@ -24,7 +24,7 @@ FACET_LAYOUTS = {
 }
 
 # TODO: Revisit
-# Figure parameters
+# Default figure parameters
 DEFAULT_FIG_KW = {
     "fontsize": 10,
     "width": 800,
@@ -80,7 +80,7 @@ PALETTES_BY_LENGTH = {
 # (i.e., for subquestions that have >5 response options)
 agg_outcome_label = "other"
 # Label used for custom outcome created to fill in the missing proportion when binarizing data based on a threshold
-na_outcome_label = "NA"
+na_outcome_label = "not3+"
 
 # Pre-defined thresholds
 available_threshold_dict = {"3+": ["1", "2"], "4+": ["1", "2", "3"]}
@@ -199,21 +199,30 @@ def plot_bars(
         pass
 
     # ----------------------------------------------------------------------
-    # TODO: replace the placeholder with the actual annotation text column
+    # TODO: Maybe refactor to avoid creating new columns every time
+    # Get full text labels for each outcome
     # ----------------------------------------------------------------------
-    if annot_col is not None:
-        plot_df["annotate_text"] = (
-            "placeholder: "
-            + plot_df[annot_col].astype(str)
-            + "<br>"
-            + plot_df[x].round(3).astype(str)
-            + "%"
-        )
+    outcome_dict_df = DATA_DICTIONARIES["outcome_dictionary.tsv"]
+    plot_df["key"] = (
+        plot_df["question"].astype(str) + "_" + plot_df[annot_col].astype(str)
+    )
+    outcome_dict_df["key"] = (
+        outcome_dict_df["question"] + "_" + outcome_dict_df[annot_col]
+    )
 
+    full_text_series = outcome_dict_df.set_index("key")["full_text"]
+    plot_df["full_text"] = plot_df["key"].map(full_text_series)
+    plot_df["annotate_text"] = (
+        plot_df["full_text"] + "<br>" + plot_df[x].round(3).astype(str) + "%"
+    )
+
+    # Clean up temporary keys
+    plot_df.drop(columns=["key"], inplace=True)
+    # IMPORTANT - otherwise the original reference in DATA_DICTIONARIES is modified!
+    outcome_dict_df.drop(columns=["key"], inplace=True)
     # ----------------------------------------------------------------------
-
-    else:
-        plot_df["annotate_text"] = plot_df[x].astype(str) + "%"
+    # NOTE: If human-readable labels not wanted, can use the outcomes directly:
+    # plot_df["annotate_text"] = plot_df[annot_col] + "<br>" + plot_df[x].astype(str) + "%"
 
     # plot
 
