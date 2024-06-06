@@ -38,6 +38,7 @@ def get_question_options():
     ].groupby("question")
 
     data = []
+    # TODO: Try to refactor this to not use iterrows
     for _, q_row in DATA_DICTIONARIES["question_dictionary.tsv"].iterrows():
         question = q_row["question"]
         question_label = q_row["full_text"]
