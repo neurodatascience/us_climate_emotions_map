@@ -26,7 +26,7 @@ cryptography==42.0.5
     # via
     #   pyopenssl
     #   urllib3
-dash==2.17.0
+dash==2.16.1
     # via -r requirements.in
 dash-core-components==2.0.0
     # via dash
