@@ -15,11 +15,13 @@ from dash import (
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
-from .layout import construct_layout
+from .layout import SINGLE_SUBQUESTION_FIG_KW, construct_layout
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
 from .utility import DEFAULT_QUESTION  # IMPACT_COLORMAP,; OPINION_COLORMAP,
+
+ALL_STATES_LABEL = "National"
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
 _dash_renderer._set_react_version("18.2.0")
@@ -81,7 +83,7 @@ def drawer_toggle(n_clicks, opened):
 def update_drawer_state(value):
     """Callback function for updating the state in the drawer."""
     if value is None:
-        return "National"
+        return ALL_STATES_LABEL
     return f"State: {value}"
 
 
@@ -171,6 +173,53 @@ def update_map(question_value, state, impact):
         show_impact_as_gradient=True,
         # impact_colormap=IMPACT_COLORMAP,
     )
+
+
+@callback(
+    Output("selected-question-bar-plot", "figure"),
+    [
+        Input("question-select", "value"),
+        Input("state-select", "value"),
+        Input("party-stratify-switch", "checked"),
+        Input("response-threshold-control", "checked"),
+    ],
+    prevent_initial_call=True,
+)
+def update_selected_question_bar_plot(
+    question_value,
+    state,
+    is_party_stratify_checked,
+    show_all_responses_checked,
+):
+    """Update the stacked bar plot for the selected question based on the selected criteria."""
+    question, subquestion = utils.extract_question_subquestion(question_value)
+
+    if show_all_responses_checked:
+        threshold = None
+    elif not show_all_responses_checked:
+        threshold = DEFAULT_QUESTION["outcome"]
+
+    figure = make_stacked_bar(
+        question=question,
+        subquestion=subquestion,
+        state=state,
+        stratify=is_party_stratify_checked,
+        threshold=threshold,
+        fig_kw=SINGLE_SUBQUESTION_FIG_KW,
+    )
+    return figure
+
+
+@callback(
+    Output("selected-question-title", "children"),
+    Input("state-select", "value"),
+    prevent_initial_call=True,
+)
+def update_selected_question_title(state):
+    """Update the title for the selected question based on the selected state."""
+    if state is None:
+        return f"Response distribution, {ALL_STATES_LABEL}"
+    return f"Response distribution, {state}"
 
 
 @callback(
