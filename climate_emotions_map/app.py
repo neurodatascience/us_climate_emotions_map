@@ -12,6 +12,7 @@ from dash import (
     ctx,
     no_update,
 )
+from dash.exceptions import PreventUpdate
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
@@ -54,16 +55,20 @@ def update_state_and_disable_state_select_and_party_switch_interaction(
     figure, is_party_stratify_checked, selected_state
 ):
     """
-    Update the state dropdown when a specific state is clicked,
-    Disable the state dropdown when the party stratify switch is checked,
+    Update the state dropdown when a specific state is clicked (if party stratify switch is not checked),
+    disable the state dropdown when the party stratify switch is checked,
     and disable the party stratify switch when a specific state is selected (i.e., not None).
     """
-    if figure:
+    if ctx.triggered_id == "us-map":
+        map_selected_state = figure["points"][0]["customdata"][0]
+
+        if is_party_stratify_checked or map_selected_state == selected_state:
+            raise PreventUpdate
         return (
-            figure["points"][0]["customdata"][0],
+            map_selected_state,
             no_update,
-            no_update,
-            no_update,
+            False,
+            True,
         )
     if ctx.triggered_id == "party-stratify-switch":
         # Deselect any state
