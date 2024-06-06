@@ -451,8 +451,23 @@ def create_domain_tabs():
             dmc.TabsPanel(
                 id=domain_full,
                 children=[
-                    create_domain_heading(domain_full),
-                    create_bar_plots_for_domain(domain_text=domain_full),
+                    dcc.Loading(
+                        id={
+                            "type": "domain-loading-overlay",
+                            "domain": domain_full,
+                        },
+                        children=[
+                            create_domain_heading(domain_full),
+                            create_bar_plots_for_domain(
+                                domain_text=domain_full
+                            ),
+                        ],
+                        overlay_style={
+                            "visibility": "visible",
+                            "filter": "blur(2px)",
+                        },
+                        type="circle",
+                    ),
                 ],
                 value=domain_full,
                 pt="sm",
