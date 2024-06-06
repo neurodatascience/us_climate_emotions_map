@@ -15,6 +15,13 @@ from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 )
 
 HEADER_HEIGHT = 110
+SINGLE_SUBQUESTION_FIG_KW = {
+    "fontsize": 10,
+    # NOTE: Can calculate same actual height as create_bar_plots_for_question with:
+    # ( default height - (default-set margin top) - (default-set margin bottom) )
+    "height": 105,
+    "margin": {"l": 30, "r": 30, "t": 5, "b": 20},
+}
 
 
 def create_question_dropdown():
@@ -342,7 +349,8 @@ def create_question_heading(question_label: str) -> dmc.Text:
     )
 
 
-def create_stacked_bars_for_question(question_id: str, subquestion_id: str):
+# TODO: Refactor args
+def create_bar_plots_for_question(question_id: str, subquestion_id: str):
     """
     Create component to hold the stacked bar plot(s) for a single subquestion
     or all subquestions for a question.
@@ -367,15 +375,49 @@ def create_stacked_bars_for_question(question_id: str, subquestion_id: str):
     return figure
 
 
+def create_selected_question_bar_plot():
+    """Create the component holding a title and stacked bar plot for the selected question."""
+    title = dmc.Title(
+        id="selected-question-title",
+        children="Response distribution, National",
+        order=4,
+        fw=300,
+    )
+
+    figure = dmc.Container(
+        dcc.Graph(
+            id="selected-question-bar-plot",
+            figure=make_stacked_bar(
+                question=DEFAULT_QUESTION["question"],
+                subquestion=DEFAULT_QUESTION["sub_question"],
+                state=None,
+                stratify=False,
+                threshold=DEFAULT_QUESTION["outcome"],
+                fig_kw=SINGLE_SUBQUESTION_FIG_KW,
+            ),
+        ),
+        w=1200,
+    )
+
+    return dmc.Stack(
+        children=[
+            title,
+            figure,
+        ],
+        gap=0,
+        align="center",
+    )
+
+
 def create_question_components(q_row: pd.Series) -> list:
     """Create a heading and stacked bar plot component for each question."""
     return [
         create_question_heading(q_row["full_text"]),
-        create_stacked_bars_for_question(q_row["question"], "all"),
+        create_bar_plots_for_question(q_row["question"], "all"),
     ]
 
 
-def create_stacked_bar_plots_for_domain(domain_text: str):
+def create_bar_plots_for_domain(domain_text: str):
     """Create component to hold the stacked bar plot(s) for all questions in a domain."""
     questions_df = DATA_DICTIONARIES["question_dictionary.tsv"]
     domain_df = questions_df.loc[
@@ -410,9 +452,7 @@ def create_domain_tabs():
                 id=domain_full,
                 children=[
                     create_domain_heading(domain_full),
-                    create_stacked_bar_plots_for_domain(
-                        domain_text=domain_full
-                    ),
+                    create_bar_plots_for_domain(domain_text=domain_full),
                 ],
                 value=domain_full,
                 pt="sm",
@@ -438,6 +478,7 @@ def create_main():
                     create_question_title(),
                     create_impact_dropdown(),
                     create_map_plot(),
+                    create_selected_question_bar_plot(),
                     create_domain_tabs(),
                 ],
             )
