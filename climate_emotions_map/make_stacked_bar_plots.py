@@ -7,17 +7,7 @@ import plotly.express as px
 from .data_loader import DATA_DICTIONARIES, SUBQUESTION_ORDER, SURVEY_DATA
 
 THEME = "plotly_white"
-LAYOUTS = {
-    "margin": {"l": 30, "r": 30, "t": 30, "b": 20},
-    # TODO: Remove
-    "title": {  # figure title position properties, see https://plotly.com/python/reference/layout/#layout-title
-        "yanchor": "bottom",
-        "yref": "paper",
-        # "pad": {"t": 10},
-        "y": 1,
-    },
-    # NOTE: to debug the title layout, use the "plotly" theme to make the plot area visible
-}
+
 FACET_LAYOUTS = {
     "title_fsize": 14,
     "facet_row_spacing": 40,
@@ -33,6 +23,7 @@ DEFAULT_FIG_KW = {
     "height": 130,
     "marker_line_width": 1,
     "marker_line_color": "black",
+    "margin": {"l": 30, "r": 30, "t": 30, "b": 20},
 }
 
 # Custom palettes
@@ -232,26 +223,46 @@ def plot_bars(
             ]
         )
 
-    fig = px.bar(
-        plot_df,
-        x=x,
-        y=y,
-        color=color,
-        title=title,
-        # We use facet_col here as a hack to display the facet titles horizontally above plots
-        facet_col=facet_var,
-        facet_col_wrap=1,
-        facet_row_spacing=(
-            FACET_LAYOUTS["facet_row_spacing"] / fig_kw["height"]
-        ),
-        text="annotate_text",
-        category_orders=category_orders,
-        custom_data=custom_data,
-        color_discrete_sequence=palette,
-        # width=fig_kw["width"],
-        height=fig_kw["height"],
-        template=THEME,
-    )
+    if n_facets > 1:
+        fig = px.bar(
+            plot_df,
+            x=x,
+            y=y,
+            color=color,
+            title=title,
+            # We use facet_col here as a hack to display the facet titles horizontally above plots
+            facet_col=facet_var,
+            facet_col_wrap=1,
+            facet_row_spacing=(
+                FACET_LAYOUTS["facet_row_spacing"] / fig_kw["height"]
+            ),
+            text="annotate_text",
+            category_orders=category_orders,
+            custom_data=custom_data,
+            color_discrete_sequence=palette,
+            # width=fig_kw["width"],
+            height=fig_kw["height"],
+            template=THEME,
+        )
+        # We need matches=None to avoid very thin bars when there are multiple facets
+        # Not too sure why this happens, but maybe related to how we're wrapping the facets at 1 column?
+        # See also: https://plotly.com/python/facet-plots/#synchronizing-axes-in-subplots-with-matches
+        fig.update_yaxes(matches=None)
+    else:
+        fig = px.bar(
+            plot_df,
+            x=x,
+            y=y,
+            color=color,
+            title=title,
+            text="annotate_text",
+            category_orders=category_orders,
+            custom_data=custom_data,
+            color_discrete_sequence=palette,
+            # width=fig_kw["width"],
+            height=fig_kw["height"],
+            template=THEME,
+        )
 
     # TODO: Add state/"National" as well?
     # Update hover data
@@ -279,11 +290,8 @@ def plot_bars(
         # TODO: See if we want to remove the x tick labels
         showticklabels=False,
     )
-    # We need matches=None to avoid very thin bars when there are multiple facets
-    # Not too sure why this happens, but maybe related to how we're wrapping the facets at 1 column?
-    # See also: https://plotly.com/python/facet-plots/#synchronizing-axes-in-subplots-with-matches
-    fig.update_yaxes(showgrid=False, title=None, matches=None)
-    fig.update_layout(margin=LAYOUTS["margin"])
+    fig.update_yaxes(showgrid=False, title=None)
+    fig.update_layout(margin=fig_kw["margin"])
 
     fig.update_traces(
         texttemplate="%{text}",
@@ -358,7 +366,7 @@ def make_stacked_bar(
     # check subquestion
     if subquestion == "all":
         print("Plotting all subquestions as facets.")
-
+        facet_order = SUBQUESTION_ORDER[question]
     else:
         print(f"Plotting subquestion {subquestion}.")
         # assert (
@@ -366,6 +374,7 @@ def make_stacked_bar(
         #     in df[df["question"] == question]["sub_question"].unique()
         # ), f"Subquestion {subquestion} not found in data."
         q_df = q_df.loc[(q_df["sub_question"] == subquestion)].copy()
+        facet_order = subquestion
 
     n_subquestions = q_df["sub_question"].nunique()
     print(f"n_subquestions: {n_subquestions}")
@@ -432,7 +441,7 @@ def make_stacked_bar(
         q_df,
         x="percentage",
         y=y,
-        facet_order=SUBQUESTION_ORDER[question],
+        facet_order=facet_order,
         sort_order=sort_order,
         palette=palette,
         fig_kw=fig_kw,
