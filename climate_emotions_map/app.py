@@ -44,18 +44,27 @@ server = app.server
         Output("party-stratify-switch", "disabled"),
     ],
     [
+        Input("us-map", "clickData"),
         Input("party-stratify-switch", "checked"),
         Input("state-select", "value"),
     ],
     prevent_initial_call=True,
 )
-def disable_state_select_and_party_switch_interaction(
-    is_party_stratify_checked, selected_state
+def update_state_and_disable_state_select_and_party_switch_interaction(
+    figure, is_party_stratify_checked, selected_state
 ):
     """
+    Update the state dropdown when a specific state is clicked,
     Disable the state dropdown when the party stratify switch is checked,
     and disable the party stratify switch when a specific state is selected (i.e., not None).
     """
+    if figure:
+        return (
+            figure["points"][0]["customdata"][0],
+            no_update,
+            no_update,
+            no_update,
+        )
     if ctx.triggered_id == "party-stratify-switch":
         # Deselect any state
         return None, is_party_stratify_checked, no_update, no_update
