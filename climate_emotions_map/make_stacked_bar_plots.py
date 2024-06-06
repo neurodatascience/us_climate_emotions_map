@@ -345,9 +345,8 @@ def make_stacked_bar(
     fig_kw : dict, optional
         A dictionary of figure parameters. The default is None.
     """
-    if fig_kw is None:
-        # We need to make a deep copy to avoid modifying the default values!
-        fig_kw = copy.deepcopy(DEFAULT_FIG_KW)
+    # We need to make a deep copy to avoid modifying the global figure parameters
+    fig_kw = copy.deepcopy(DEFAULT_FIG_KW if fig_kw is None else fig_kw)
 
     if palettes is None:
         palettes = PALETTES_BY_LENGTH
