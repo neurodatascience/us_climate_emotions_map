@@ -2,7 +2,12 @@
 
 from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
-DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
+DEFAULT_QUESTION = {
+    "domain": "Climate emotions & beliefs",
+    "question": "q2",
+    "sub_question": "1",
+    "outcome": "3+",
+}
 # TODO: Revisit title
 SECTION_TITLES = {
     "app": "US Climate Emotions Map",

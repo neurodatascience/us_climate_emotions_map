@@ -1,9 +1,11 @@
 """Generate the layout for the dashboard."""
 
 import dash_mantine_components as dmc
+import pandas as pd
 from dash import dcc, html
 
 from . import utility as utils
+from .data_loader import DATA_DICTIONARIES, DOMAIN_TEXT
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
@@ -317,24 +319,113 @@ def create_map_plot():
     return us_map
 
 
-def create_stacked_bar_plots():
-    """Create component to hold the stacked bar plot(s) for a subquestion."""
+def create_domain_heading(domain_text: str) -> dmc.Title:
+    """Create a domain heading for the stacked bar plots."""
+    return dmc.Title(
+        id={
+            "type": "domain-title",
+            "domain": domain_text,
+        },
+        children=domain_text,
+        order=4,
+        fw=300,
+        # Add some padding between the domain title and the question plots
+        pb="md",
+    )
+
+
+def create_question_heading(question_label: str) -> dmc.Text:
+    """Create a question heading for the stacked bar plots."""
+    return dmc.Text(
+        children=question_label,
+        size="md",
+    )
+
+
+def create_stacked_bars_for_question(question_id: str, subquestion_id: str):
+    """
+    Create component to hold the stacked bar plot(s) for a single subquestion
+    or all subquestions for a question.
+    """
     figure = dmc.Container(
         dcc.Graph(
-            id="stacked-bar-plot",
+            id={
+                "type": "stacked-bar-plot",
+                "question": question_id,
+                "subquestion": subquestion_id,
+            },
             figure=make_stacked_bar(
-                question=DEFAULT_QUESTION["question"],
-                subquestion=DEFAULT_QUESTION["sub_question"],
+                question=question_id,
+                subquestion=subquestion_id,
                 state=None,
                 stratify=False,
                 threshold=DEFAULT_QUESTION["outcome"],
                 binarize_threshold=True,
             ),
-            style={"height": "20vh"},
         ),
-        size="xl",
+        w=1200,
+        # size="xl",
     )
     return figure
+
+
+def create_question_components(q_row: pd.Series) -> list:
+    """Create a heading and stacked bar plot component for each question."""
+    return [
+        create_question_heading(q_row["full_text"]),
+        create_stacked_bars_for_question(q_row["question"], "all"),
+    ]
+
+
+def create_stacked_bar_plots_for_domain(domain_text: str):
+    """Create component to hold the stacked bar plot(s) for all questions in a domain."""
+    questions_df = DATA_DICTIONARIES["question_dictionary.tsv"]
+    domain_df = questions_df.loc[
+        questions_df["domain_text"] == domain_text
+    ].copy()
+
+    # Create a list that includes a heading and stacked bar plot for each question in the domain
+    component_children = (
+        domain_df.apply(create_question_components, axis=1).explode().tolist()
+    )
+
+    return dmc.Stack(
+        component_children,
+        gap="xs",
+    )
+
+
+def create_domain_tabs():
+    """Create the tabs for each domain, each containing stacked bar plots for the questions in that domain."""
+    tab_list = []
+    panel_list = []
+
+    for domain_short, domain_full in DOMAIN_TEXT.items():
+        tab_list.append(
+            dmc.TabsTab(
+                domain_short,
+                value=domain_full,
+            )
+        )
+        panel_list.append(
+            dmc.TabsPanel(
+                id=domain_full,
+                children=[
+                    create_domain_heading(domain_full),
+                    create_stacked_bar_plots_for_domain(
+                        domain_text=domain_full
+                    ),
+                ],
+                value=domain_full,
+                pt="sm",
+            )
+        )
+
+    return dmc.Tabs(
+        children=[dmc.TabsList(children=tab_list, grow=True)] + panel_list,
+        orientation="horizontal",
+        value=DOMAIN_TEXT[DEFAULT_QUESTION["domain"]],
+    )
 
 
 def create_main():
@@ -349,7 +440,7 @@ def create_main():
                     create_question_title(),
                     create_impact_dropdown(),
                     create_map_plot(),
-                    create_stacked_bar_plots(),
+                    create_domain_tabs(),
                 ],
             )
         ]
