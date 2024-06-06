@@ -17,16 +17,22 @@ certifi==2024.2.2
     #   requests
     #   urllib3
 cffi==1.16.0
-    # via cryptography
+    # via
+    #   cryptography
+    #   trio
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via flask
+colorama==0.4.6
+    # via
+    #   click
+    #   pytest
 cryptography==42.0.5
     # via
     #   pyopenssl
     #   urllib3
-dash==2.16.1
+dash==2.17.0
     # via -r requirements.in
 dash-core-components==2.0.0
     # via dash
