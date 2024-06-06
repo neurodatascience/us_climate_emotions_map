@@ -2,6 +2,7 @@
 
 import dash_mantine_components as dmc
 from dash import (
+    ALL,
     Dash,
     Input,
     Output,
@@ -173,9 +174,8 @@ def update_map(question_value, state, impact):
 
 
 @callback(
-    Output("stacked-bar-plot", "figure"),
+    Output({"type": "stacked-bar-plot", "question": ALL}, "figure"),
     [
-        Input("question-select", "value"),
         Input("state-select", "value"),
         Input("party-stratify-switch", "checked"),
         Input("response-threshold-control", "checked"),
@@ -183,28 +183,31 @@ def update_map(question_value, state, impact):
     prevent_initial_call=True,
 )
 def update_stacked_bar_plots(
-    question_value,
     state,
     is_party_stratify_checked,
     show_all_responses_checked,
 ):
-    """Update the stacked bar plots based on the selected question."""
-    question, subquestion = utils.extract_question_subquestion(question_value)
+    """Update the stacked bar plots for all questions based on the selected criteria."""
+    figures = []
+    for output in ctx.outputs_list:
+        # Example: {'id': {'question': 'q2', 'type': 'stacked-bar-plot'}, 'property': 'figure'}
+        question = output["id"]["question"]
 
-    if show_all_responses_checked:
-        threshold = None
-    elif not show_all_responses_checked:
-        threshold = DEFAULT_QUESTION["outcome"]
+        if show_all_responses_checked:
+            threshold = None
+        elif not show_all_responses_checked:
+            threshold = DEFAULT_QUESTION["outcome"]
 
-    figure = make_stacked_bar(
-        question=question,
-        subquestion=subquestion,
-        state=state,
-        stratify=is_party_stratify_checked,
-        threshold=threshold,
-        binarize_threshold=True,
-    )
-    return figure
+        figure = make_stacked_bar(
+            question=question,
+            subquestion="all",
+            state=state,
+            stratify=is_party_stratify_checked,
+            threshold=threshold,
+        )
+        figures.append(figure)
+
+    return figures
 
 
 if __name__ == "__main__":

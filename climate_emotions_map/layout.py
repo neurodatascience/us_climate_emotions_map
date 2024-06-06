@@ -352,7 +352,6 @@ def create_stacked_bars_for_question(question_id: str, subquestion_id: str):
             id={
                 "type": "stacked-bar-plot",
                 "question": question_id,
-                "subquestion": subquestion_id,
             },
             figure=make_stacked_bar(
                 question=question_id,
@@ -360,7 +359,6 @@ def create_stacked_bars_for_question(question_id: str, subquestion_id: str):
                 state=None,
                 stratify=False,
                 threshold=DEFAULT_QUESTION["outcome"],
-                binarize_threshold=True,
             ),
         ),
         w=1200,
