@@ -76,8 +76,7 @@ AGG_OUTCOME_LABEL = "other"
 NA_OUTCOME_LABEL = "not3+"
 
 # Pre-defined thresholds
-available_threshold_dict = {"3+": ["1", "2"], "4+": ["1", "2", "3"]}
-
+AVAILABLE_THRESHOLDS = ["3+", "4+"]
 PARTY_ORDER = ["Democrat", "Independent/Other", "Republican"]
 
 
@@ -107,38 +106,6 @@ def wrap_column_text(df: pd.DataFrame, column: str, width: int) -> pd.Series:
         )
     )
     return df[column]
-
-
-# TODO: Remove all logic related to aggregating - not needed for the current data
-def aggregate_outcome_subset(
-    df: pd.DataFrame, agg_outcomes: list, strata_col: str = None
-):
-    """
-    Aggregate a subset of outcomes into a single outcome.
-    This is used only when the response data is thresholded at a specific endorsement level.
-    """
-    if strata_col is None:
-        agg_percent = df[df["outcome"].isin(agg_outcomes)]["percentage"].sum()
-        agg_df = pd.DataFrame([{"percentage": agg_percent}])
-    else:
-        agg_df = (
-            df[df["outcome"].isin(agg_outcomes)]
-            .groupby([strata_col])["percentage"]
-            .sum()
-        )
-        agg_df = pd.DataFrame(agg_df).reset_index()
-
-    agg_df["outcome"] = AGG_OUTCOME_LABEL
-    agg_df["question"] = df["question"].unique()[0]
-    agg_df["sub_question"] = df["sub_question"].unique()[0]
-
-    # remove original individual outcomes
-    df = df[~df["outcome"].isin(agg_outcomes)]
-
-    # append aggregated outcome
-    df = pd.concat([df, agg_df])
-
-    return df
 
 
 def fill_na_percentage(df: pd.DataFrame):
@@ -171,33 +138,33 @@ def plot_bars(
     x="percentage",
     y="question",
     color="outcome",
-    title=None,  # "opinions" - TODO: remove this argument?
-    round_values=True,
+    title=None,  # TODO: remove this argument?
+    round_to=3,
     sort_order="descending",
-    facet_row=None,
     facet_order=None,
     palette=None,
     annot_col="outcome",
     fig_kw=None,
 ) -> px.bar:
     """Make a stacked bar plot of the opinions of the whole sample, split by state and party."""
-    if round_values:
-        plot_df[x] = plot_df[x].round(3) * 100
+    facet_var = "sub_question"
+
+    plot_df[x] = plot_df[x].round(round_to) * 100
 
     # sort by subquestion
 
-    if facet_row is not None:
-        # TODO: Check if this part is necessary - seems to mess things up
-        # order = SUBQUESTION_ORDER[question]  # plot_df["question"].unique()[0]
-        # plot_df[facet_row] = pd.Categorical(plot_df[facet_row], order)
-        # plot_df = plot_df.sort_values(by=facet_row)
+    # if facet_row is not None:
+    # TODO: Check if this part is necessary - seems to mess things up
+    # order = SUBQUESTION_ORDER[question]  # plot_df["question"].unique()[0]
+    # plot_df[facet_row] = pd.Categorical(plot_df[facet_row], order)
+    # plot_df = plot_df.sort_values(by=facet_row)
 
-        # plot_df[facet_row] = plot_df[facet_row].astype(int)
-        # plot_df = plot_df.sort_values(by=facet_row, ascending=True)
+    # plot_df[facet_row] = plot_df[facet_row].astype(int)
+    # plot_df = plot_df.sort_values(by=facet_row, ascending=True)
 
-        # resize fig height to accommodate more facets
-        n_facets = len(plot_df[facet_row].unique())
-        fig_kw["height"] = fig_kw["height"] * n_facets  # * 0.5
+    # resize fig height to accommodate more facets
+    n_facets = plot_df[facet_var].nunique()
+    fig_kw["height"] = fig_kw["height"] * n_facets  # * 0.5
 
     # sort by outcome
     print(f"sorting in {sort_order} order")
@@ -205,8 +172,6 @@ def plot_bars(
         plot_df = plot_df.sort_values(by="outcome", ascending=False)
     elif sort_order == "ascending":
         plot_df = plot_df.sort_values(by="outcome", ascending=True)
-    else:
-        pass
 
     # ----------------------------------------------------------------------
     # TODO: Maybe refactor to avoid creating new columns every time
@@ -240,7 +205,7 @@ def plot_bars(
     # plot
 
     # set facet order
-    category_orders = {facet_row: facet_order}
+    category_orders = {facet_var: facet_order}
 
     # Define custom hover data
     # TODO: Do we need the raw outcomes in the hover data? "outcome" / color column
@@ -267,60 +232,30 @@ def plot_bars(
             ]
         )
 
-    # if plot_df[facet_row].nunique() > 1:
-    if facet_row is not None:
-        fig = px.bar(
-            plot_df,
-            x=x,
-            y=y,
-            color=color,
-            title=title,
-            facet_col=facet_row,
-            facet_col_wrap=1,
-            facet_row_spacing=(
-                FACET_LAYOUTS["facet_row_spacing"] / fig_kw["height"]
-            ),
-            text="annotate_text",
-            category_orders=category_orders,
-            custom_data=custom_data,
-            color_discrete_sequence=palette,
-            # width=fig_kw["width"],
-            height=fig_kw["height"],
-            template=THEME,
-        )
+    fig = px.bar(
+        plot_df,
+        x=x,
+        y=y,
+        color=color,
+        title=title,
+        # We use facet_col here as a hack to display the facet titles horizontally above plots
+        facet_col=facet_var,
+        facet_col_wrap=1,
+        facet_row_spacing=(
+            FACET_LAYOUTS["facet_row_spacing"] / fig_kw["height"]
+        ),
+        text="annotate_text",
+        category_orders=category_orders,
+        custom_data=custom_data,
+        color_discrete_sequence=palette,
+        # width=fig_kw["width"],
+        height=fig_kw["height"],
+        template=THEME,
+    )
 
-        # TODO: Add state/"National" as well?
-        # Update hover data
-        fig.update_traces(hovertemplate=hovertemplate)
-
-        # # Update facet titles with subquestion text
-        # fig.for_each_annotation(
-        #     lambda a: a.update(
-        #         text=get_subquestion_text(
-        #             question, subquestion=a.text.split("=")[-1]
-        #         ),
-        #         # Ensure that facet title is left-aligned
-        #         xanchor="left",
-        #         x=0,
-        #         xref="paper",
-        #     )
-        # )
-
-    # TODO: See if we can remove the else block
-    else:
-        fig = px.bar(
-            plot_df,
-            x=x,
-            y=y,
-            color=color,
-            title=title,
-            text="annotate_text",
-            category_orders=category_orders,
-            color_discrete_sequence=palette,
-            # width=fig_kw["width"],
-            height=fig_kw["height"],
-            template=THEME,
-        )
+    # TODO: Add state/"National" as well?
+    # Update hover data
+    fig.update_traces(hovertemplate=hovertemplate)
 
     # TODO: Revisit to add thicker lines between bars
     # fig.add_vline(x=0.5, line_color="black")
@@ -336,6 +271,7 @@ def plot_bars(
     #     col=j)
 
     fig.update_xaxes(
+        range=[0, 100],
         showgrid=False,
         # showline=False,
         zeroline=False,
@@ -343,7 +279,10 @@ def plot_bars(
         # TODO: See if we want to remove the x tick labels
         showticklabels=False,
     )
-    fig.update_yaxes(showgrid=False, title=None)
+    # We need matches=None to avoid very thin bars when there are multiple facets
+    # Not too sure why this happens, but maybe related to how we're wrapping the facets at 1 column?
+    # See also: https://plotly.com/python/facet-plots/#synchronizing-axes-in-subplots-with-matches
+    fig.update_yaxes(showgrid=False, title=None, matches=None)
     fig.update_layout(margin=LAYOUTS["margin"])
 
     fig.update_traces(
@@ -374,7 +313,6 @@ def make_stacked_bar(
     state: str | None = None,
     stratify: bool = False,
     threshold: str | None = None,
-    binarize_threshold: bool = False,
     palettes: dict = None,
     fig_kw: dict = None,
 ) -> px.bar:
@@ -394,9 +332,6 @@ def make_stacked_bar(
         Whether to stratify the data by party. The default is False.
     threshold : str, optional
         The outcome ID for the Likert endorsement level to threshold at (e.g. "3+"). The default is None.
-    binarize_threshold : bool, optional
-        Whether to binarize the data based on the threshold, meaning that the stacked bar will include two segments, one
-        representing the threshold and another segment representing 100% - the proportion for the threshold. The default is False.
     palettes : dict, optional
         A dictionary of color palettes for different numbers of outcomes. The default is None.
     fig_kw : dict, optional
@@ -432,7 +367,8 @@ def make_stacked_bar(
         # ), f"Subquestion {subquestion} not found in data."
         q_df = q_df.loc[(q_df["sub_question"] == subquestion)].copy()
 
-    print(f"n_subquestions: {len(q_df['sub_question'].unique())}")
+    n_subquestions = q_df["sub_question"].nunique()
+    print(f"n_subquestions: {n_subquestions}")
 
     y = "question"
 
@@ -455,9 +391,6 @@ def make_stacked_bar(
 
         print("Stratifying by {strata}.")
 
-    else:
-        strata = None
-
     if threshold:
         # assert (
         #     threshold in available_threshold_dict
@@ -465,56 +398,27 @@ def make_stacked_bar(
 
         print(f"Thresholding at {threshold}.")
 
-        if binarize_threshold:
-            print(f"Binarizing threshold at {threshold}.")
+        # set binary palette
+        palette = palettes[2]
 
-            include_outcomes = [threshold]
+        q_df = q_df[q_df["outcome"] == threshold]
 
-            # set binary palette
-            palette = palettes[2]
-
-        else:
-            include_outcomes = [threshold] + available_threshold_dict[
-                threshold
-            ]
-
-            # set palette for binary + "NA" option
-            palette = palettes[3]
-
-        print(f"include_outcomes: {include_outcomes}")
-        q_df = q_df[q_df["outcome"].isin(include_outcomes)]
-
-        if not binarize_threshold:
-            # aggregate outcomes less than the threshold
-            q_df = aggregate_outcome_subset(
-                q_df, available_threshold_dict[threshold], strata
-            )
-
-            # fill in the missing percentage values as the NA outcome
-            q_df = fill_na_percentage(q_df)
-
-            cat_order = {
-                "outcome": [threshold, NA_OUTCOME_LABEL, AGG_OUTCOME_LABEL]
-            }
-
-        else:
-            # fill in the missing percentage values as the NA outcome
-            q_df = fill_na_percentage(q_df)
-            cat_order = {"outcome": [threshold, NA_OUTCOME_LABEL]}
+        # fill in the missing percentage values as the NA outcome
+        q_df = fill_na_percentage(q_df)
+        cat_order = {"outcome": [threshold, NA_OUTCOME_LABEL]}
 
         q_df["outcome"] = pd.Categorical(q_df["outcome"], cat_order["outcome"])
         q_df = q_df.sort_values(by="outcome")
 
         sort_order = "predetermined"
-
     else:
         # exclude categorical thresholds
         print("Excluding categorical thresholds.")
 
-        q_df = q_df[~q_df["outcome"].isin(available_threshold_dict.keys())]
+        q_df = q_df[~q_df["outcome"].isin(AVAILABLE_THRESHOLDS)]
         sort_order = "descending"
 
-        n_outcomes = len(q_df["outcome"].unique())
+        n_outcomes = q_df["outcome"].nunique()
         print(f"n_outcomes: {n_outcomes}")
 
         try:
@@ -528,8 +432,6 @@ def make_stacked_bar(
         q_df,
         x="percentage",
         y=y,
-        round_values=True,
-        facet_row="sub_question",
         facet_order=SUBQUESTION_ORDER[question],
         sort_order=sort_order,
         palette=palette,
@@ -538,7 +440,7 @@ def make_stacked_bar(
 
     # TODO: See if this needs refactoring
     # Update facet titles with subquestion text
-    if q_df["sub_question"].nunique() > 1:
+    if n_subquestions > 1:
         fig.for_each_annotation(
             lambda a: a.update(
                 text=get_subquestion_text(
