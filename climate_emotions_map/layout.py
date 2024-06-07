@@ -10,6 +10,7 @@ from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
+    ALL_STATES_LABEL,
     DEFAULT_QUESTION,
     SECTION_TITLES,
 )
@@ -263,7 +264,7 @@ def create_header():
     )
 
 
-def create_question_title():
+def create_map_title():
     """Create the title for the map section of the dashboard."""
     return dmc.Stack(
         children=[
@@ -379,7 +380,7 @@ def create_selected_question_bar_plot():
     """Create the component holding a title and stacked bar plot for the selected question."""
     title = dmc.Title(
         id="selected-question-title",
-        children="Response distribution, National",
+        children=f"{SECTION_TITLES['selected_question']}, {ALL_STATES_LABEL}",
         order=4,
         fw=300,
     )
@@ -407,6 +408,18 @@ def create_selected_question_bar_plot():
         ],
         gap=0,
         align="center",
+        pb="sm",
+    )
+
+
+def create_all_questions_section_title() -> dmc.Title:
+    """Create a title for the section containing the bar plots for all questions."""
+    return dmc.Title(
+        id="all-questions-title",
+        children=f"{SECTION_TITLES['all_questions']}, {ALL_STATES_LABEL}",
+        order=3,
+        fw=300,
+        pb="sm",
     )
 
 
@@ -491,10 +504,11 @@ def create_main():
                 mx="xs",
                 fluid=True,
                 children=[
-                    create_question_title(),
+                    create_map_title(),
                     create_impact_dropdown(),
                     create_map_plot(),
                     create_selected_question_bar_plot(),
+                    create_all_questions_section_title(),
                     create_domain_tabs(),
                 ],
             )

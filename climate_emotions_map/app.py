@@ -20,9 +20,11 @@ from .layout import SINGLE_SUBQUESTION_FIG_KW, construct_layout
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
-from .utility import DEFAULT_QUESTION  # IMPACT_COLORMAP,; OPINION_COLORMAP,
-
-ALL_STATES_LABEL = "National"
+from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
+    ALL_STATES_LABEL,
+    DEFAULT_QUESTION,
+    SECTION_TITLES,
+)
 
 # Currently needed by DMC, https://www.dash-mantine-components.com/getting-started#simple-usage
 _dash_renderer._set_react_version("18.2.0")
@@ -232,8 +234,8 @@ def update_selected_question_bar_plot(
 def update_selected_question_title(state):
     """Update the title for the selected question based on the selected state."""
     if state is None:
-        return f"Response distribution, {ALL_STATES_LABEL}"
-    return f"Response distribution, {state}"
+        return f"{SECTION_TITLES['selected_question']}, {ALL_STATES_LABEL}"
+    return f"{SECTION_TITLES['selected_question']}, {state}"
 
 
 @callback(
@@ -246,6 +248,17 @@ def toggle_selected_question_bar_plot_visibility(impact):
     if impact is not None:
         return "none"
     return "flex"
+
+
+@callback(
+    Output("all-questions-title", "children"),
+    Input("state-select", "value"),
+)
+def update_all_questions_title(state):
+    """Update the title for the section for all questions based on the selected state."""
+    if state is None:
+        return f"{SECTION_TITLES['all_questions']}, {ALL_STATES_LABEL}"
+    return f"{SECTION_TITLES['all_questions']}, {state}"
 
 
 @callback(
