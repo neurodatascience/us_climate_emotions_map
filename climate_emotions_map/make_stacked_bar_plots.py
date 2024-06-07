@@ -10,8 +10,9 @@ THEME = "plotly_white"
 
 FACET_LAYOUTS = {
     "title_fsize": 14,
+    "title_wrap": 105,
     "facet_row_spacing": 40,
-    "wrap_width": 25,
+    "text_wrap": 25,
 }
 
 # TODO: Revisit
@@ -21,8 +22,6 @@ DEFAULT_FIG_KW = {
     # width not used, controlled instead by the app layout
     "width": 800,
     "height": 130,
-    "marker_line_width": 1,
-    "marker_line_color": "black",
     "margin": {"l": 30, "r": 30, "t": 30, "b": 20},
 }
 
@@ -82,6 +81,14 @@ def load_df(state: str | None, stratify: bool) -> pd.DataFrame | None:
     return None
 
 
+# TODO: Refactor into a utility module
+def wrap_text(text: str, width: int) -> list[str]:
+    """Wrap text to a specified character width."""
+    return "<br>".join(
+        wrap(text=str(text), width=width, break_long_words=False)
+    )
+
+
 def wrap_column_text(df: pd.DataFrame, column: str, width: int) -> pd.Series:
     """Wrap string values of a column which are longer than the specified character length."""
     df = df.copy()
@@ -92,9 +99,7 @@ def wrap_column_text(df: pd.DataFrame, column: str, width: int) -> pd.Series:
     # Apply wrapping to only rows where the mask is True
     # Need to worry about NaNs?
     df.loc[mask, column] = df.loc[mask, column].apply(
-        lambda value: "<br>".join(
-            wrap(text=str(value), width=width, break_long_words=False)
-        )
+        lambda value: wrap_text(value, width)
     )
     return df[column]
 
@@ -180,7 +185,7 @@ def plot_bars(
     plot_df["full_text"] = plot_df["key"].map(full_text_series)
     plot_df["annotate_text"] = (
         wrap_column_text(
-            df=plot_df, column="full_text", width=FACET_LAYOUTS["wrap_width"]
+            df=plot_df, column="full_text", width=FACET_LAYOUTS["text_wrap"]
         )
         + "<br>"
         + plot_df[x].round(3).astype(str)
@@ -451,14 +456,18 @@ def make_stacked_bar(
     if n_subquestions > 1:
         fig.for_each_annotation(
             lambda a: a.update(
-                text=get_subquestion_text(
-                    question, subquestion=a.text.split("=")[-1]
+                text=wrap_text(
+                    get_subquestion_text(
+                        question, subquestion=a.text.split("=")[-1]
+                    ),
+                    width=FACET_LAYOUTS["title_wrap"],
                 ),
                 font_size=FACET_LAYOUTS["title_fsize"],
                 # Ensure that facet title is left-aligned
                 xanchor="left",
                 x=0,
                 xref="paper",
+                align="left",
             )
         )
     else:
