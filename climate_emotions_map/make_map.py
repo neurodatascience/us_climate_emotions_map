@@ -229,7 +229,7 @@ def make_map(
     if impact is not None and not show_impact_as_gradient:
         customdata_cols.append(col_color_impact)
         hovertemplate_extra = (
-            f"<br>{col_color_impact.capitalize()}: %{{customdata[2]:.2f}}"
+            f"<br>{col_color_impact.capitalize()}: %{{customdata[2]:.1f}}%"
         )
     fig.add_choropleth(
         locations=df_hover_data["state_abbreviated"],
@@ -241,7 +241,7 @@ def make_map(
         hovertemplate=(
             "<b>%{customdata[0]}</b>"
             "<br>Sample size: %{customdata[1]}"
-            f"<br>{col_gradient.capitalize()}: %{{z:.2f}}"
+            f"<br>{col_gradient.capitalize()}: %{{z:.1f}}%"
             f"{hovertemplate_extra}"
             "<extra></extra>"
         ),
@@ -270,7 +270,9 @@ def make_map(
     fig.add_scattergeo(
         locations=state_abbrevs_long["state_abbreviated"],
         locationmode="USA-states",
-        text=state_abbrevs_long["state_abbreviated"].apply(lambda abbr: f"<b>{abbr}</b>"),
+        text=state_abbrevs_long["state_abbreviated"].apply(
+            lambda abbr: f"<b>{abbr}</b>"
+        ),
         mode="text",
         hoverinfo="skip",
         name="abbr_labels",
