@@ -120,10 +120,12 @@ def reset_impact_select(question_value):
 @callback(
     Output("map-title", "children"),
     Input("impact-select", "value"),
+    State("impact-select", "data"),
 )
-def update_map_title(impact):
+def update_map_title(impact, opts):
     """Update the map title when a specific impact is selected (or if the selection is cleared)."""
-    return utils.create_map_title(impact)
+    label = [opt["label"] for opt in opts if opt["value"] == impact]
+    return utils.create_map_title(label[0])
 
 
 @callback(
