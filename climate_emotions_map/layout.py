@@ -16,6 +16,11 @@ from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 )
 
 HEADER_HEIGHT = 110
+
+SUPP_TEXT = {
+    "weighted_descriptives": "*N are unweighted while proportions are weighted according to census estimates for age, sex, race, and ethnicity",
+}
+
 SINGLE_SUBQUESTION_FIG_KW = {
     "fontsize": 10,
     # NOTE: Can calculate same actual height as create_bar_plots_for_question with:
@@ -93,6 +98,14 @@ def create_drawer_sample_size():
     return dmc.Text(id="drawer-sample-size", size="md")
 
 
+def create_sample_descriptive_note():
+    """Create the note for the sample characteristics section."""
+    return dmc.Text(
+        children=SUPP_TEXT["weighted_descriptives"],
+        size="xs",
+    )
+
+
 def create_sample_descriptive_plot():
     """Create the component holding the subplots of sample descriptive statistics."""
     return dcc.Graph(
@@ -120,6 +133,7 @@ def create_sample_description_drawer():
                     create_drawer_state(),
                     create_drawer_sample_size(),
                     create_sample_descriptive_plot(),
+                    create_sample_descriptive_note(),
                 ],
                 title=dmc.Title(
                     SECTION_TITLES["demographics"], order=3, fw=300
