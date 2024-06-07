@@ -62,8 +62,8 @@ def make_map(
     impact_colormap: str | None = "OrRd",
     clicked_state_marker: dict | None = None,
     impact_marker_size_scale: float = 1.0,
-    colormap_range_padding=10,
-    margins=None,
+    colormap_range_padding: int = 10,
+    margins: dict = None,
 ) -> go.Figure:
     """Generate choropleth map showing opinion and/or impact data.
 
@@ -82,13 +82,13 @@ def make_map(
     show_impact_as_gradient : bool, optional
         Whether to show impact information in the base map (replacing opinion
         data) instead of as an additional scatter plot, by default True
-    opinion_colormap : str | None, optional
-        Colormap for the opinion data, by default "Greens"
+    opinion_colormap : str | list | None, optional
+        Colormap for the opinion data
     impact_colormap : str | None, optional
-        Colormap for the impact data, by default "Oranges"
+        Colormap for the impact data, by default "OrRd"
     clicked_state_marker : dict | None, optional
         Configuration for the clicked state (e.g., highlighting color). By
-        default it will make the outline thicker and yellow
+        default it will make the outline thicker and navy (#2a3f5f)
     impact_marker_size_scale : float, optional
         Scale factor for the impact marker size, by default 1.0
     colormap_range_padding : int, optional
@@ -270,10 +270,7 @@ def make_map(
     fig.add_scattergeo(
         locations=state_abbrevs_long["state_abbreviated"],
         locationmode="USA-states",
-        text=[
-            f"<b>{abbr}</b>"
-            for abbr in state_abbrevs_long["state_abbreviated"]
-        ],
+        text=state_abbrevs_long["state_abbreviated"].apply(lambda abbr: f"<b>{abbr}</b>"),
         mode="text",
         hoverinfo="skip",
         name="abbr_labels",
