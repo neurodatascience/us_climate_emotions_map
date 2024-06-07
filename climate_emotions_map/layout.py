@@ -319,7 +319,6 @@ def create_impact_dropdown():
 
 def create_map_plot():
     """Create the component holding the cloropleth map plot of US states."""
-    # TODO: Ensure that state click events are handled properly
     us_map = dmc.Container(
         # TODO: Make map margins smaller (or create a param for this, maybe), and make figure height larger (?)
         dcc.Graph(

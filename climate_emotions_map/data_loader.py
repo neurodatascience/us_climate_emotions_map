@@ -117,6 +117,13 @@ def get_subquestion_order():
     return subquestion_order
 
 
+def get_domain_text() -> dict[str, str]:
+    """Return a dictionary where key-value pairs are short and full names of each available domain."""
+    df = DATA_DICTIONARIES["question_dictionary.tsv"]
+    df_unique = df[["domain_short", "domain_text"]].drop_duplicates()
+    return dict(zip(df_unique["domain_short"], df_unique["domain_text"]))
+
+
 SURVEY_DATA = load_survey_data()
 # NOTE: column dtypes for opinions data TSVs
 # Input:
@@ -144,14 +151,7 @@ DATA_DICTIONARIES = load_data_dictionaries()
 # ignore            bool
 # dtype: object
 
-# TODO: Extract from updated question data dictionary
-DOMAIN_TEXT = {
-    "Climate emotions & beliefs": "Emotions & beliefs about climate change",
-    "Responses to climate emotions": "Response to emotions about climate change",
-    "Responsibility perceptions": "Responsibility for climate climate change",
-    "Desired and planned actions": "Desired and planned actions",
-    "Views on government response": "Emotions and beliefs about US Government response to climate change",
-}
+DOMAIN_TEXT = get_domain_text()
 
 NATIONAL_SAMPLE_SIZE = SURVEY_DATA["samplesizes_state.tsv"]["n"].sum()
 GEOJSON_OBJECTS = load_geojson_objects()
