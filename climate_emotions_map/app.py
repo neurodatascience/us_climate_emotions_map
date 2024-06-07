@@ -237,6 +237,18 @@ def update_selected_question_title(state):
 
 
 @callback(
+    Output("selected-question-container", "display"),
+    Input("impact-select", "value"),
+    prevent_initial_call=True,
+)
+def toggle_selected_question_bar_plot_visibility(impact):
+    """Toggle visibility of the selected question bar plot component based on whether an impact is selected."""
+    if impact is not None:
+        return "none"
+    return "flex"
+
+
+@callback(
     Output({"type": "stacked-bar-plot", "question": ALL}, "figure"),
     [
         Input("state-select", "value"),

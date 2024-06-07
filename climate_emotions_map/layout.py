@@ -400,6 +400,7 @@ def create_selected_question_bar_plot():
     )
 
     return dmc.Stack(
+        id="selected-question-container",
         children=[
             title,
             figure,
