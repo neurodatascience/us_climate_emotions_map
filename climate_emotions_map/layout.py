@@ -1,16 +1,33 @@
 """Generate the layout for the dashboard."""
 
 import dash_mantine_components as dmc
-from dash import dcc
+import pandas as pd
+from dash import dcc, html
 
 from . import utility as utils
+from .data_loader import DATA_DICTIONARIES, DOMAIN_TEXT
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
-    DEFAULT_MAP_TITLE,
+    ALL_STATES_LABEL,
     DEFAULT_QUESTION,
+    SECTION_TITLES,
 )
+
+HEADER_HEIGHT = 110
+
+SUPP_TEXT = {
+    "weighted_descriptives": "*N are unweighted while proportions are weighted according to census estimates for age, sex, race, and ethnicity",
+}
+
+SINGLE_SUBQUESTION_FIG_KW = {
+    "fontsize": 10,
+    # NOTE: Can calculate same actual height as create_bar_plots_for_question with:
+    # ( default height - (default-set margin top) - (default-set margin bottom) )
+    "height": 105,
+    "margin": {"l": 30, "r": 30, "t": 5, "b": 20},
+}
 
 
 def create_question_dropdown():
@@ -81,6 +98,14 @@ def create_drawer_sample_size():
     return dmc.Text(id="drawer-sample-size", size="md")
 
 
+def create_sample_descriptive_note():
+    """Create the note for the sample characteristics section."""
+    return dmc.Text(
+        children=SUPP_TEXT["weighted_descriptives"],
+        size="xs",
+    )
+
+
 def create_sample_descriptive_plot():
     """Create the component holding the subplots of sample descriptive statistics."""
     return dcc.Graph(
@@ -99,15 +124,20 @@ def create_sample_description_drawer():
     return dmc.Container(
         [
             dmc.Button(
-                "View Sample Description", id="drawer-button", variant="subtle"
+                "View Sample Characteristics",
+                id="drawer-button",
+                variant="subtle",
             ),
             dmc.Drawer(
                 children=[
                     create_drawer_state(),
                     create_drawer_sample_size(),
                     create_sample_descriptive_plot(),
+                    create_sample_descriptive_note(),
                 ],
-                title=dmc.Title("Sample Description", order=3, fw=300),
+                title=dmc.Title(
+                    SECTION_TITLES["demographics"], order=3, fw=300
+                ),
                 id="drawer",
                 padding="md",
                 transitionProps={
@@ -126,22 +156,82 @@ def create_sample_description_drawer():
     )
 
 
+def create_design_credit():
+    """Create the text hovercard for web app developer details."""
+    short_credit = dmc.Text(
+        children="Built by members of the ORIGAMI Lab",
+        size="xs",
+        c="dimmed",
+    )
+
+    long_credit = dmc.Text(
+        children=[
+            dmc.Text(
+                "Alyssa Dai, Nikhil Bhagwat, Rémi Gau, Arman Jahanpour, Kendra Oudyk, Sebastian Urchs, Michelle Wang"
+            ),
+            dmc.Anchor(
+                "ORIGAMI Lab, PI: Jean-Baptiste Poline",
+                href="https://neurodatascience.github.io/",
+                target="_blank",
+            ),
+        ],
+        size="xs",
+        c="dimmed",
+    )
+
+    return dmc.HoverCard(
+        withArrow=True,
+        width=350,
+        offset=3,
+        shadow="sm",
+        children=[
+            dmc.HoverCardTarget(children=short_credit),
+            dmc.HoverCardDropdown(children=long_credit),
+        ],
+    )
+
+
 def create_navbar():
     """Create the navbar for the dashboard."""
     return dmc.AppShellNavbar(
-        children=dmc.Stack(
+        children=dmc.Flex(
             mt=25,
             px=25,
+            h="100vh",
             gap="lg",
+            direction="column",
             children=[
-                create_question_dropdown(),
-                create_state_dropdown(),
-                create_barplot_options_heading(),
-                create_party_switch(),
-                create_response_threshold_control(),
-                create_sample_description_drawer(),
+                dmc.Stack(
+                    children=[
+                        create_question_dropdown(),
+                        create_state_dropdown(),
+                        create_barplot_options_heading(),
+                        create_party_switch(),
+                        create_response_threshold_control(),
+                        create_sample_description_drawer(),
+                    ],
+                ),
+                dmc.Container(
+                    create_design_credit(),
+                    mt="auto",
+                    pb=25,
+                ),
             ],
-        )
+        ),
+    )
+
+
+def create_app_subtitle():
+    """Create the subtitle for the dashboard."""
+    return dmc.Text(
+        children=[
+            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults" \n(Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ',
+            html.I("Lancet Planetary Health, "),
+            "(volume, issue, tbd)",
+        ],
+        size="sm",
+        c="dimmed",
+        style={"whiteSpace": "pre-wrap"},
     )
 
 
@@ -153,17 +243,24 @@ def create_header():
         children=[
             dmc.Stack(
                 justify="center",
-                h=70,
+                h=HEADER_HEIGHT,
                 children=dmc.Grid(
                     justify="space-between",
                     align="center",
                     children=[
                         dmc.GridCol(
-                            children=dmc.Anchor(
-                                "US Climate Emotions Map 2024",
-                                size="xl",
-                                href="/",
-                                underline=False,
+                            children=dmc.Stack(
+                                gap=5,
+                                justify="center",
+                                children=[
+                                    dmc.Anchor(
+                                        SECTION_TITLES["app"],
+                                        size="xl",
+                                        href="/",
+                                        underline=False,
+                                    ),
+                                    create_app_subtitle(),
+                                ],
                             ),
                             span="content",
                         ),
@@ -171,7 +268,6 @@ def create_header():
                             dmc.Group(
                                 justify="flex-end",
                                 # TODO: Add GitHub link? Not sure if needed/wanted.
-                                # TODO: Add link to paper
                             ),
                             span="auto",
                         ),
@@ -182,13 +278,13 @@ def create_header():
     )
 
 
-def create_question_title():
-    """Create the title for the main content of the dashboard."""
+def create_map_title():
+    """Create the title for the map section of the dashboard."""
     return dmc.Stack(
         children=[
             dmc.Title(
                 id="map-title",
-                children=DEFAULT_MAP_TITLE,
+                children=SECTION_TITLES["map_opinions"],
                 order=3,
                 fw=300,
             ),
@@ -223,7 +319,6 @@ def create_impact_dropdown():
 
 def create_map_plot():
     """Create the component holding the cloropleth map plot of US states."""
-    # TODO: Ensure that state click events are handled properly
     us_map = dmc.Container(
         # TODO: Make map margins smaller (or create a param for this, maybe), and make figure height larger (?)
         dcc.Graph(
@@ -245,24 +340,172 @@ def create_map_plot():
     return us_map
 
 
-def create_stacked_bar_plots():
-    """Create component to hold the stacked bar plot(s) for a subquestion."""
+def create_domain_heading(domain_text: str) -> dmc.Title:
+    """Create a domain heading for the stacked bar plots."""
+    return dmc.Title(
+        id={
+            "type": "domain-title",
+            "domain": domain_text,
+        },
+        children=domain_text,
+        order=4,
+        fw=300,
+        # Add some padding between the domain title and the question plots
+        pb="md",
+    )
+
+
+def create_question_heading(question_label: str) -> dmc.Text:
+    """Create a question heading for the stacked bar plots."""
+    return dmc.Text(
+        children=question_label,
+        size="md",
+    )
+
+
+# TODO: Refactor args
+def create_bar_plots_for_question(question_id: str, subquestion_id: str):
+    """
+    Create component to hold the stacked bar plot(s) for a single subquestion
+    or all subquestions for a question.
+    """
     figure = dmc.Container(
         dcc.Graph(
-            id="stacked-bar-plot",
+            id={
+                "type": "stacked-bar-plot",
+                "question": question_id,
+            },
+            figure=make_stacked_bar(
+                question=question_id,
+                subquestion=subquestion_id,
+                state=None,
+                stratify=False,
+                threshold=DEFAULT_QUESTION["outcome"],
+            ),
+        ),
+        w=1200,
+        # size="xl",
+    )
+    return figure
+
+
+def create_selected_question_bar_plot():
+    """Create the component holding a title and stacked bar plot for the selected question."""
+    title = dmc.Title(
+        id="selected-question-title",
+        children=f"{SECTION_TITLES['selected_question']}, {ALL_STATES_LABEL}",
+        order=4,
+        fw=300,
+    )
+
+    figure = dmc.Container(
+        dcc.Graph(
+            id="selected-question-bar-plot",
             figure=make_stacked_bar(
                 question=DEFAULT_QUESTION["question"],
                 subquestion=DEFAULT_QUESTION["sub_question"],
                 state=None,
                 stratify=False,
                 threshold=DEFAULT_QUESTION["outcome"],
-                binarize_threshold=True,
+                fig_kw=SINGLE_SUBQUESTION_FIG_KW,
             ),
-            style={"height": "20vh"},
         ),
-        size="xl",
+        w=1200,
     )
-    return figure
+
+    return dmc.Stack(
+        id="selected-question-container",
+        children=[
+            title,
+            figure,
+        ],
+        gap=0,
+        align="center",
+        pb="sm",
+    )
+
+
+def create_all_questions_section_title() -> dmc.Title:
+    """Create a title for the section containing the bar plots for all questions."""
+    return dmc.Title(
+        id="all-questions-title",
+        children=f"{SECTION_TITLES['all_questions']}, {ALL_STATES_LABEL}",
+        order=3,
+        fw=300,
+        pb="sm",
+    )
+
+
+def create_question_components(q_row: pd.Series) -> list:
+    """Create a heading and stacked bar plot component for each question."""
+    return [
+        create_question_heading(q_row["full_text"]),
+        create_bar_plots_for_question(q_row["question"], "all"),
+    ]
+
+
+def create_bar_plots_for_domain(domain_text: str):
+    """Create component to hold the stacked bar plot(s) for all questions in a domain."""
+    questions_df = DATA_DICTIONARIES["question_dictionary.tsv"]
+    domain_df = questions_df.loc[
+        questions_df["domain_text"] == domain_text
+    ].copy()
+
+    # Create a list that includes a heading and stacked bar plot for each question in the domain
+    component_children = (
+        domain_df.apply(create_question_components, axis=1).explode().tolist()
+    )
+
+    return dmc.Stack(
+        component_children,
+        gap="xs",
+    )
+
+
+def create_domain_tabs():
+    """Create the tabs for each domain, each containing stacked bar plots for the questions in that domain."""
+    tab_list = []
+    panel_list = []
+
+    for domain_short, domain_full in DOMAIN_TEXT.items():
+        tab_list.append(
+            dmc.TabsTab(
+                domain_short,
+                value=domain_full,
+            )
+        )
+        panel_list.append(
+            dmc.TabsPanel(
+                id=domain_full,
+                children=[
+                    dcc.Loading(
+                        id={
+                            "type": "domain-loading-overlay",
+                            "domain": domain_full,
+                        },
+                        children=[
+                            create_domain_heading(domain_full),
+                            create_bar_plots_for_domain(
+                                domain_text=domain_full
+                            ),
+                        ],
+                        overlay_style={
+                            "visibility": "visible",
+                            "filter": "blur(2px)",
+                        },
+                        type="circle",
+                    ),
+                ],
+                value=domain_full,
+                pt="sm",
+            )
+        )
+
+    return dmc.Tabs(
+        children=[dmc.TabsList(children=tab_list, grow=True)] + panel_list,
+        orientation="horizontal",
+        value=DOMAIN_TEXT[DEFAULT_QUESTION["domain"]],
+    )
 
 
 def create_main():
@@ -274,10 +517,12 @@ def create_main():
                 mx="xs",
                 fluid=True,
                 children=[
-                    create_question_title(),
+                    create_map_title(),
                     create_impact_dropdown(),
                     create_map_plot(),
-                    create_stacked_bar_plots(),
+                    create_selected_question_bar_plot(),
+                    create_all_questions_section_title(),
+                    create_domain_tabs(),
                 ],
             )
         ]
@@ -288,6 +533,6 @@ def construct_layout():
     """Generate the overall dashboard layout."""
     return dmc.AppShell(
         children=[create_header(), create_navbar(), create_main()],
-        header={"height": 70},
-        navbar={"width": 400},
+        header={"height": HEADER_HEIGHT},
+        navbar={"width": 300},
     )

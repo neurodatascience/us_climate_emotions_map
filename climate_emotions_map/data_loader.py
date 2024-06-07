@@ -23,6 +23,9 @@ def load_data_dictionary(file: str) -> pd.DataFrame:
     return pd.read_csv(
         Path(__file__).parents[1] / "data" / "data_dictionaries" / file,
         sep="\t",
+        # Some data dictionaries have "None" as a meaningful value, so we have to prevent it
+        # from being interpreted as a NaN by pandas
+        keep_default_na=False,
     )
 
 
@@ -63,11 +66,13 @@ def load_survey_data() -> dict[str, pd.DataFrame]:
 def load_data_dictionaries() -> dict[str, pd.DataFrame]:
     """Load the data dictionaries for the survey data."""
     data_files = [
+        "demographics_dictionary.tsv",
         "impacts_list.tsv",
         "outcome_dictionary.tsv",
         "question_dictionary.tsv",
         "state_abbreviations.tsv",
         "subquestion_dictionary.tsv",
+        "threshold_dictionary.tsv",
     ]
 
     data_frames = {}
@@ -91,6 +96,34 @@ def load_geojson_objects() -> dict:
     return geojson_objects
 
 
+# TODO: Maybe just save result in a file/fixed dict and load it in the app?
+def get_subquestion_order():
+    """
+    Return the order of subquestions for each question based on descending order of % endorsement
+    for the 3+ outcome, for the whole sample.
+    """
+    df = SURVEY_DATA["opinions_wholesample.tsv"]
+    # TODO: Fix this hack!
+    df_thres = df.loc[
+        (df["outcome"] == "3+") & (df["sub_question"] != "noanswer")
+    ]
+
+    subquestion_order = {}
+    for question, group in df_thres.groupby("question"):
+        subquestion_order[question] = group.sort_values(
+            by="percentage", ascending=False
+        )["sub_question"].tolist()
+
+    return subquestion_order
+
+
+def get_domain_text() -> dict[str, str]:
+    """Return a dictionary where key-value pairs are short and full names of each available domain."""
+    df = DATA_DICTIONARIES["question_dictionary.tsv"]
+    df_unique = df[["domain_short", "domain_text"]].drop_duplicates()
+    return dict(zip(df_unique["domain_short"], df_unique["domain_text"]))
+
+
 SURVEY_DATA = load_survey_data()
 # NOTE: column dtypes for opinions data TSVs
 # Input:
@@ -103,6 +136,7 @@ SURVEY_DATA = load_survey_data()
 # outcome          object
 # percentage      float64
 # dtype: object
+SUBQUESTION_ORDER = get_subquestion_order()
 
 DATA_DICTIONARIES = load_data_dictionaries()
 # NOTE: column dtypes for data dictionary TSVs
@@ -116,6 +150,8 @@ DATA_DICTIONARIES = load_data_dictionaries()
 # full_text       object
 # ignore            bool
 # dtype: object
+
+DOMAIN_TEXT = get_domain_text()
 
 NATIONAL_SAMPLE_SIZE = SURVEY_DATA["samplesizes_state.tsv"]["n"].sum()
 GEOJSON_OBJECTS = load_geojson_objects()
