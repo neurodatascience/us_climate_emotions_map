@@ -521,5 +521,5 @@ def construct_layout():
     return dmc.AppShell(
         children=[create_header(), create_navbar(), create_main()],
         header={"height": HEADER_HEIGHT},
-        navbar={"width": 400},
+        navbar={"width": 300},
     )
