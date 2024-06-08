@@ -108,8 +108,8 @@ def make_map(
     # constants
     col_location = "state"
     col_color = "percentage"
-    col_color_opinion = f"{col_color} (opinion)"
-    col_color_impact = f"{col_color} (impact)"
+    col_color_opinion = f"{col_color}<br>(endorsement)"
+    col_color_impact = f"{col_color}<br>(weather event)"
 
     # default values
     if opinion_colormap is None:
@@ -194,6 +194,9 @@ def make_map(
         colorbar_title=col_gradient.capitalize(),
         name="main_map",
         hoverinfo="none",  # no hoverbox but click events are still emitted (?)
+        # TODO: revisit
+        # position colorbar closer to plot area (map)
+        colorbar={"x": 1},
     )
 
     # add outline for clicked state
@@ -241,7 +244,7 @@ def make_map(
         hovertemplate=(
             "<b>%{customdata[0]}</b>"
             "<br>Sample size: %{customdata[1]}"
-            f"<br>{col_gradient.capitalize()}: %{{z:.1f}}%"
+            f"<br>{col_gradient.replace('<br>', ' ').capitalize()}: %{{z:.1f}}%"
             f"{hovertemplate_extra}"
             "<extra></extra>"
         ),
