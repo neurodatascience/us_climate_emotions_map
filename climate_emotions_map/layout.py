@@ -21,6 +21,11 @@ SUPP_TEXT = {
     "weighted_descriptives": "*N are unweighted while proportions are weighted according to census estimates for age, sex, race, and ethnicity",
 }
 
+MAP_LAYOUT = {
+    "margin": {"l": 15, "r": 15, "t": 15, "b": 15},
+    "colormap_range_padding": 0,
+}
+
 SINGLE_SUBQUESTION_FIG_KW = {
     "fontsize": 10,
     # NOTE: Can calculate same actual height as create_bar_plots_for_question with:
@@ -325,22 +330,25 @@ def create_impact_dropdown():
 def create_map_plot():
     """Create the component holding the cloropleth map plot of US states."""
     us_map = dmc.Container(
-        # TODO: Make map margins smaller (or create a param for this, maybe), and make figure height larger (?)
         dcc.Graph(
             id="us-map",
             figure=make_map(
                 question=DEFAULT_QUESTION["question"],
                 sub_question=DEFAULT_QUESTION["sub_question"],
                 outcome=DEFAULT_QUESTION["outcome"],
+                colormap_range_padding=MAP_LAYOUT["colormap_range_padding"],
+                margins=MAP_LAYOUT["margin"],
                 # opinion_colormap=OPINION_COLORMAP,
             ),
             # vh = % of viewport height
             # TODO: Revisit once plot margins are adjusted
+            config={"scrollZoom": False},
             style={"height": "65vh"},
         ),
-        # sets max width
+        # set max width
         # TODO: Revisit once plot margins are adjusted
-        size="lg",
+        # style={"maxWidth": "70vw"},
+        size="xl",
     )
     return us_map
 

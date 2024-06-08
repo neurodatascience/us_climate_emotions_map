@@ -16,7 +16,7 @@ from dash.exceptions import PreventUpdate
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
-from .layout import SINGLE_SUBQUESTION_FIG_KW, construct_layout
+from .layout import MAP_LAYOUT, SINGLE_SUBQUESTION_FIG_KW, construct_layout
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
@@ -191,8 +191,9 @@ def update_map(question_value, state, impact):
         outcome=DEFAULT_QUESTION["outcome"],
         clicked_state=state,
         impact=impact,
+        colormap_range_padding=MAP_LAYOUT["colormap_range_padding"],
+        margins=MAP_LAYOUT["margin"],
         # opinion_colormap=OPINION_COLORMAP,
-        show_impact_as_gradient=True,
         # impact_colormap=IMPACT_COLORMAP,
     )
 
