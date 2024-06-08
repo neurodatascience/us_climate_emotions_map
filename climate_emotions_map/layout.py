@@ -177,7 +177,7 @@ def create_design_credit():
     long_credit = dmc.Text(
         children=[
             dmc.Text(
-                "Alyssa Dai, Nikhil Bhagwat, Rémi Gau, Arman Jahanpour, Kendra Oudyk, Sebastian Urchs, Michelle Wang"
+                "Alyssa Dai, Michelle Wang, Nikhil Bhagwat, Arman Jahanpour, Kendra Oudyk, Rémi Gau, Sebastian Urchs"
             ),
             dmc.Anchor(
                 "ORIGAMI Lab, PI: Jean-Baptiste Poline",
