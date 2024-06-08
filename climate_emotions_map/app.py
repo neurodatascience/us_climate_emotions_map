@@ -62,10 +62,22 @@ def update_state_and_disable_state_select_and_party_switch_interaction(
     and disable the party stratify switch when a specific state is selected (i.e., not None).
     """
     if ctx.triggered_id == "us-map":
-        map_selected_state = figure["points"][0]["customdata"][0]
-
-        if is_party_stratify_checked or map_selected_state == selected_state:
+        if is_party_stratify_checked:
             raise PreventUpdate
+
+        point = figure["points"][0]
+
+        # TODO: This is a temporary fix to handle the edge case where the exact same point (coords)
+        # on the map is selected twice, in which case the customdata key is for some reason missing
+        # from the clickData of the second click.
+        # This workaround assumes that this can only happen in cases where the clicked state is
+        # the same as the currently selected state, and thus will deselect the state in this case.
+        if "customdata" not in point:
+            return None, no_update, False, False
+
+        map_selected_state = point["customdata"][0]
+        if map_selected_state == selected_state:
+            return None, no_update, False, False
         return (
             map_selected_state,
             no_update,
