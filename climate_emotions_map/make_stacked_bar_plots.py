@@ -204,7 +204,6 @@ def plot_bars(
     category_orders = {facet_var: facet_order}
 
     # Define custom hover data
-    # TODO: Do we need the raw outcomes in the hover data? "outcome" / color column
     custom_data = ["full_text"]
     # <extra></extra> hides the secondary box that appears when hovering over the bars
     hovertemplate = "<br>".join(
