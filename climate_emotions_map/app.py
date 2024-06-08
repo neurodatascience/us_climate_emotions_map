@@ -130,6 +130,7 @@ def update_sample_descriptive_plot(state):
 @callback(
     Output("impact-select", "value"),
     Input("question-select", "value"),
+    prevent_initial_call=True,
 )
 def reset_impact_select(question_value):
     """Reset the impact select dropdown when a new question is selected."""
@@ -157,6 +158,7 @@ def update_map_title(impact, options):
         Input("question-select", "value"),
         Input("impact-select", "value"),
     ],
+    prevent_initial_call=True,
 )
 def update_map_subtitle(question_value, impact):
     """Update the map subtitle based on the selected question and whether an impact is selected."""
@@ -260,6 +262,7 @@ def toggle_selected_question_bar_plot_visibility(impact):
 @callback(
     Output("all-questions-title", "children"),
     Input("state-select", "value"),
+    prevent_initial_call=True,
 )
 def update_all_questions_title(state):
     """Update the title for the section for all questions based on the selected state."""
