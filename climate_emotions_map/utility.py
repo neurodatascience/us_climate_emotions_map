@@ -42,7 +42,7 @@ def get_question_options():
     # TODO: Try to refactor this to not use iterrows
     for _, q_row in DATA_DICTIONARIES["question_dictionary.tsv"].iterrows():
         question = q_row["question"]
-        question_label = q_row["full_text"]
+        question_label = q_row["dropdown_text"]
 
         group = subquestions_grouped.get_group(question)
         if group.shape[0] > 1:
@@ -51,7 +51,7 @@ def get_question_options():
                 # NOTE: Option `value` must be a string for DMC.
                 data_group["items"].append(
                     {
-                        "label": sq_row["full_text"],
+                        "label": sq_row["dropdown_text"],
                         "value": f"{question}_{sq_row['sub_question']}",
                     }
                 )
@@ -101,7 +101,15 @@ def create_question_subtitle(question: str, subquestion: str) -> str:
 
 def get_impact_options() -> list[dict]:
     """Get the options for the impact dropdown."""
-    return [
-        {"label": impact, "value": impact}
-        for impact in DATA_DICTIONARIES["impacts_list.tsv"]["impact"]
+    demog_df = DATA_DICTIONARIES["demographics_dictionary.tsv"]
+    impact_df = DATA_DICTIONARIES["impacts_list.tsv"]
+
+    # Get the impacts that are demographic questions
+    filt_demog = demog_df[
+        demog_df["demographic_variable"].isin(impact_df["impact"])
     ]
+    options = filt_demog.rename(
+        columns={"demographic_variable": "value", "full_text": "label"}
+    ).to_dict(orient="records")
+
+    return options
