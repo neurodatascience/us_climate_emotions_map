@@ -28,10 +28,8 @@ MAP_LAYOUT = {
 
 SINGLE_SUBQUESTION_FIG_KW = {
     "fontsize": 10,
-    # NOTE: Can calculate same actual height as create_bar_plots_for_question with:
-    # ( default height - (default-set margin top) - (default-set margin bottom) )
-    "height": 105,
-    "margin": {"l": 30, "r": 30, "t": 5, "b": 20},
+    "height": 120,
+    "margin": {"l": 30, "r": 30, "t": 10, "b": 20},
 }
 
 
