@@ -2,13 +2,19 @@
 
 from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
-DEFAULT_QUESTION = {"question": "q2", "sub_question": "1", "outcome": "3+"}
-# TODO: Revisit title
+DEFAULT_QUESTION = {
+    "domain": "Climate emotions & beliefs",
+    "question": "q2",
+    "sub_question": "1",
+    "outcome": "3+",
+}
+ALL_STATES_LABEL = "National"
 SECTION_TITLES = {
     "app": "US Climate Emotions Map",
-    "map_opinions": "Map: Percent (%) of adolescents and young adults who endorse the following question/statement:",
+    "map_opinions": "Percent (%) of adolescents and young adults who endorse the following question/statement:",
     "map_impacts": "Map: Percent (%) of adolescents and young adults who reported experiencing the following in the last year",
-    "bar_charts": "Climate emotions and thoughts of adolescents and young adults",
+    "selected_question": "Response distribution",
+    "all_questions": "Climate emotions and thoughts of adolescents and young adults",
     "demographics": "Sample Characteristics",
 }
 
@@ -33,6 +39,7 @@ def get_question_options():
     ].groupby("question")
 
     data = []
+    # TODO: Try to refactor this to not use iterrows
     for _, q_row in DATA_DICTIONARIES["question_dictionary.tsv"].iterrows():
         question = q_row["question"]
         question_label = q_row["dropdown_text"]
