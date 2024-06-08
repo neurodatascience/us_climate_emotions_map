@@ -230,7 +230,7 @@ def make_descriptive_plot_traces(
             #     for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
             # ],
             hovertemplate=(
-                "<b>%{customdata[1]}</b>: %{x:.2f}% (%{customdata[0]})"
+                "<b>%{customdata[1]}</b>: %{x:.1f}% (%{customdata[0]})"
                 "<extra></extra>"
             ),
             marker_color=marker_color,
@@ -335,9 +335,7 @@ def make_descriptive_plots(
 
     # add plots
     demographic_variable_labels = []
-    for demographic_variable in SUBPLOT_POSITIONS.keys():
-
-        row, col = SUBPLOT_POSITIONS[demographic_variable]
+    for demographic_variable, (row, col) in SUBPLOT_POSITIONS.items():
         color = colors[row - 1]
 
         if demographic_variable == IMPACTS_LABEL:
@@ -391,12 +389,12 @@ def make_descriptive_plots(
             )
 
         fig.update_yaxes(
-            tickfont=dict(size=10),
+            tickfont={"size": 10},
             row=row,
             col=col,
         )
         fig.update_xaxes(
-            tickfont=dict(size=10),
+            tickfont={"size": 10},
             row=row,
             col=col,
         )
@@ -405,7 +403,7 @@ def make_descriptive_plots(
         showlegend=False,
         margin=margins,
         template="plotly_white",
-        font=dict(size=10),
+        font={"size": 10},
     )
     fig.update_annotations(font_size=12)
 
