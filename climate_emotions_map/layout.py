@@ -45,8 +45,13 @@ def create_question_dropdown():
         searchable=True,
         nothingFoundMessage="No matches",
         styles={
-            "group": {"marginTop": 10},
-            "option": {"paddingTop": 2, "paddingBottom": 2},
+            "group": {
+                "paddingTop": 4,
+                "paddingBottom": 4,
+                "borderBottom": "1px solid #E6E6E6",
+            },
+            "groupLabel": {"color": "#228BE6"},
+            "option": {"paddingTop": 4, "paddingBottom": 4},
             "input": {"textOverflow": "ellipsis"},
         },
     )
