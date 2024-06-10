@@ -118,9 +118,10 @@ def create_sample_descriptive_plot():
         figure=make_descriptive_plots(
             state=None,
         ),
-        # TODO: Revisit once we've made plot margins smaller (or create a param for this, maybe)
-        # TODO: Fix margins to prevent text from being cut off; make kwargs work
-        style={"height": "90vh"},
+        # TODO: Revisit
+        # We use px instead of viewport height here for now to more easily control scrolling
+        # on smaller screens
+        style={"height": "1000px"},
     )
 
 
@@ -151,7 +152,7 @@ def create_sample_description_drawer():
                     "timingFunction": "ease",
                 },
                 # TODO: Revisit size once plot margins are adjusted
-                size="30%",
+                size="40%",
                 position="right",
                 # Allow user to interact with content in rest of the app when the drawer is open
                 withOverlay=False,
