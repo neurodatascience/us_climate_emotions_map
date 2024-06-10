@@ -333,8 +333,6 @@ def make_descriptive_plots(
     else:
         data = SAMPLEDESC_STATE.loc[SAMPLEDESC_STATE["state"] == state]
 
-    # vertical_spacing = 0.05
-
     # Number of bars in each subplot
     n_categories = [2, 2, 3, 2, 3, 2, 3, 3, 5, 5, 8]
     # Row heights are specified as a fraction of the total height of the subplot grid
@@ -349,7 +347,6 @@ def make_descriptive_plots(
             get_demographic_variable_to_display(demographic_variable)
             for demographic_variable in SUBPLOT_POSITIONS
         ],
-        # vertical_spacing=vertical_spacing,
     )
 
     if colors is None:
