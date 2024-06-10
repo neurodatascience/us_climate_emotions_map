@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from functools import partial
 from textwrap import wrap
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -107,13 +108,13 @@ CATEGORY_ORDERS = {
         "Yes",
     ],
     Q2_LABEL: [
-        "Very sure it is not happening",
-        "Moderately sure it is not happening",
-        "Slightly sure it is not happening",
-        "Slightly sure it is happening",
-        "Moderately sure it is happening",
         "Very sure it is happening",
+        "Moderately sure it is happening",
+        "Slightly sure it is happening",
         "Don't know",
+        "Slightly sure it is not happening",
+        "Moderately sure it is not happening",
+        "Very sure it is not happening",
     ],
 }
 CATEGORY_ORDERS.update(
@@ -185,7 +186,7 @@ def make_descriptive_plot_traces(
     Parameters
     ----------
     df : pd.DataFrame
-        Data to plot. Expect columns: "demographic_variable" "category", "n",
+        Data to plot. Expect columns: "demographic_variable", "category", "n",
         and "percentage".
     demographic_variable : str
         Demographic variable to plot.
@@ -299,8 +300,28 @@ def make_impact_plot_traces(
 
 
 def make_descriptive_plots(
-    state: str | None = None, margins=None, text_wrap_width=14
+    state: str | None = None,
+    margins: Optional[dict] = None,
+    text_wrap_width=14,
+    colors: list[str] = None,
 ) -> go.Figure:
+    """Make the sample descriptive plots
+
+    Parameters
+    ----------
+    state : str | None, optional
+        State/cluster label, by default None (whole sample)
+    margins : dict | None, optional
+        Figure margins, by default None ({"l": 0, "r": 0, "t": 20, "b": 0})
+    text_wrap_width : int, optional
+        Maximum width for wrapping some text labels, by default 14
+    colors : list[str], optional
+        List of colors for the bar plots, by default None (uses the turbo colorscale)
+
+    Returns
+    -------
+    go.Figure
+    """
 
     if margins is None:
         margins = {"l": 0, "r": 0, "t": 20, "b": 0}
@@ -311,8 +332,9 @@ def make_descriptive_plots(
     else:
         data = SAMPLEDESC_STATE.loc[SAMPLEDESC_STATE["state"] == state]
 
+    vertical_spacing = 0.05
     row_heights = [
-        n_categories + 0.5
+        n_categories + 0.5 + (vertical_spacing * 2)
         for n_categories in [2, 2, 3, 2, 3, 2, 3, 3, 5, 5, 8]
     ]
 
@@ -325,18 +347,18 @@ def make_descriptive_plots(
             get_demographic_variable_to_display(demographic_variable)
             for demographic_variable in SUBPLOT_POSITIONS
         ],
-        vertical_spacing=0.04,
+        vertical_spacing=vertical_spacing,
     )
 
-    colorscale_step = 1 / (len(row_heights) - 1)
-    colors = sample_colorscale(
-        "turbo", np.arange(0, 1 + colorscale_step, colorscale_step)
-    )
+    if colors is None:
+        colorscale_step = 1 / (len(row_heights) - 1)
+        colors = sample_colorscale(
+            "turbo", np.arange(0, 1 + colorscale_step, colorscale_step)
+        )
 
     # add plots
-    demographic_variable_labels = []
     for demographic_variable, (row, col) in SUBPLOT_POSITIONS.items():
-        color = colors[row - 1]
+        color = colors[(row - 1) % len(colors)]
 
         if demographic_variable == IMPACTS_LABEL:
             traces = make_impact_plot_traces(
@@ -346,10 +368,6 @@ def make_descriptive_plots(
             traces = make_descriptive_plot_traces(
                 data, demographic_variable, reverse=True, marker_color=color
             )
-            if demographic_variable != Q2_LABEL:
-                demographic_variable_labels.extend(
-                    [demographic_variable] * len(traces[0].y)
-                )
 
         for trace in traces:
             fig.add_trace(trace, row=row, col=col)
@@ -366,8 +384,8 @@ def make_descriptive_plots(
             )
             fig.update_xaxes(
                 range=[0, 105],
-                tickvals=[0, 20, 40, 60, 80, 100],
-                ticktext=["0", "20", "40", "60", "80", "100 (%)"],
+                tickvals=[0, 25, 50, 75, 100],
+                ticktext=["0", "25", "50", "75", "100 (%)"],
                 row=row,
                 col=col,
             )
@@ -376,8 +394,8 @@ def make_descriptive_plots(
         else:
             fig.update_yaxes(
                 range=[0, 100],
-                tickvals=[0, 20, 40, 60, 80, 100],
-                ticktext=["0", "20", "40", "60", "80", "(%)"],
+                tickvals=[0, 25, 50, 75, 100],
+                ticktext=["0", "25", "50", "75", "(%)"],
                 row=row,
                 col=col,
             )
