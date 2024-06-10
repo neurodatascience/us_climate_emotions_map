@@ -161,10 +161,10 @@ def get_demographic_variable_to_display(demographic_variable: str):
     )
     if demographic_variable in DEMOGRAPHIC_VARIABLES_WITH_ASTERISK:
         demographic_variable_to_display = f"{demographic_variable_to_display}*"
-    # if demographic_variable == Q2_LABEL:
-    #     demographic_variable_to_display = wrap_text_label(
-    #         demographic_variable_to_display, width=38
-    #     )
+    if demographic_variable == Q2_LABEL:
+        demographic_variable_to_display = wrap_text_label(
+            demographic_variable_to_display, width=40
+        )
     return demographic_variable_to_display
 
 
