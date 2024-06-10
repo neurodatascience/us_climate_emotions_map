@@ -312,7 +312,7 @@ def make_descriptive_plots(
     state : str | None, optional
         State/cluster label, by default None (whole sample)
     margins : dict | None, optional
-        Figure margins, by default None ({"l": 0, "r": 0, "t": 20, "b": 0})
+        Figure margins, by default None ({"l": 5, "r": 5, "t": 20, "b": 20})
     text_wrap_width : int, optional
         Maximum width for wrapping some text labels, by default 14
     colors : list[str], optional
@@ -324,7 +324,8 @@ def make_descriptive_plots(
     """
 
     if margins is None:
-        margins = {"l": 0, "r": 0, "t": 20, "b": 0}
+        # NOTE: L/R margins cannot be 0 or else x-axis labels can be cut off on smaller screens
+        margins = {"l": 5, "r": 5, "t": 20, "b": 20}
 
     # get data to plot
     if state is None:
@@ -332,11 +333,12 @@ def make_descriptive_plots(
     else:
         data = SAMPLEDESC_STATE.loc[SAMPLEDESC_STATE["state"] == state]
 
-    vertical_spacing = 0.05
-    row_heights = [
-        n_categories + 0.5 + (vertical_spacing * 2)
-        for n_categories in [2, 2, 3, 2, 3, 2, 3, 3, 5, 5, 8]
-    ]
+    # vertical_spacing = 0.05
+
+    # Number of bars in each subplot
+    n_categories = [2, 2, 3, 2, 3, 2, 3, 3, 5, 5, 8]
+    # Row heights are specified as a fraction of the total height of the subplot grid
+    row_heights = [((1 / sum(n_categories)) * n) for n in n_categories]
 
     # initialize figure
     fig = make_subplots(
@@ -347,7 +349,7 @@ def make_descriptive_plots(
             get_demographic_variable_to_display(demographic_variable)
             for demographic_variable in SUBPLOT_POSITIONS
         ],
-        vertical_spacing=vertical_spacing,
+        # vertical_spacing=vertical_spacing,
     )
 
     if colors is None:
