@@ -383,9 +383,9 @@ def make_descriptive_plots(
                 col=col,
             )
             fig.update_xaxes(
-                range=[0, 105],
+                range=[0, 100],
                 tickvals=[0, 25, 50, 75, 100],
-                ticktext=["0", "25", "50", "75", "100 (%)"],
+                ticktext=["0", "25", "50", "75", "100<br>(%)"],
                 row=row,
                 col=col,
             )
