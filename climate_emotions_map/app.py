@@ -16,7 +16,7 @@ from dash.exceptions import PreventUpdate
 
 from . import utility as utils
 from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
-from .layout import SINGLE_SUBQUESTION_FIG_KW, construct_layout
+from .layout import MAP_LAYOUT, SINGLE_SUBQUESTION_FIG_KW, construct_layout
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
@@ -62,10 +62,22 @@ def update_state_and_disable_state_select_and_party_switch_interaction(
     and disable the party stratify switch when a specific state is selected (i.e., not None).
     """
     if ctx.triggered_id == "us-map":
-        map_selected_state = figure["points"][0]["customdata"][0]
-
-        if is_party_stratify_checked or map_selected_state == selected_state:
+        if is_party_stratify_checked:
             raise PreventUpdate
+
+        point = figure["points"][0]
+
+        # TODO: This is a temporary fix to handle the edge case where the exact same point (coords)
+        # on the map is selected twice, in which case the customdata key is for some reason missing
+        # from the clickData of the second click.
+        # This workaround assumes that this can only happen in cases where the clicked state is
+        # the same as the currently selected state, and thus will deselect the state in this case.
+        if "customdata" not in point:
+            return None, no_update, False, False
+
+        map_selected_state = point["customdata"][0]
+        if map_selected_state == selected_state:
+            return None, no_update, False, False
         return (
             map_selected_state,
             no_update,
@@ -130,6 +142,7 @@ def update_sample_descriptive_plot(state):
 @callback(
     Output("impact-select", "value"),
     Input("question-select", "value"),
+    prevent_initial_call=True,
 )
 def reset_impact_select(question_value):
     """Reset the impact select dropdown when a new question is selected."""
@@ -157,6 +170,7 @@ def update_map_title(impact, options):
         Input("question-select", "value"),
         Input("impact-select", "value"),
     ],
+    prevent_initial_call=True,
 )
 def update_map_subtitle(question_value, impact):
     """Update the map subtitle based on the selected question and whether an impact is selected."""
@@ -191,8 +205,9 @@ def update_map(question_value, state, impact):
         outcome=DEFAULT_QUESTION["outcome"],
         clicked_state=state,
         impact=impact,
+        colormap_range_padding=MAP_LAYOUT["colormap_range_padding"],
+        margins=MAP_LAYOUT["margin"],
         # opinion_colormap=OPINION_COLORMAP,
-        show_impact_as_gradient=True,
         # impact_colormap=IMPACT_COLORMAP,
     )
 
@@ -259,6 +274,7 @@ def toggle_selected_question_bar_plot_visibility(impact):
 @callback(
     Output("all-questions-title", "children"),
     Input("state-select", "value"),
+    prevent_initial_call=True,
 )
 def update_all_questions_title(state):
     """Update the title for the section for all questions based on the selected state."""

@@ -25,7 +25,6 @@ SECTION_TITLES = {
 
 def get_state_options():
     """Get the options for the state dropdown."""
-    # TODO: The state values include cluster labels in parentheses, e.g. (Cluster F). Can remove from label if desired.
     return [
         {"label": state, "value": state}
         for state in SURVEY_DATA["samplesizes_state.tsv"]["state"]

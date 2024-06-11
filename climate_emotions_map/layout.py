@@ -21,12 +21,15 @@ SUPP_TEXT = {
     "weighted_descriptives": "*N are unweighted while proportions are weighted according to census estimates for age, sex, race, and ethnicity",
 }
 
+MAP_LAYOUT = {
+    "margin": {"l": 15, "r": 15, "t": 15, "b": 15},
+    "colormap_range_padding": 0,
+}
+
 SINGLE_SUBQUESTION_FIG_KW = {
     "fontsize": 10,
-    # NOTE: Can calculate same actual height as create_bar_plots_for_question with:
-    # ( default height - (default-set margin top) - (default-set margin bottom) )
-    "height": 105,
-    "margin": {"l": 30, "r": 30, "t": 5, "b": 20},
+    "height": 120,
+    "margin": {"l": 30, "r": 30, "t": 10, "b": 20},
 }
 
 
@@ -173,7 +176,7 @@ def create_design_credit():
     long_credit = dmc.Text(
         children=[
             dmc.Text(
-                "Alyssa Dai, Nikhil Bhagwat, Rémi Gau, Arman Jahanpour, Kendra Oudyk, Sebastian Urchs, Michelle Wang"
+                "Alyssa Dai, Michelle Wang, Nikhil Bhagwat, Arman Jahanpour, Kendra Oudyk, Rémi Gau, Sebastian Urchs"
             ),
             dmc.Anchor(
                 "ORIGAMI Lab, PI: Jean-Baptiste Poline",
@@ -326,22 +329,25 @@ def create_impact_dropdown():
 def create_map_plot():
     """Create the component holding the cloropleth map plot of US states."""
     us_map = dmc.Container(
-        # TODO: Make map margins smaller (or create a param for this, maybe), and make figure height larger (?)
         dcc.Graph(
             id="us-map",
             figure=make_map(
                 question=DEFAULT_QUESTION["question"],
                 sub_question=DEFAULT_QUESTION["sub_question"],
                 outcome=DEFAULT_QUESTION["outcome"],
+                colormap_range_padding=MAP_LAYOUT["colormap_range_padding"],
+                margins=MAP_LAYOUT["margin"],
                 # opinion_colormap=OPINION_COLORMAP,
             ),
             # vh = % of viewport height
             # TODO: Revisit once plot margins are adjusted
+            config={"scrollZoom": False},
             style={"height": "65vh"},
         ),
-        # sets max width
+        # set max width
         # TODO: Revisit once plot margins are adjusted
-        size="lg",
+        # style={"maxWidth": "70vw"},
+        size="xl",
     )
     return us_map
 
