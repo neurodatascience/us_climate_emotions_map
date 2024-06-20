@@ -1,0 +1,12 @@
+---
+services:
+    dash:
+        build: .
+        ports:
+        -   8050:8050
+        volumes:
+        -   climate_data:/app/data:ro
+
+volumes:
+    climate_data:
+        external: true
