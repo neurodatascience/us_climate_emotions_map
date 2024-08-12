@@ -135,7 +135,7 @@ def plot_bars(
     y="question",
     color="outcome",
     title=None,  # TODO: remove this argument?
-    round_to=3,
+    round_to=2,  # NOTE: This is the number of decimal places to round the data to, BEFORE multiplying by 100.
     sort_order="descending",
     facet_order=None,
     palette=None,
@@ -144,6 +144,10 @@ def plot_bars(
 ) -> px.bar:
     """Make a stacked bar plot of the opinions of the whole sample, split by state and party."""
     facet_var = "sub_question"
+
+    # Determine the appropriate number of decimal places to use after converting data
+    # to percentages based on the applied rounding, to use in hover text
+    decimals = max(0, round_to - 2)
 
     plot_df[x] = plot_df[x].round(round_to) * 100
 
@@ -183,12 +187,13 @@ def plot_bars(
 
     full_text_series = outcome_dict_df.set_index("key")["full_text"]
     plot_df["full_text"] = plot_df["key"].map(full_text_series)
+    # Format the text to display on the bars
     plot_df["annotate_text"] = (
         wrap_column_text(
             df=plot_df, column="full_text", width=FACET_LAYOUTS["text_wrap"]
         )
         + "<br>"
-        + plot_df[x].round(3).astype(str)
+        + plot_df[x].apply(lambda y: f"{y:.{decimals}f}")
         + "%"
     )
 
@@ -205,11 +210,12 @@ def plot_bars(
 
     # Define custom hover data
     custom_data = ["full_text"]
+    # Format the hover text
     # <extra></extra> hides the secondary box that appears when hovering over the bars
     hovertemplate = "<br>".join(
         [
             "Outcome: %{customdata[0]}",
-            "Percentage: %{x:.1f}%",
+            f"Percentage: %{{x:.{decimals}f}}%",
             "<extra></extra>",
         ]
     )

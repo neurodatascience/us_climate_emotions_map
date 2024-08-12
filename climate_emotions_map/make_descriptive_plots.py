@@ -138,6 +138,8 @@ SUBPLOT_POSITIONS = {
     Q2_LABEL: (11, 1),
 }
 
+DECIMALS = 0
+
 
 def get_categories_dict(df: pd.DataFrame) -> dict:
     """
@@ -231,7 +233,7 @@ def make_descriptive_plot_traces(
             #     for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
             # ],
             hovertemplate=(
-                "<b>%{customdata[1]}</b>: %{x:.1f}% (%{customdata[0]})"
+                f"<b>%{{customdata[1]}}</b>: %{{x:.{DECIMALS}f}}% (%{{customdata[0]}})"
                 "<extra></extra>"
             ),
             marker_color=marker_color,
@@ -288,7 +290,7 @@ def make_impact_plot_traces(
                 customdata=list(zip(x, data_category[COL_N])),
                 hovertemplate=(
                     "<b>%{customdata[0]}</b>"
-                    ": %{y:.2f}% (%{customdata[1]})"
+                    f": %{{y:.{DECIMALS}f}}% (%{{customdata[1]}})"
                     "<extra></extra>"
                 ),
                 marker_color=marker_color,
