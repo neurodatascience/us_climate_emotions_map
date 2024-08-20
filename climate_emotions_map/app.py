@@ -123,8 +123,10 @@ def update_drawer_sample_size(value):
     """Callback function for updating the sample size in the drawer."""
     df = SURVEY_DATA["samplesizes_state.tsv"]
     if value is None:
-        return f"Sample size: {NATIONAL_SAMPLE_SIZE}"
-    return f"Sample size: {df[df['state'] == value]['n'].values[0]}"
+        sample_size = NATIONAL_SAMPLE_SIZE
+    else:
+        sample_size = df[df["state"] == value]["n"].values[0]
+    return f"Sample size: {sample_size:,}"
 
 
 @callback(
