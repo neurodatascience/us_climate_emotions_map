@@ -64,6 +64,7 @@ def make_map(
     impact_marker_size_scale: float = 1.0,
     colormap_range_padding: int = 10,
     margins: dict = None,
+    decimals: int = 0,
 ) -> go.Figure:
     """Generate choropleth map showing opinion and/or impact data.
 
@@ -95,6 +96,8 @@ def make_map(
         Padding for the colormap vmin/vmax range, by default 10
     margins : dict | None, optional
         Margins for the Plotly figure, by default 30 everywhere
+    decimals : int, optional
+        Number of decimals to show in the hoverbox, by default 0
 
     Returns
     -------
@@ -231,9 +234,7 @@ def make_map(
     # if gradient and scatter dots
     if impact is not None and not show_impact_as_gradient:
         customdata_cols.append(col_color_impact)
-        hovertemplate_extra = (
-            f"<br>{col_color_impact.capitalize()}: %{{customdata[2]:.1f}}%"
-        )
+        hovertemplate_extra = f"<br>{col_color_impact.capitalize()}: %{{customdata[2]:.{decimals}f}}%"
     fig.add_choropleth(
         locations=df_hover_data["state_abbreviated"],
         locationmode="USA-states",
@@ -244,7 +245,7 @@ def make_map(
         hovertemplate=(
             "<b>%{customdata[0]}</b>"
             "<br>Sample size: %{customdata[1]}"
-            f"<br>{col_gradient.replace('<br>', ' ').capitalize()}: %{{z:.1f}}%"
+            f"<br>{col_gradient.replace('<br>', ' ').capitalize()}: %{{z:.{decimals}f}}%"
             f"{hovertemplate_extra}"
             "<extra></extra>"
         ),
