@@ -7,7 +7,8 @@ updates:
     schedule:
         interval: monthly
 
--   package-ecosystem: gitsubmodule
-    directory: /
-    schedule:
-        interval: daily
+# NOTE: This doesn't work seem to work when the submodule points to a private repository
+# -   package-ecosystem: gitsubmodule
+#     directory: /
+#     schedule:
+#         interval: daily
