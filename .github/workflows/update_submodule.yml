@@ -1,0 +1,33 @@
+name: Update data submodule
+
+on:
+    schedule:
+    # Run daily at midnight
+    -   cron: 0 0 * * *
+    workflow_dispatch:
+
+jobs:
+    update-submodule:
+        runs-on: ubuntu-latest
+        steps:
+        -   name: Checkout repository
+            uses: actions/checkout@v4
+            with:
+                submodules: recursive
+                token: ${{ secrets.CLIMATE_DB_DATA_PAT }}
+
+        -   name: Update submodule
+            run: git submodule update --remote --merge
+
+        -   name: Create pull request
+            uses: peter-evans/create-pull-request@v7
+            with:
+                token: ${{ secrets.CLIMATE_DB_DATA_PAT }}
+                commit-message: '[create-pull-request] update data submodule'
+                title: '[BOT] Update data submodule'
+                body: |
+                    This PR updates the data submodule to the latest commit.
+
+                    Automated changes by [create-pull-request](https://github.com/peter-evans/create-pull-request) GitHub action
+                base: main
+                branch: create-pull-request/bump-data-submodule
