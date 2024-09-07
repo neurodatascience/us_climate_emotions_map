@@ -17,7 +17,10 @@ jobs:
                 token: ${{ secrets.CLIMATE_DB_DATA_PAT }}
 
         -   name: Update submodule
-            run: git submodule update --remote --merge
+            run: |
+                cd data
+                git switch main && git pull
+                cd ..
 
         -   name: Create pull request
             uses: peter-evans/create-pull-request@v7
