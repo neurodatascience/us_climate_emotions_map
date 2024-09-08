@@ -18,7 +18,7 @@ from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 HEADER_HEIGHT = 110
 
 SUPP_TEXT = {
-    "weighted_descriptives": "*N are unweighted while proportions are weighted according to census estimates for age, sex, race, and ethnicity",
+    "weighted_descriptives": "*N are unweighted while proportions are weighted according to US census estimates for age, sex, race, and ethnicity",
 }
 
 MAP_LAYOUT = {
@@ -316,7 +316,7 @@ def create_impact_dropdown():
     return dmc.Flex(
         dmc.Select(
             id="impact-select",
-            label="View distribution of self-reported severe weather event",
+            label="Distribution of severe weather events (self-reported)",
             placeholder="Select a severe weather event",
             data=utils.get_impact_options(),
             clearable=True,
@@ -407,7 +407,7 @@ def create_selected_question_bar_plot():
     """Create the component holding a title and stacked bar plot for the selected question."""
     title = dmc.Title(
         id="selected-question-title",
-        children=f"{SECTION_TITLES['selected_question']}, {ALL_STATES_LABEL}",
+        children=ALL_STATES_LABEL,
         order=4,
         fw=300,
     )
@@ -444,7 +444,7 @@ def create_all_questions_section_title() -> dmc.Title:
     """Create a title for the section containing the bar plots for all questions."""
     return dmc.Title(
         id="all-questions-title",
-        children=f"{SECTION_TITLES['all_questions']}, {ALL_STATES_LABEL}",
+        children=f"{SECTION_TITLES['all_questions']}: {ALL_STATES_LABEL}",
         order=3,
         fw=300,
         pb="sm",

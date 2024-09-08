@@ -257,8 +257,8 @@ def update_selected_question_bar_plot(
 def update_selected_question_title(state):
     """Update the title for the selected question based on the selected state."""
     if state is None:
-        return f"{SECTION_TITLES['selected_question']}, {ALL_STATES_LABEL}"
-    return f"{SECTION_TITLES['selected_question']}, {state}"
+        return ALL_STATES_LABEL
+    return state
 
 
 @callback(
@@ -281,8 +281,8 @@ def toggle_selected_question_bar_plot_visibility(impact):
 def update_all_questions_title(state):
     """Update the title for the section for all questions based on the selected state."""
     if state is None:
-        return f"{SECTION_TITLES['all_questions']}, {ALL_STATES_LABEL}"
-    return f"{SECTION_TITLES['all_questions']}, {state}"
+        return f"{SECTION_TITLES['all_questions']}: {ALL_STATES_LABEL}"
+    return f"{SECTION_TITLES['all_questions']}: {state}"
 
 
 @callback(

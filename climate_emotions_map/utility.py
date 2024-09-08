@@ -4,17 +4,16 @@ from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 DEFAULT_QUESTION = {
     "domain": "Climate emotions & beliefs",
-    "question": "q2",
+    "question": "q4",
     "sub_question": "1",
     "outcome": "3+",
 }
 ALL_STATES_LABEL = "National"
 SECTION_TITLES = {
-    "app": "US Climate Emotions Map",
+    "app": "US Climate Emotions Map (16-25 years old)",
     "map_opinions": "Percent (%) of adolescents and young adults who endorse the following question/statement:",
     "map_impacts": "Map: Percent (%) of adolescents and young adults who reported experiencing the following in the last year",
-    "selected_question": "Response distribution",
-    "all_questions": "Climate emotions and thoughts of adolescents and young adults",
+    "all_questions": "Select a survey domain to view responses for",
     "demographics": "Sample Characteristics",
 }
 
