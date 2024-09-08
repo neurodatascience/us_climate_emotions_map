@@ -37,8 +37,8 @@ Q2_LABEL = "q2"
 # order in the lists determines order in the plots
 CATEGORY_ORDERS = {
     "age": [
-        "under 18",
-        "18+",
+        "16-17",
+        "18-25",
     ],
     "sex": [
         "Female",
