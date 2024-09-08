@@ -14,7 +14,9 @@ import pandas as pd
 def load_data_file(file: str) -> pd.DataFrame:
     """Load a TSV data file into a dataframe."""
     return pd.read_csv(
-        Path(__file__).parents[1] / "data" / "survey_results" / file, sep="\t"
+        Path(__file__).parents[1] / "data" / "survey_results" / file,
+        sep="\t",
+        dtype={"question": str, "sub_question": str, "outcome": str},
     )
 
 
@@ -26,6 +28,7 @@ def load_data_dictionary(file: str) -> pd.DataFrame:
         # Some data dictionaries have "None" as a meaningful value, so we have to prevent it
         # from being interpreted as a NaN by pandas
         keep_default_na=False,
+        dtype={"question": str, "sub_question": str, "outcome": str},
     )
 
 
@@ -103,10 +106,7 @@ def get_subquestion_order():
     for the 3+ outcome, for the whole sample.
     """
     df = SURVEY_DATA["opinions_wholesample.tsv"]
-    # TODO: Fix this hack!
-    df_thres = df.loc[
-        (df["outcome"] == "3+") & (df["sub_question"] != "noanswer")
-    ]
+    df_thres = df.loc[df["outcome"] == "3+"]
 
     subquestion_order = {}
     for question, group in df_thres.groupby("question"):
