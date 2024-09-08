@@ -68,7 +68,8 @@ def get_question_options():
 
 def extract_question_subquestion(value: str) -> tuple[str, str]:
     """Extract the question and subquestion from a value in the question dropdown."""
-    question, sub_question = value.split("_")
+    # NOTE: We split on the last occurrence of "_" to account for underscores in the question ID
+    question, sub_question = value.rsplit("_", 1)
     return question, sub_question
 
 

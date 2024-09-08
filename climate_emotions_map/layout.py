@@ -37,6 +37,7 @@ def create_question_dropdown():
     """
     Create the dropdown for subquestions grouped by question.
     NOTE: 'value' must be a string for DMC, so we use f-strings to concatenate the question and subquestion.
+    NOTE: Some questions include a '_' character in the id, so when extracting the question and subquestion we always need to split on the last '_'.
     """
     return dmc.Select(
         id="question-select",
