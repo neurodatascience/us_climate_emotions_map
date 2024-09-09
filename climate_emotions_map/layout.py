@@ -170,7 +170,8 @@ def create_sample_description_drawer():
 def create_design_credit():
     """Create the text hovercard for web app developer details."""
     short_credit = dmc.Text(
-        children="Built by members of the ORIGAMI Lab",
+        children="Web application built by members of the ORIGAMI Lab",
+        ta="center",
         size="xs",
         c="dimmed",
     )
@@ -236,12 +237,13 @@ def create_app_subtitle():
     """Create the subtitle for the dashboard."""
     return dmc.Text(
         children=[
-            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults" \n(Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ',
+            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults:',
+            "a cross-sectional descriptive survey and analysis by political party identification and self-reported exposure to severe weather events. ",
+            "(Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ",
             html.I("Lancet Planetary Health, "),
-            "(volume, issue, tbd)",
+            "(volume, issue, tbd))",
         ],
         size="sm",
-        c="dimmed",
         style={"whiteSpace": "pre-wrap"},
     )
 
@@ -273,14 +275,7 @@ def create_header():
                                     create_app_subtitle(),
                                 ],
                             ),
-                            span="content",
-                        ),
-                        dmc.GridCol(
-                            dmc.Group(
-                                justify="flex-end",
-                                # TODO: Add GitHub link? Not sure if needed/wanted.
-                            ),
-                            span="auto",
+                            span="12",
                         ),
                     ],
                 ),
