@@ -237,7 +237,7 @@ def create_app_subtitle():
     """Create the subtitle for the dashboard."""
     return dmc.Text(
         children=[
-            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults:',
+            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults: ',
             "a cross-sectional descriptive survey and analysis by political party identification and self-reported exposure to severe weather events. ",
             "(Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ",
             html.I("Lancet Planetary Health, "),
