@@ -48,6 +48,8 @@ dill==0.3.8
     # via multiprocess
 flask==3.0.3
     # via dash
+gunicorn==23.0.0
+    # via -r requirements.in
 h11==0.14.0
     # via wsproto
 idna==3.7
@@ -79,6 +81,7 @@ outcome==1.3.0.post0
     # via trio
 packaging==24.0
     # via
+    #   gunicorn
     #   plotly
     #   pytest
 pandas==2.2.2
