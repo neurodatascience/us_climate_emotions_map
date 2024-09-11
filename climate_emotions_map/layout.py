@@ -18,7 +18,7 @@ from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 HEADER_HEIGHT = 110
 
 SUPP_TEXT = {
-    "weighted_descriptives": "*N are unweighted while proportions are weighted according to census estimates for age, sex, race, and ethnicity",
+    "weighted_descriptives": "*N are unweighted while proportions are weighted according to US census estimates for age, sex, race, and ethnicity",
 }
 
 MAP_LAYOUT = {
@@ -37,6 +37,7 @@ def create_question_dropdown():
     """
     Create the dropdown for subquestions grouped by question.
     NOTE: 'value' must be a string for DMC, so we use f-strings to concatenate the question and subquestion.
+    NOTE: Some questions include a '_' character in the id, so when extracting the question and subquestion we always need to split on the last '_'.
     """
     return dmc.Select(
         id="question-select",
@@ -169,7 +170,8 @@ def create_sample_description_drawer():
 def create_design_credit():
     """Create the text hovercard for web app developer details."""
     short_credit = dmc.Text(
-        children="Built by members of the ORIGAMI Lab",
+        children="Web application built by members of the ORIGAMI Lab",
+        ta="center",
         size="xs",
         c="dimmed",
     )
@@ -235,12 +237,13 @@ def create_app_subtitle():
     """Create the subtitle for the dashboard."""
     return dmc.Text(
         children=[
-            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults" \n(Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ',
+            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults: ',
+            "a cross-sectional descriptive survey and analysis by political party identification and self-reported exposure to severe weather events. ",
+            "(Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ",
             html.I("Lancet Planetary Health, "),
-            "(volume, issue, tbd)",
+            "(volume, issue, tbd))",
         ],
         size="sm",
-        c="dimmed",
         style={"whiteSpace": "pre-wrap"},
     )
 
@@ -272,14 +275,7 @@ def create_header():
                                     create_app_subtitle(),
                                 ],
                             ),
-                            span="content",
-                        ),
-                        dmc.GridCol(
-                            dmc.Group(
-                                justify="flex-end",
-                                # TODO: Add GitHub link? Not sure if needed/wanted.
-                            ),
-                            span="auto",
+                            span="12",
                         ),
                     ],
                 ),
@@ -316,7 +312,7 @@ def create_impact_dropdown():
     return dmc.Flex(
         dmc.Select(
             id="impact-select",
-            label="View distribution of self-reported severe weather event",
+            label="Distribution of severe weather events (self-reported)",
             placeholder="Select a severe weather event",
             data=utils.get_impact_options(),
             clearable=True,
@@ -407,7 +403,7 @@ def create_selected_question_bar_plot():
     """Create the component holding a title and stacked bar plot for the selected question."""
     title = dmc.Title(
         id="selected-question-title",
-        children=f"{SECTION_TITLES['selected_question']}, {ALL_STATES_LABEL}",
+        children=ALL_STATES_LABEL,
         order=4,
         fw=300,
     )
@@ -444,7 +440,7 @@ def create_all_questions_section_title() -> dmc.Title:
     """Create a title for the section containing the bar plots for all questions."""
     return dmc.Title(
         id="all-questions-title",
-        children=f"{SECTION_TITLES['all_questions']}, {ALL_STATES_LABEL}",
+        children=f"{SECTION_TITLES['all_questions']}: {ALL_STATES_LABEL}",
         order=3,
         fw=300,
         pb="sm",

@@ -367,10 +367,7 @@ def make_stacked_bar(
     # assert (
     #     question in df["question"].unique()
     # ), f"Question {question} not found in data."
-    # TODO: Remove temporary workaround for "noanswer" subquestion
-    q_df = df.loc[
-        (df["question"] == question) & (df["sub_question"] != "noanswer")
-    ].copy()
+    q_df = df.loc[df["question"] == question].copy()
 
     # check subquestion
     if subquestion == "all":

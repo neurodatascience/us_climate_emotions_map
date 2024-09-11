@@ -4,17 +4,16 @@ from .data_loader import DATA_DICTIONARIES, SURVEY_DATA
 
 DEFAULT_QUESTION = {
     "domain": "Climate emotions & beliefs",
-    "question": "q2",
+    "question": "q4",
     "sub_question": "1",
     "outcome": "3+",
 }
 ALL_STATES_LABEL = "National"
 SECTION_TITLES = {
-    "app": "US Climate Emotions Map",
+    "app": "US Climate Emotions Map (16-25 years old)",
     "map_opinions": "Percent (%) of adolescents and young adults who endorse the following question/statement:",
     "map_impacts": "Map: Percent (%) of adolescents and young adults who reported experiencing the following in the last year",
-    "selected_question": "Response distribution",
-    "all_questions": "Climate emotions and thoughts of adolescents and young adults",
+    "all_questions": "Select a survey domain to view responses for",
     "demographics": "Sample Characteristics",
 }
 
@@ -69,7 +68,8 @@ def get_question_options():
 
 def extract_question_subquestion(value: str) -> tuple[str, str]:
     """Extract the question and subquestion from a value in the question dropdown."""
-    question, sub_question = value.split("_")
+    # NOTE: We split on the last occurrence of "_" to account for underscores in the question ID
+    question, sub_question = value.rsplit("_", 1)
     return question, sub_question
 
 
