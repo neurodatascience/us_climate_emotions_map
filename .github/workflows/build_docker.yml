@@ -36,6 +36,9 @@ jobs:
                 push: true
                 tags: ${{ env.DOCKER_IMAGE }}
 
+        -   name: List Docker images
+            run: docker images
+
         # NOTE: AWS CLI is also needed but should already be installed on the runner
         # From https://docs.aws.amazon.com/en_us/lightsail/latest/userguide/amazon-lightsail-install-software.html
         -   name: Install lightsailctl plugin
