@@ -1,5 +1,5 @@
 # NOTE: This workflow pushes to a private DockerHub repo
-name: Build and push image to DockerHub
+name: Build and push image to DockerHub and an AWS Lightsail service
 
 on:
     push:
@@ -10,6 +10,8 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        env:
+            DOCKER_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.SERVICE_NAME }}:nightly
         steps:
         -   name: Checkout
             uses: actions/checkout@v4
@@ -26,10 +28,52 @@ jobs:
         -   name: Set up Docker Buildx
             uses: docker/setup-buildx-action@v3
 
-        -   name: Build and push
+        # NOTE: AWS CLI is also needed but should already be installed on the runner
+        # From https://docs.aws.amazon.com/en_us/lightsail/latest/userguide/amazon-lightsail-install-software.html
+        -   name: Install lightsailctl plugin
+            run: |
+                curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl"
+                sudo chmod +x /usr/local/bin/lightsailctl
+
+        -   name: Build and push to DockerHub
             uses: docker/build-push-action@v6
             with:
                 context: .
                 file: ./Dockerfile
                 push: true
-                tags: ${{ vars.DOCKERHUB_USERNAME }}/us-climate-emotions-map:nightly
+                tags: ${{ env.DOCKER_IMAGE }}
+
+        -   name: Push Docker image to AWS Lightsail service
+            env:
+                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            run: |
+                aws lightsail push-container-image \
+                    --region ${{ vars.AWS_REGION }} \
+                    --service-name ${{ vars.SERVICE_NAME }} \
+                    --label webmap \
+                    --image ${{ env.DOCKER_IMAGE }}
+
+                # Get uploaded image (different every time)
+                echo "LIGHTSAIL_IMAGE_TAG=$(aws lightsail get-container-images --service ${{ vars.SERVICE_NAME }} | jq -r .containerImages[0].image)" >> $GITHUB_ENV
+
+        -   name: Create new Lightsail deployment
+            run: |
+                aws lightsail create-container-service-deployment \
+                --service-name ${{ vars.SERVICE_NAME }} \
+                --containers "{
+                    \"${{ vars.SERVICE_NAME }}\": {
+                    \"image\": \"$LIGHTSAIL_IMAGE_TAG\",
+                    \"ports\": {
+                        \"8050\": \"HTTP\"
+                    }
+                    }
+                }" \
+                --public-endpoint "{
+                    \"containerName\": \"${{ vars.SERVICE_NAME }}\",
+                    \"containerPort\": 8050,
+                    \"healthCheck\": {
+                        \"timeoutSeconds\": 60,
+                        \"intervalSeconds\": 120
+                    }
+                }"
