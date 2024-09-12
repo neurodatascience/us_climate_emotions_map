@@ -28,14 +28,17 @@ jobs:
         -   name: Set up Docker Buildx
             uses: docker/setup-buildx-action@v3
 
+        # NOTE: 'load' is needed for the image to be available for the next steps
         -   name: Build and push to DockerHub
             uses: docker/build-push-action@v6
             with:
                 context: .
                 file: ./Dockerfile
+                load: true
                 push: true
                 tags: ${{ env.DOCKER_IMAGE }}
 
+        # Sanity check
         -   name: List Docker images
             run: docker images
 
