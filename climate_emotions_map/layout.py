@@ -32,7 +32,12 @@ SINGLE_SUBQUESTION_FIG_KW = {
     "margin": {"l": 30, "r": 30, "t": 10, "b": 20},
 }
 
-DCC_GRAPH_CONFIG = {"displayModeBar": False, "scrollZoom": False}
+# See https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js for all options
+DCC_GRAPH_CONFIG = {
+    "displayModeBar": False,
+    "scrollZoom": False,
+    "doubleClick": "reset",
+}
 
 
 def create_question_dropdown():
