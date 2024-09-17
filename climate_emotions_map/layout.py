@@ -32,6 +32,8 @@ SINGLE_SUBQUESTION_FIG_KW = {
     "margin": {"l": 30, "r": 30, "t": 10, "b": 20},
 }
 
+DCC_GRAPH_CONFIG = {"displayModeBar": False, "scrollZoom": False}
+
 
 def create_question_dropdown():
     """
@@ -122,7 +124,7 @@ def create_sample_descriptive_plot():
         figure=make_descriptive_plots(
             state=None,
         ),
-        config={"displayModeBar": False},
+        config=DCC_GRAPH_CONFIG,
         # TODO: Revisit
         # We use px instead of viewport height here for now to more easily control scrolling
         # on smaller screens
@@ -338,7 +340,7 @@ def create_map_plot():
             ),
             # vh = % of viewport height
             # TODO: Revisit once plot margins are adjusted
-            config={"displayModeBar": False, "scrollZoom": False},
+            config=DCC_GRAPH_CONFIG,
             style={"height": "65vh"},
         ),
         # set max width
@@ -391,7 +393,7 @@ def create_bar_plots_for_question(question_id: str, subquestion_id: str):
                 stratify=False,
                 threshold=DEFAULT_QUESTION["outcome"],
             ),
-            config={"displayModeBar": False},
+            config=DCC_GRAPH_CONFIG,
         ),
         w=1200,
         # size="xl",
@@ -419,7 +421,7 @@ def create_selected_question_bar_plot():
                 threshold=DEFAULT_QUESTION["outcome"],
                 fig_kw=SINGLE_SUBQUESTION_FIG_KW,
             ),
-            config={"displayModeBar": False},
+            config=DCC_GRAPH_CONFIG,
         ),
         w=1200,
     )
