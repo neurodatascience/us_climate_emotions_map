@@ -423,6 +423,7 @@ def make_descriptive_plots(
         margin=margins,
         template="plotly_white",
         font={"size": 10},
+        dragmode=False,
     )
     fig.update_annotations(font_size=12)
 
