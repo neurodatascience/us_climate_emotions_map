@@ -20,6 +20,7 @@ HEADER_HEIGHT = 110
 SUPP_TEXT = {
     "hover_tip": "Hover over bars for full proportions",
     "weighted_descriptives": "*N are unweighted while proportions are weighted according to US census estimates for age, sex, race, and ethnicity",
+    "map_disclaimer": "Map does not support making statistical comparisons between states",
 }
 
 MAP_LAYOUT = {
@@ -328,17 +329,14 @@ def create_map_title():
 
 def create_impact_dropdown():
     """Create the dropdown for selecting the impact to display."""
-    return dmc.Flex(
-        dmc.Select(
-            id="impact-select",
-            label="Distribution of severe weather events (self-reported)",
-            placeholder="Select a severe weather event",
-            data=utils.get_impact_options(),
-            clearable=True,
-            searchable=True,
-            nothingFoundMessage="No matches",
-        ),
-        justify="flex-end",
+    return dmc.Select(
+        id="impact-select",
+        label="Distribution of severe weather events (self-reported)",
+        placeholder="Select a severe weather event",
+        data=utils.get_impact_options(),
+        clearable=True,
+        searchable=True,
+        nothingFoundMessage="No matches",
     )
 
 
@@ -366,6 +364,25 @@ def create_map_plot():
         size="xl",
     )
     return us_map
+
+
+def create_map_disclaimer():
+    """Create the disclaimer for the map section of the dashboard."""
+    return dmc.Flex(
+        [
+            html.I(
+                className="bi bi-exclamation-circle", style={"fontSize": 15}
+            ),
+            dmc.Text(
+                children=SUPP_TEXT["map_disclaimer"],
+                fs="italic",
+                size="sm",
+                # ta="center",
+            ),
+        ],
+        gap=5,
+        align="center",
+    )
 
 
 def create_domain_heading(domain_text: str) -> dmc.Title:
@@ -548,7 +565,20 @@ def create_main():
                 fluid=True,
                 children=[
                     create_map_title(),
-                    create_impact_dropdown(),
+                    dmc.Grid(
+                        [
+                            dmc.GridCol(
+                                create_map_disclaimer(),
+                                span="content",
+                            ),
+                            dmc.GridCol(
+                                create_impact_dropdown(),
+                                span="content",
+                            ),
+                        ],
+                        justify="space-between",
+                        align="flex-end",
+                    ),
                     create_map_plot(),
                     create_selected_question_bar_plot(),
                     create_all_questions_section_title(),
