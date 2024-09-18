@@ -18,6 +18,7 @@ from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 HEADER_HEIGHT = 110
 
 SUPP_TEXT = {
+    "hover_tip": "Hover over bars for full proportions",
     "weighted_descriptives": "*N are unweighted while proportions are weighted according to US census estimates for age, sex, race, and ethnicity",
 }
 
@@ -114,6 +115,16 @@ def create_drawer_sample_size():
     return dmc.Text(id="drawer-sample-size", size="md")
 
 
+def create_sample_descriptives_hover_tip():
+    """Create the tip to hover over bars in the sample characteristics drawer."""
+    return dmc.Text(
+        children=SUPP_TEXT["hover_tip"],
+        fs="italic",
+        size="sm",
+        mt="xs",
+    )
+
+
 def create_sample_descriptive_note():
     """Create the note for the sample characteristics section."""
     return dmc.Text(
@@ -150,6 +161,7 @@ def create_sample_description_drawer():
                 children=[
                     create_drawer_state(),
                     create_drawer_sample_size(),
+                    create_sample_descriptives_hover_tip(),
                     create_sample_descriptive_plot(),
                     create_sample_descriptive_note(),
                 ],
