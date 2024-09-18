@@ -286,11 +286,28 @@ def create_header():
                                 gap=5,
                                 justify="center",
                                 children=[
-                                    dmc.Anchor(
-                                        SECTION_TITLES["app"],
-                                        size="xl",
-                                        href="/",
-                                        underline=False,
+                                    dmc.Grid(
+                                        children=[
+                                            dmc.GridCol(
+                                                dmc.Anchor(
+                                                    SECTION_TITLES["app"],
+                                                    size="xl",
+                                                    href="/",
+                                                    underline=False,
+                                                ),
+                                                span="content",
+                                            ),
+                                            # TODO: Uncomment once the more info page is created
+                                            # dmc.GridCol(
+                                            #     dmc.Anchor(
+                                            #         SECTION_TITLES["more_info"],
+                                            #         href="/"
+                                            #     ),
+                                            #     span="content"
+                                            # )
+                                        ],
+                                        justify="space-between",
+                                        align="flex-end",
                                     ),
                                     create_app_subtitle(),
                                 ],

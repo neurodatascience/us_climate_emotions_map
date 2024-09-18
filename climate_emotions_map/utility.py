@@ -11,6 +11,7 @@ DEFAULT_QUESTION = {
 ALL_STATES_LABEL = "National"
 SECTION_TITLES = {
     "app": "US Climate Emotions Map (16-25 years old)",
+    "more_info": "About & Methodology",
     "map_opinions": "Percent (%) of adolescents and young adults who endorse the following question/statement:",
     "map_impacts": "Map: Percent (%) of adolescents and young adults who reported experiencing the following in the last year",
     "all_questions": "Select a survey domain to view responses for",
