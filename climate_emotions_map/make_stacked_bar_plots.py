@@ -320,7 +320,7 @@ def plot_bars(
     fig.update_layout(
         uniformtext_minsize=fig_kw["fontsize"], uniformtext_mode="hide"
     )
-    fig.update_layout(showlegend=False)
+    fig.update_layout(showlegend=False, dragmode=False)
 
     return fig
 

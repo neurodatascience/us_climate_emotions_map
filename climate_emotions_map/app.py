@@ -32,6 +32,9 @@ _dash_renderer._set_react_version("18.2.0")
 app = Dash(
     __name__,
     title="US Climate Emotions Map",
+    external_stylesheets=[
+        "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    ],
 )
 
 app.layout = dmc.MantineProvider(construct_layout(), forceColorScheme="light")

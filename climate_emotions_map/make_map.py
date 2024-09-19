@@ -290,6 +290,7 @@ def make_map(
     fig.update_layout(
         geo_scope="usa",
         margin=margins,
+        dragmode=False,
     )
 
     return fig
