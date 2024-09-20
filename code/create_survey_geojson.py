@@ -15,6 +15,11 @@ DPATH_ASSETS = Path(__file__).parent / "assets"
 # path to generic US states GeoJSON file
 FPATH_STATES_JSON_DEFAULT = DPATH_ASSETS / "us_states.json"
 
+# for overriding state names in generic US states GeoJSON file
+CUSTOM_STATE_NAME_MAP_DEFAULT = {
+    "District of Columbia": "Washington DC",
+}
+
 # path to output GeoJSON file
 FPATH_OUT_DEFAULT = DPATH_ASSETS / "survey_states.json"
 
@@ -22,6 +27,7 @@ FPATH_OUT_DEFAULT = DPATH_ASSETS / "survey_states.json"
 def create_survey_geojson(
     survey_states_and_clusters: Iterable[str],
     fpath_states_json: Path | str = FPATH_STATES_JSON_DEFAULT,
+    custom_state_name_map: Optional[dict] = CUSTOM_STATE_NAME_MAP_DEFAULT,
     fpath_out: Optional[Path | str] = FPATH_OUT_DEFAULT,
 ) -> dict:
     """Create a GeoJSON file for the states and state clusters used in the survey.
@@ -35,6 +41,8 @@ def create_survey_geojson(
         Path to GeoJSON file with standard US states.
         By default, will use the one that was
         downloaded from https://github.com/PublicaMundi/MappingAPI/blob/master/data/geojson/us-states.json.
+    custom_state_name_map : dict, optional
+        Mapping of state names in the original GeoJSON file to state names in survey_states_and_clusters.
     fpath_out : Path | str, optional
         Path to output GeoJSON file.
 
@@ -64,6 +72,10 @@ def create_survey_geojson(
     state_info_map = {
         info["properties"]["name"]: info for info in states_json["features"]
     }
+
+    # apply custom renaming map
+    for old_state_name, new_state_name in custom_state_name_map.items():
+        state_info_map[new_state_name] = state_info_map.pop(old_state_name)
 
     # split into clusters and states
     survey_clusters = [
