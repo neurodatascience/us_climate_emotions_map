@@ -305,7 +305,7 @@ def make_descriptive_plots(
     state: str | None = None,
     margins: dict | None = None,
     text_wrap_width: int = 14,
-    colors: list[str] = None,
+    colors: list[str] | None = None,
     decimals: int = 1,
 ) -> go.Figure:
     """Make the sample descriptive plots
