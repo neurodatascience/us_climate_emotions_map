@@ -17,6 +17,8 @@ SECTION_TITLES = {
     "all_questions": "Select a survey domain to view responses for",
     "demographics": "Sample Characteristics",
 }
+# Number of decimal places to round to in all plots
+NUM_DECIMALS = 1
 
 # We have not yet decided on the best colormaps to use
 # OPINION_COLORMAP = "OrRd"

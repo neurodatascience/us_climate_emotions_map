@@ -64,7 +64,7 @@ def make_map(
     impact_marker_size_scale: float = 1.0,
     colormap_range_padding: int = 10,
     margins: dict = None,
-    decimals: int = 0,
+    decimals: int = 1,
 ) -> go.Figure:
     """Generate choropleth map showing opinion and/or impact data.
 
@@ -97,7 +97,7 @@ def make_map(
     margins : dict | None, optional
         Margins for the Plotly figure, by default 30 everywhere
     decimals : int, optional
-        Number of decimals to show in the hoverbox, by default 0
+        Number of decimals to show in the hoverbox, by default 1
 
     Returns
     -------
