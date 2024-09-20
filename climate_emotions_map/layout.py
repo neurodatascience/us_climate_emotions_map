@@ -12,6 +12,7 @@ from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
     ALL_STATES_LABEL,
     DEFAULT_QUESTION,
+    NUM_DECIMALS,
     SECTION_TITLES,
 )
 
@@ -140,6 +141,7 @@ def create_sample_descriptive_plot():
         id="sample-descriptive-plot",
         figure=make_descriptive_plots(
             state=None,
+            decimals=NUM_DECIMALS,
         ),
         config=DCC_GRAPH_CONFIG,
         # TODO: Revisit
@@ -368,6 +370,7 @@ def create_map_plot():
                 outcome=DEFAULT_QUESTION["outcome"],
                 colormap_range_padding=MAP_LAYOUT["colormap_range_padding"],
                 margins=MAP_LAYOUT["margin"],
+                decimals=NUM_DECIMALS,
                 # opinion_colormap=OPINION_COLORMAP,
             ),
             # vh = % of viewport height
@@ -443,6 +446,7 @@ def create_bar_plots_for_question(question_id: str, subquestion_id: str):
                 state=None,
                 stratify=False,
                 threshold=DEFAULT_QUESTION["outcome"],
+                decimals=NUM_DECIMALS,
             ),
             config=DCC_GRAPH_CONFIG,
         ),
@@ -470,6 +474,7 @@ def create_selected_question_bar_plot():
                 state=None,
                 stratify=False,
                 threshold=DEFAULT_QUESTION["outcome"],
+                decimals=NUM_DECIMALS,
                 fig_kw=SINGLE_SUBQUESTION_FIG_KW,
             ),
             config=DCC_GRAPH_CONFIG,
