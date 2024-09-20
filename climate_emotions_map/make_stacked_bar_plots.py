@@ -135,7 +135,7 @@ def plot_bars(
     y="question",
     color="outcome",
     title=None,  # TODO: remove this argument?
-    round_to=2,  # NOTE: This is the number of decimal places to round the data to, BEFORE multiplying by 100.
+    decimals=1,
     sort_order="descending",
     facet_order=None,
     palette=None,
@@ -145,11 +145,7 @@ def plot_bars(
     """Make a stacked bar plot of the opinions of the whole sample, split by state and party."""
     facet_var = "sub_question"
 
-    # Determine the appropriate number of decimal places to use after converting data
-    # to percentages based on the applied rounding, to use in hover text
-    decimals = max(0, round_to - 2)
-
-    plot_df[x] = plot_df[x].round(round_to) * 100
+    plot_df[x] = plot_df[x] * 100
 
     # sort by subquestion
 
@@ -331,6 +327,7 @@ def make_stacked_bar(
     state: str | None = None,
     stratify: bool = False,
     threshold: str | None = None,
+    decimals: int = 1,
     palettes: dict = None,
     fig_kw: dict = None,
 ) -> px.bar:
@@ -350,6 +347,8 @@ def make_stacked_bar(
         Whether to stratify the data by party. The default is False.
     threshold : str, optional
         The outcome ID for the Likert endorsement level to threshold at (e.g. "3+"). The default is None.
+    decimals : int, optional
+        The number of decimal places to display for the percentage values. The default is 1.
     palettes : dict, optional
         A dictionary of color palettes for different numbers of outcomes. The default is None.
     fig_kw : dict, optional
@@ -449,6 +448,7 @@ def make_stacked_bar(
         y=y,
         facet_order=facet_order,
         sort_order=sort_order,
+        decimals=decimals,
         palette=palette,
         fig_kw=fig_kw,
     )

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from functools import partial
 from textwrap import wrap
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -138,8 +137,6 @@ SUBPLOT_POSITIONS = {
     Q2_LABEL: (11, 1),
 }
 
-DECIMALS = 0
-
 
 def get_categories_dict(df: pd.DataFrame) -> dict:
     """
@@ -179,8 +176,9 @@ def get_category_to_display(category: str, demographic_variable: str):
 def make_descriptive_plot_traces(
     df: pd.DataFrame,
     demographic_variable: str,
-    marker_color=None,
-    reverse=True,
+    marker_color: str | None = None,
+    reverse: bool = True,
+    decimals: int = 1,
 ) -> go.Bar:
     """
     Make a single plot for a descriptive demographic variable.
@@ -192,6 +190,8 @@ def make_descriptive_plot_traces(
         and "percentage".
     demographic_variable : str
         Demographic variable to plot.
+    decimals : int, optional
+        Number of decimal places to display, by default 1
     """
     # subset the data
     df: pd.DataFrame = df.loc[
@@ -233,7 +233,7 @@ def make_descriptive_plot_traces(
             #     for n, percentage in zip(df[COL_N], df[COL_PERCENTAGE])
             # ],
             hovertemplate=(
-                f"<b>%{{customdata[1]}}</b>: %{{x:.{DECIMALS}f}}% (%{{customdata[0]}})"
+                f"<b>%{{customdata[1]}}</b>: %{{x:.{decimals}f}}% (%{{customdata[0]}})"
                 "<extra></extra>"
             ),
             marker_color=marker_color,
@@ -259,7 +259,7 @@ def wrap_text_label(text: str, width: int) -> pd.DataFrame:
 
 
 def make_impact_plot_traces(
-    df: pd.DataFrame, marker_color=None, text_wrap_width=10
+    df: pd.DataFrame, marker_color=None, text_wrap_width=10, decimals=1
 ):
     data_impact = df.loc[
         df[COL_DEMOGRAPHIC_VARIABLE].isin(IMPACT_VARIABLES)
@@ -290,7 +290,7 @@ def make_impact_plot_traces(
                 customdata=list(zip(x, data_category[COL_N])),
                 hovertemplate=(
                     "<b>%{customdata[0]}</b>"
-                    f": %{{y:.{DECIMALS}f}}% (%{{customdata[1]}})"
+                    f": %{{y:.{decimals}f}}% (%{{customdata[1]}})"
                     "<extra></extra>"
                 ),
                 marker_color=marker_color,
@@ -303,9 +303,10 @@ def make_impact_plot_traces(
 
 def make_descriptive_plots(
     state: str | None = None,
-    margins: Optional[dict] = None,
-    text_wrap_width=14,
+    margins: dict | None = None,
+    text_wrap_width: int = 14,
     colors: list[str] = None,
+    decimals: int = 1,
 ) -> go.Figure:
     """Make the sample descriptive plots
 
@@ -319,6 +320,8 @@ def make_descriptive_plots(
         Maximum width for wrapping some text labels, by default 14
     colors : list[str], optional
         List of colors for the bar plots, by default None (uses the turbo colorscale)
+    decimals : int, optional
+        Number of decimal places to display, by default 1
 
     Returns
     -------
@@ -363,11 +366,18 @@ def make_descriptive_plots(
 
         if demographic_variable == IMPACTS_LABEL:
             traces = make_impact_plot_traces(
-                data, text_wrap_width=text_wrap_width, marker_color=color
+                data,
+                text_wrap_width=text_wrap_width,
+                marker_color=color,
+                decimals=decimals,
             )
         else:
             traces = make_descriptive_plot_traces(
-                data, demographic_variable, reverse=True, marker_color=color
+                data,
+                demographic_variable,
+                reverse=True,
+                marker_color=color,
+                decimals=decimals,
             )
 
         for trace in traces:
