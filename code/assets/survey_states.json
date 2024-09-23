@@ -13731,9 +13731,9 @@
         },
         {
             "type": "Feature",
-            "id": "Delaware, District of Columbia, Maryland (Cluster C)",
+            "id": "Delaware, Washington DC, Maryland (Cluster C)",
             "properties": {
-                "name": "Delaware, District of Columbia, Maryland (Cluster C)"
+                "name": "Delaware, Washington DC, Maryland (Cluster C)"
             },
             "geometry": {
                 "type": "MultiPolygon",
