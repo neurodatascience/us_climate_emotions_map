@@ -12,12 +12,13 @@ from climate_emotions_map.make_stacked_bar_plots import (  # noqa
     make_stacked_bar,
 )
 
-unique_questions_list = (
+UNIQUE_QUESTIONS = (
     DATA_DICTIONARIES["question_dictionary.tsv"]["question"].unique().tolist()
 )
-unique_states_list = (
+UNIQUE_STATES = (
     DATA_DICTIONARIES["state_abbreviations.tsv"]["state"].unique().tolist()
 )
+OUTPUT_FILE = Path(__file__).parents[0] / "assets/prerendered_figures.pkl"
 
 
 def make_full_set_of_barplots(state=None, stratify=None, threshold=None):
@@ -27,7 +28,7 @@ def make_full_set_of_barplots(state=None, stratify=None, threshold=None):
     """
     return {
         question: make_stacked_bar(question, "all", state, stratify, threshold)
-        for question in unique_questions_list
+        for question in UNIQUE_QUESTIONS
     }
 
 
@@ -40,7 +41,7 @@ def make_all_figures():
     """
     figures = {}
     # A state of None means we are looking at national level questions
-    for state in unique_states_list + [None]:
+    for state in UNIQUE_STATES + [None]:
         for stratify in [False, True]:
             # For state level figures, we don't stratify by party
             if state is not None and stratify:
@@ -53,5 +54,7 @@ def make_all_figures():
 
 if __name__ == "__main__":
     figures = make_all_figures()
-    with open("prerendered_figures.pkl", "wb") as f:
+    with OUTPUT_FILE.open("wb") as f:
         pkl.dump(figures, f)
+
+    print(f"Done prerendering figures to {OUTPUT_FILE}!")
