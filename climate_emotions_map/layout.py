@@ -12,13 +12,16 @@ from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
     ALL_STATES_LABEL,
     DEFAULT_QUESTION,
+    NUM_DECIMALS,
     SECTION_TITLES,
 )
 
 HEADER_HEIGHT = 110
 
 SUPP_TEXT = {
+    "hover_tip": "Hover over bars for full proportions",
     "weighted_descriptives": "*N are unweighted while proportions are weighted according to US census estimates for age, sex, race, and ethnicity",
+    "map_disclaimer": "Map does not support making statistical comparisons between states",
 }
 
 MAP_LAYOUT = {
@@ -30,6 +33,13 @@ SINGLE_SUBQUESTION_FIG_KW = {
     "fontsize": 10,
     "height": 120,
     "margin": {"l": 30, "r": 30, "t": 10, "b": 20},
+}
+
+# See https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js for all options
+DCC_GRAPH_CONFIG = {
+    "displayModeBar": False,
+    "scrollZoom": False,
+    "doubleClick": "reset",
 }
 
 
@@ -107,6 +117,16 @@ def create_drawer_sample_size():
     return dmc.Text(id="drawer-sample-size", size="md")
 
 
+def create_sample_descriptives_hover_tip():
+    """Create the tip to hover over bars in the sample characteristics drawer."""
+    return dmc.Text(
+        children=SUPP_TEXT["hover_tip"],
+        fs="italic",
+        size="sm",
+        mt="xs",
+    )
+
+
 def create_sample_descriptive_note():
     """Create the note for the sample characteristics section."""
     return dmc.Text(
@@ -121,8 +141,9 @@ def create_sample_descriptive_plot():
         id="sample-descriptive-plot",
         figure=make_descriptive_plots(
             state=None,
+            decimals=NUM_DECIMALS,
         ),
-        config={"displayModeBar": False},
+        config=DCC_GRAPH_CONFIG,
         # TODO: Revisit
         # We use px instead of viewport height here for now to more easily control scrolling
         # on smaller screens
@@ -143,6 +164,7 @@ def create_sample_description_drawer():
                 children=[
                     create_drawer_state(),
                     create_drawer_sample_size(),
+                    create_sample_descriptives_hover_tip(),
                     create_sample_descriptive_plot(),
                     create_sample_descriptive_note(),
                 ],
@@ -266,11 +288,28 @@ def create_header():
                                 gap=5,
                                 justify="center",
                                 children=[
-                                    dmc.Anchor(
-                                        SECTION_TITLES["app"],
-                                        size="xl",
-                                        href="/",
-                                        underline=False,
+                                    dmc.Grid(
+                                        children=[
+                                            dmc.GridCol(
+                                                dmc.Anchor(
+                                                    SECTION_TITLES["app"],
+                                                    size="xl",
+                                                    href="/",
+                                                    underline=False,
+                                                ),
+                                                span="content",
+                                            ),
+                                            # TODO: Uncomment once the more info page is created
+                                            # dmc.GridCol(
+                                            #     dmc.Anchor(
+                                            #         SECTION_TITLES["more_info"],
+                                            #         href="/"
+                                            #     ),
+                                            #     span="content"
+                                            # )
+                                        ],
+                                        justify="space-between",
+                                        align="flex-end",
                                     ),
                                     create_app_subtitle(),
                                 ],
@@ -309,17 +348,14 @@ def create_map_title():
 
 def create_impact_dropdown():
     """Create the dropdown for selecting the impact to display."""
-    return dmc.Flex(
-        dmc.Select(
-            id="impact-select",
-            label="Distribution of severe weather events (self-reported)",
-            placeholder="Select a severe weather event",
-            data=utils.get_impact_options(),
-            clearable=True,
-            searchable=True,
-            nothingFoundMessage="No matches",
-        ),
-        justify="flex-end",
+    return dmc.Select(
+        id="impact-select",
+        label="Distribution of severe weather events (self-reported)",
+        placeholder="Select a severe weather event",
+        data=utils.get_impact_options(),
+        clearable=True,
+        searchable=True,
+        nothingFoundMessage="No matches",
     )
 
 
@@ -334,11 +370,12 @@ def create_map_plot():
                 outcome=DEFAULT_QUESTION["outcome"],
                 colormap_range_padding=MAP_LAYOUT["colormap_range_padding"],
                 margins=MAP_LAYOUT["margin"],
+                decimals=NUM_DECIMALS,
                 # opinion_colormap=OPINION_COLORMAP,
             ),
             # vh = % of viewport height
             # TODO: Revisit once plot margins are adjusted
-            config={"displayModeBar": False, "scrollZoom": False},
+            config=DCC_GRAPH_CONFIG,
             style={"height": "65vh"},
         ),
         # set max width
@@ -347,6 +384,25 @@ def create_map_plot():
         size="xl",
     )
     return us_map
+
+
+def create_map_disclaimer():
+    """Create the disclaimer for the map section of the dashboard."""
+    return dmc.Flex(
+        [
+            html.I(
+                className="bi bi-exclamation-circle", style={"fontSize": 15}
+            ),
+            dmc.Text(
+                children=SUPP_TEXT["map_disclaimer"],
+                fs="italic",
+                size="sm",
+                # ta="center",
+            ),
+        ],
+        gap=5,
+        align="center",
+    )
 
 
 def create_domain_heading(domain_text: str) -> dmc.Title:
@@ -390,8 +446,9 @@ def create_bar_plots_for_question(question_id: str, subquestion_id: str):
                 state=None,
                 stratify=False,
                 threshold=DEFAULT_QUESTION["outcome"],
+                decimals=NUM_DECIMALS,
             ),
-            config={"displayModeBar": False},
+            config=DCC_GRAPH_CONFIG,
         ),
         w=1200,
         # size="xl",
@@ -417,9 +474,10 @@ def create_selected_question_bar_plot():
                 state=None,
                 stratify=False,
                 threshold=DEFAULT_QUESTION["outcome"],
+                decimals=NUM_DECIMALS,
                 fig_kw=SINGLE_SUBQUESTION_FIG_KW,
             ),
-            config={"displayModeBar": False},
+            config=DCC_GRAPH_CONFIG,
         ),
         w=1200,
     )
@@ -529,7 +587,20 @@ def create_main():
                 fluid=True,
                 children=[
                     create_map_title(),
-                    create_impact_dropdown(),
+                    dmc.Grid(
+                        [
+                            dmc.GridCol(
+                                create_map_disclaimer(),
+                                span="content",
+                            ),
+                            dmc.GridCol(
+                                create_impact_dropdown(),
+                                span="content",
+                            ),
+                        ],
+                        justify="space-between",
+                        align="flex-end",
+                    ),
                     create_map_plot(),
                     create_selected_question_bar_plot(),
                     create_all_questions_section_title(),

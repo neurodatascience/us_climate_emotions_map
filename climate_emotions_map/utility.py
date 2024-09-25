@@ -11,11 +11,14 @@ DEFAULT_QUESTION = {
 ALL_STATES_LABEL = "National"
 SECTION_TITLES = {
     "app": "US Climate Emotions Map (16-25 years old)",
+    "more_info": "About & Methodology",
     "map_opinions": "Percent (%) of adolescents and young adults who endorse the following question/statement:",
     "map_impacts": "Map: Percent (%) of adolescents and young adults who reported experiencing the following in the last year",
     "all_questions": "Select a survey domain to view responses for",
     "demographics": "Sample Characteristics",
 }
+# Number of decimal places to round to in all plots
+NUM_DECIMALS = 1
 
 # We have not yet decided on the best colormaps to use
 # OPINION_COLORMAP = "OrRd"

@@ -27,6 +27,7 @@ from .make_stacked_bar_plots import make_stacked_bar
 from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
     ALL_STATES_LABEL,
     DEFAULT_QUESTION,
+    NUM_DECIMALS,
     SECTION_TITLES,
 )
 
@@ -36,6 +37,9 @@ _dash_renderer._set_react_version("18.2.0")
 app = Dash(
     __name__,
     title="US Climate Emotions Map",
+    external_stylesheets=[
+        "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    ],
 )
 
 app.layout = dmc.MantineProvider(construct_layout(), forceColorScheme="light")
@@ -142,6 +146,7 @@ def update_sample_descriptive_plot(state):
     """Update the sample descriptive plot based on the selected state."""
     return make_descriptive_plots(
         state=state,
+        decimals=NUM_DECIMALS,
     )
 
 
@@ -213,6 +218,7 @@ def update_map(question_value, state, impact):
         impact=impact,
         colormap_range_padding=MAP_LAYOUT["colormap_range_padding"],
         margins=MAP_LAYOUT["margin"],
+        decimals=NUM_DECIMALS,
         # opinion_colormap=OPINION_COLORMAP,
         # impact_colormap=IMPACT_COLORMAP,
     )
@@ -248,6 +254,7 @@ def update_selected_question_bar_plot(
         state=state,
         stratify=is_party_stratify_checked,
         threshold=threshold,
+        decimals=NUM_DECIMALS,
         fig_kw=SINGLE_SUBQUESTION_FIG_KW,
     )
     return figure
