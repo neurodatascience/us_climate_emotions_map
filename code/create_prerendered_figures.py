@@ -23,11 +23,11 @@ OUTPUT_FILE = Path(__file__).parents[0] / "assets/prerendered_figures.pkl"
 
 def make_full_set_of_barplots(state=None, stratify=None, threshold=None):
     """
-    This returns a dictionary keyed on the question
-    with the value being the plotly graph object figure for that question.
+    This returns a dictionary for all questions where keys are question IDs
+    and values are the plotly graph object figure for each question.
     """
     return {
-        question: make_stacked_bar(question, "all", state, stratify, threshold)
+        question: make_stacked_bar(question, "all", state, stratify, threshold, NUM_DECIMALS)
         for question in UNIQUE_QUESTIONS
     }
 
@@ -46,7 +46,7 @@ def make_all_figures():
             # For state level figures, we don't stratify by party
             if state is not None and stratify:
                 continue
-            for threshold in [None, "3+"]:
+            for threshold in [None, DEFAULT_QUESTION["outcome"]]:
                 key = (state, stratify, threshold)
                 figures[key] = make_full_set_of_barplots(*key)
     return figures
