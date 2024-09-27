@@ -316,7 +316,12 @@ def update_stacked_bar_plots(
     elif not show_all_responses_checked:
         threshold = DEFAULT_QUESTION["outcome"]
 
-    figure_lookup_key = (state, is_party_stratify_checked, threshold)
+    figure_lookup_key = (
+        state,
+        is_party_stratify_checked,
+        threshold,
+        NUM_DECIMALS,
+    )
 
     figures = []
     for output in ctx.outputs_list:
