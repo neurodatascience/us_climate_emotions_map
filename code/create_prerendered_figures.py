@@ -11,6 +11,7 @@ from climate_emotions_map.make_stacked_bar_plots import (  # noqa
     DATA_DICTIONARIES,
     make_stacked_bar,
 )
+from climate_emotions_map.utility import DEFAULT_QUESTION, NUM_DECIMALS  # noqa
 
 UNIQUE_QUESTIONS = (
     DATA_DICTIONARIES["question_dictionary.tsv"]["question"].unique().tolist()
@@ -27,7 +28,9 @@ def make_full_set_of_barplots(state=None, stratify=None, threshold=None):
     and values are the plotly graph object figure for each question.
     """
     return {
-        question: make_stacked_bar(question, "all", state, stratify, threshold, NUM_DECIMALS)
+        question: make_stacked_bar(
+            question, "all", state, stratify, threshold, NUM_DECIMALS
+        )
         for question in UNIQUE_QUESTIONS
     }
 
