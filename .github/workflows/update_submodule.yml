@@ -21,6 +21,8 @@ jobs:
                 cd data
                 git switch main && git pull
                 cd ..
+                ./code/create_prerendered_figures.py
+
 
         -   name: Create pull request
             uses: peter-evans/create-pull-request@v7
