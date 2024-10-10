@@ -6,15 +6,18 @@ opinions_party.tsv data file can be accessed with SURVEY_DATA["opinions_party.ts
 """
 
 import json
+import pickle as pkl
 from pathlib import Path
 
 import pandas as pd
+
+BASE_PATH = Path(__file__).parents[1]
 
 
 def load_data_file(file: str) -> pd.DataFrame:
     """Load a TSV data file into a dataframe."""
     return pd.read_csv(
-        Path(__file__).parents[1] / "data" / "survey_results" / file,
+        BASE_PATH / "data" / "survey_results" / file,
         sep="\t",
         dtype={"question": str, "sub_question": str, "outcome": str},
     )
@@ -23,13 +26,28 @@ def load_data_file(file: str) -> pd.DataFrame:
 def load_data_dictionary(file: str) -> pd.DataFrame:
     """Load a data dictionary TSV into a dataframe."""
     return pd.read_csv(
-        Path(__file__).parents[1] / "data" / "data_dictionaries" / file,
+        BASE_PATH / "data" / "data_dictionaries" / file,
         sep="\t",
         # Some data dictionaries have "None" as a meaningful value, so we have to prevent it
         # from being interpreted as a NaN by pandas
         keep_default_na=False,
         dtype={"question": str, "sub_question": str, "outcome": str},
     )
+
+
+def load_prerendered_figures(file: str) -> dict:
+    """Load a pickle file containing a dictionary of prerendered plotly figures."""
+    target_file = BASE_PATH / "code/assets" / file
+    # Because this module always runs the loaders, even when imported by the create_prerendered_figures module
+    # we need to allow for the file to not exist yet when we want to run the script the first time
+    if not target_file.exists():
+        print(
+            "Prerendered figures not found. Run create_prerendered_figures.py to generate them."
+        )
+        return {}
+
+    print(f"Loading prerendered figures from {target_file}")
+    return pkl.load(target_file.open("rb"))
 
 
 def remove_ignored_rows(df: pd.DataFrame) -> pd.DataFrame:
@@ -40,7 +58,7 @@ def remove_ignored_rows(df: pd.DataFrame) -> pd.DataFrame:
 def load_geojson_object(file: str) -> dict:
     """Load a geojson file into a dataframe."""
     return json.loads(
-        (Path(__file__).parents[1] / "code" / "assets" / file).read_text(),
+        (BASE_PATH / "code" / "assets" / file).read_text(),
     )
 
 
@@ -155,3 +173,4 @@ DOMAIN_TEXT = get_domain_text()
 
 NATIONAL_SAMPLE_SIZE = SURVEY_DATA["samplesizes_state.tsv"]["n"].sum()
 GEOJSON_OBJECTS = load_geojson_objects()
+PRERENDERED_BARPLOTS = load_prerendered_figures("prerendered_figures.pkl")

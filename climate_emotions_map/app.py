@@ -15,7 +15,11 @@ from dash import (
 from dash.exceptions import PreventUpdate
 
 from . import utility as utils
-from .data_loader import NATIONAL_SAMPLE_SIZE, SURVEY_DATA
+from .data_loader import (
+    NATIONAL_SAMPLE_SIZE,
+    PRERENDERED_BARPLOTS,
+    SURVEY_DATA,
+)
 from .layout import MAP_LAYOUT, SINGLE_SUBQUESTION_FIG_KW, construct_layout
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
@@ -307,25 +311,23 @@ def update_stacked_bar_plots(
     show_all_responses_checked,
 ):
     """Update the stacked bar plots for all questions based on the selected criteria."""
+    if show_all_responses_checked:
+        threshold = None
+    elif not show_all_responses_checked:
+        threshold = DEFAULT_QUESTION["outcome"]
+
+    figure_lookup_key = (
+        state,
+        is_party_stratify_checked,
+        threshold,
+        NUM_DECIMALS,
+    )
+
     figures = []
     for output in ctx.outputs_list:
         # Example: {'id': {'question': 'q2', 'type': 'stacked-bar-plot'}, 'property': 'figure'}
         question = output["id"]["question"]
-
-        if show_all_responses_checked:
-            threshold = None
-        elif not show_all_responses_checked:
-            threshold = DEFAULT_QUESTION["outcome"]
-
-        figure = make_stacked_bar(
-            question=question,
-            subquestion="all",
-            state=state,
-            stratify=is_party_stratify_checked,
-            threshold=threshold,
-            decimals=NUM_DECIMALS,
-        )
-        figures.append(figure)
+        figures.append(PRERENDERED_BARPLOTS[figure_lookup_key][question])
 
     return figures
 

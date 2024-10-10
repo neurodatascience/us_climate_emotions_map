@@ -5,7 +5,7 @@ import pandas as pd
 from dash import dcc, html
 
 from . import utility as utils
-from .data_loader import DATA_DICTIONARIES, DOMAIN_TEXT
+from .data_loader import DATA_DICTIONARIES, DOMAIN_TEXT, PRERENDERED_BARPLOTS
 from .make_descriptive_plots import make_descriptive_plots
 from .make_map import make_map
 from .make_stacked_bar_plots import make_stacked_bar
@@ -440,14 +440,9 @@ def create_bar_plots_for_question(question_id: str, subquestion_id: str):
                 "type": "stacked-bar-plot",
                 "question": question_id,
             },
-            figure=make_stacked_bar(
-                question=question_id,
-                subquestion=subquestion_id,
-                state=None,
-                stratify=False,
-                threshold=DEFAULT_QUESTION["outcome"],
-                decimals=NUM_DECIMALS,
-            ),
+            figure=PRERENDERED_BARPLOTS[
+                None, False, DEFAULT_QUESTION["outcome"], NUM_DECIMALS
+            ][question_id],
             config=DCC_GRAPH_CONFIG,
         ),
         w=1200,
