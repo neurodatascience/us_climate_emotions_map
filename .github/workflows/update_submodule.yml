@@ -16,10 +16,20 @@ jobs:
                 submodules: recursive
                 token: ${{ secrets.CLIMATE_DB_DATA_PAT }}
 
+        -   name: Set up Python 3.11
+            uses: actions/setup-python@v5
+            with:
+                python-version: '3.11'
+
+        -   name: Install dependencies
+            run: |
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
+
         -   name: Update submodule
             run: |
                 cd data
-                git switch main 
+                git switch main
                 output=$(git pull)
                 echo "$output"
                 cd ..
