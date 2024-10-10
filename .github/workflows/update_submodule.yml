@@ -19,9 +19,13 @@ jobs:
         -   name: Update submodule
             run: |
                 cd data
-                git switch main && git pull
+                git switch main 
+                output=$(git pull)
+                echo "$output"
                 cd ..
-                ./code/create_prerendered_figures.py
+                if [[ "$output" != *"Already up to date."* ]]; then
+                    ./code/create_prerendered_figures.py
+                fi
 
 
         -   name: Create pull request
