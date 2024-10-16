@@ -19,7 +19,8 @@ from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 HEADER_HEIGHT = 110
 
 SUPP_TEXT = {
-    "paper_link": "https://doi.org/10.1016/S2542-5196(24)00229-8",
+    "paper_link": "https://www.thelancet.com/journals/lanplh/article/PIIS2542-5196(24)00229-8/fulltext",
+    "more_info_link": "https://docs.google.com/document/d/e/2PACX-1vQVssAsC0ddI41vlVYZnS_hxOj6UTbvWVeiejjHRSAzgDzPMFZaM25dWxbdyDOFBJi0KlTlnUUSqjWU/pub",
     "hover_tip": "Hover over bars for full proportions",
     "weighted_descriptives": "*N are unweighted while proportions are weighted according to US census estimates for age, sex, race, and ethnicity",
     "map_disclaimer": "Map does not support making statistical comparisons between states",
@@ -315,14 +316,18 @@ def create_header():
                                                 ),
                                                 span="content",
                                             ),
-                                            # TODO: Uncomment once the more info page is created
-                                            # dmc.GridCol(
-                                            #     dmc.Anchor(
-                                            #         SECTION_TITLES["more_info"],
-                                            #         href="/"
-                                            #     ),
-                                            #     span="content"
-                                            # )
+                                            dmc.GridCol(
+                                                dmc.Anchor(
+                                                    SECTION_TITLES[
+                                                        "more_info"
+                                                    ],
+                                                    href=SUPP_TEXT[
+                                                        "more_info_link"
+                                                    ],
+                                                    target="_blank",
+                                                ),
+                                                span="content",
+                                            ),
                                         ],
                                         justify="space-between",
                                         align="flex-end",
