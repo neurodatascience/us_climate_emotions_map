@@ -19,6 +19,8 @@ from .utility import (  # IMPACT_COLORMAP,; OPINION_COLORMAP,
 HEADER_HEIGHT = 110
 
 SUPP_TEXT = {
+    "paper_link": "https://www.thelancet.com/journals/lanplh/article/PIIS2542-5196(24)00229-8/fulltext",
+    "more_info_link": "https://docs.google.com/document/d/e/2PACX-1vQVssAsC0ddI41vlVYZnS_hxOj6UTbvWVeiejjHRSAzgDzPMFZaM25dWxbdyDOFBJi0KlTlnUUSqjWU/pub",
     "hover_tip": "Hover over bars for full proportions",
     "weighted_descriptives": "*N are unweighted while proportions are weighted according to US census estimates for age, sex, race, and ethnicity",
     "map_disclaimer": "Map does not support making statistical comparisons between states",
@@ -200,14 +202,17 @@ def create_design_credit():
 
     long_credit = dmc.Text(
         children=[
-            dmc.Text(
-                "Alyssa Dai, Michelle Wang, Nikhil Bhagwat, Arman Jahanpour, Kendra Oudyk, Rémi Gau, Sebastian Urchs"
-            ),
+            "Developers from the ",
             dmc.Anchor(
-                "ORIGAMI Lab, PI: Jean-Baptiste Poline",
+                "ORIGAMI Neuro Data Science Lab (PI: Jean-Baptiste Poline)",
                 href="https://neurodatascience.github.io/",
                 target="_blank",
+                style={"display": "inline"},
             ),
+            " - Alyssa Dai, Michelle Wang, Nikhil Bhagwat, Arman Jahanpour, Kendra Oudyk, Rémi Gau, Sebastian Urchs - ",
+            "contributed to the creation of the web app which is provided as is with no guarantee, ",
+            "but were not involved in the design, analysis, and reporting of the project. ",
+            "The project results and interpretation are entirely the responsibility of the article authors.",
         ],
         size="xs",
         c="dimmed",
@@ -259,14 +264,26 @@ def create_app_subtitle():
     """Create the subtitle for the dashboard."""
     return dmc.Text(
         children=[
-            'Graphical appendix for "Climate emotions, thoughts, and plans among US adolescents and young adults: ',
-            "a cross-sectional descriptive survey and analysis by political party identification and self-reported exposure to severe weather events. ",
-            "(Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ",
-            html.I("Lancet Planetary Health, "),
-            "(volume, issue, tbd))",
+            "Graphical appendix for ",
+            dmc.Anchor(
+                children=[
+                    '"Climate emotions, thoughts, and plans among US adolescents and young adults: a cross-sectional descriptive survey and analysis by political party identification and self-reported exposure to severe weather events." ',
+                    "[Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024) ",
+                    html.I(
+                        "The Lancet Planetary Health, ",
+                    ),
+                    "11 (8)]",
+                ],
+                href=SUPP_TEXT["paper_link"],
+                target="_blank",
+                style={"display": "inline"},
+                # Inherit font properties from parent
+                inherit=True,
+            ),
         ],
+        style={"display": "inline"},
         size="sm",
-        style={"whiteSpace": "pre-wrap"},
+        fw=500,
     )
 
 
@@ -299,14 +316,18 @@ def create_header():
                                                 ),
                                                 span="content",
                                             ),
-                                            # TODO: Uncomment once the more info page is created
-                                            # dmc.GridCol(
-                                            #     dmc.Anchor(
-                                            #         SECTION_TITLES["more_info"],
-                                            #         href="/"
-                                            #     ),
-                                            #     span="content"
-                                            # )
+                                            dmc.GridCol(
+                                                dmc.Anchor(
+                                                    SECTION_TITLES[
+                                                        "more_info"
+                                                    ],
+                                                    href=SUPP_TEXT[
+                                                        "more_info_link"
+                                                    ],
+                                                    target="_blank",
+                                                ),
+                                                span="content",
+                                            ),
                                         ],
                                         justify="space-between",
                                         align="flex-end",

@@ -9,6 +9,13 @@ See also the [Contributing Guidelines](CONTRIBUTING.md) for more information.
 To install the app from source:
 
 1. Clone the repository
+
+    > **NOTE:** To use SSH keys to clone the repo and private submodule,
+    > run the following command first to ensure that `git://` URls are used automatically:
+    > ```bash
+    > git config --global url.git@github.com:.> insteadOf https://github.com/
+    > ```
+
     ```bash
     git clone https://github.com/neurodatascience/us_climate_emotions_map.git
 
