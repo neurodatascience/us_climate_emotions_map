@@ -49,8 +49,8 @@ def create_mobile_warning():
     """Create an alert for users on mobile devices or small screens."""
     return dmc.Alert(
         children=[
-            "The graphics on this site are not optimized for mobile devices or small screens. ",
-            "For the best experience, please use a laptop or desktop.",
+            "Graphics on this site are not optimized for mobile devices or small screens. ",
+            "For the best experience, please view it full-screen on a laptop or desktop.",
         ],
         title="Larger screen size recommended",
         color="yellow",
