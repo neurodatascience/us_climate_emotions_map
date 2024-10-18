@@ -45,6 +45,20 @@ DCC_GRAPH_CONFIG = {
 }
 
 
+def create_mobile_warning():
+    """Create an alert to be displayed on mobile devices or small screens."""
+    return dmc.Alert(
+        children=[
+            "Graphics on this site are not optimized for mobile devices or small screens. ",
+            "For the best experience, please view it full-screen on a laptop or desktop.",
+        ],
+        title="Larger screen size recommended",
+        color="yellow",
+        hiddenFrom="sm",
+        mb="sm",
+    )
+
+
 def create_question_dropdown():
     """
     Create the dropdown for subquestions grouped by question.
@@ -210,7 +224,7 @@ def create_design_credit():
                 style={"display": "inline"},
             ),
             " - Alyssa Dai, Michelle Wang, Nikhil Bhagwat, Arman Jahanpour, Kendra Oudyk, Rémi Gau, Sebastian Urchs - ",
-            "contributed to the creation of the web app which is provided as is with no guarantee, ",
+            "created this web app which is provided as is with no guarantee, ",
             "but were not involved in the design, analysis, and reporting of the project. ",
             "The project results and interpretation are entirely the responsibility of the article authors.",
         ],
@@ -284,6 +298,7 @@ def create_app_subtitle():
         style={"display": "inline"},
         size="sm",
         fw=500,
+        visibleFrom="sm",
     )
 
 
@@ -466,7 +481,9 @@ def create_bar_plots_for_question(question_id: str, subquestion_id: str):
             ][question_id],
             config=DCC_GRAPH_CONFIG,
         ),
-        w=1200,
+        fluid=True,
+        # TODO: Reduce currently hard-coded L/R margins in Plotly fig to fill up more available width
+        w={"base": "100vw", "lg": 1000},
         # size="xl",
     )
     return figure
@@ -495,7 +512,9 @@ def create_selected_question_bar_plot():
             ),
             config=DCC_GRAPH_CONFIG,
         ),
-        w=1200,
+        fluid=True,
+        # TODO: Reduce currently hard-coded L/R margins in Plotly fig to fill up more available width
+        w={"base": "100vw", "lg": 1000},
     )
 
     return dmc.Stack(
@@ -602,6 +621,7 @@ def create_main():
                 mx="xs",
                 fluid=True,
                 children=[
+                    create_mobile_warning(),
                     create_map_title(),
                     dmc.Grid(
                         [
@@ -632,5 +652,9 @@ def construct_layout():
     return dmc.AppShell(
         children=[create_header(), create_navbar(), create_main()],
         header={"height": HEADER_HEIGHT},
-        navbar={"width": 300},
+        navbar={
+            "width": 300,
+            "breakpoint": "sm",
+            "collapsed": {"mobile": True},
+        },
     )
