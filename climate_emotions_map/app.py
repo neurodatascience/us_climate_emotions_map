@@ -42,6 +42,28 @@ app = Dash(
     ],
 )
 
+# Plausible analytics script
+app.index_string = """
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+        <script defer data-domain="us-climate-emotions-map.org" src="https://plausible.io/js/script.outbound-links.js"></script>
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+"""
+
 app.layout = dmc.MantineProvider(construct_layout(), forceColorScheme="light")
 
 server = app.server
