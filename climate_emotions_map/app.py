@@ -42,7 +42,7 @@ app = Dash(
     ],
 )
 
-# Plausible analytics script
+# Plausible analytics script (see also https://dash.plotly.com/external-resources#usage)
 app.index_string = """
 <!DOCTYPE html>
 <html>
