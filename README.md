@@ -1,5 +1,10 @@
 # US Climate Emotions Map
-Interactive web app for visualizing US survey results about climate change emotions.
+Interactive infographic for exploring US survey results on climate change emotions among young people aged 16-25,
+from the following study:
+
+["Climate emotions, thoughts, and plans among US adolescents and young adults: a cross-sectional descriptive survey and analysis by political party identification and self-reported exposure to severe weather events."
+[Lewandowski, R.E, Clayton, S.D., Olbrich, L., Sakshaug, J.W., Wray, B. et al, (2024)
+_The Lancet Planetary Health_, 11 (8)]](https://www.thelancet.com/journals/lanplh/article/PIIS2542-5196(24)00229-8/fulltext)
 
 
 ## Development environment
