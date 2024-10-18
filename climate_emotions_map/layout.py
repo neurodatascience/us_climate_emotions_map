@@ -224,7 +224,7 @@ def create_design_credit():
                 style={"display": "inline"},
             ),
             " - Alyssa Dai, Michelle Wang, Nikhil Bhagwat, Arman Jahanpour, Kendra Oudyk, Rémi Gau, Sebastian Urchs - ",
-            "contributed to the creation of the web app which is provided as is with no guarantee, ",
+            "created this web app which is provided as is with no guarantee, ",
             "but were not involved in the design, analysis, and reporting of the project. ",
             "The project results and interpretation are entirely the responsibility of the article authors.",
         ],
