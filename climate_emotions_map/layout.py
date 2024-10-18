@@ -46,7 +46,7 @@ DCC_GRAPH_CONFIG = {
 
 
 def create_mobile_warning():
-    """Create an alert for users on mobile devices or small screens."""
+    """Create an alert to be displayed on mobile devices or small screens."""
     return dmc.Alert(
         children=[
             "Graphics on this site are not optimized for mobile devices or small screens. ",
