@@ -424,20 +424,25 @@ def create_map_plot():
 
 def create_map_disclaimer():
     """Create the disclaimer for the map section of the dashboard."""
-    return dmc.Flex(
-        [
+    return dmc.Text(
+        children=[
             html.I(
-                className="bi bi-exclamation-circle", style={"fontSize": 15}
+                className="bi bi-exclamation-circle",
+                style={
+                    "fontSize": 15,
+                    "display": "inline",
+                    "verticalAlign": "middle",
+                },
             ),
             dmc.Text(
                 children=SUPP_TEXT["map_disclaimer"],
                 fs="italic",
                 size="sm",
+                ms=5,
                 # ta="center",
+                style={"display": "inline", "verticalAlign": "middle"},
             ),
         ],
-        gap=5,
-        align="center",
     )
 
 
@@ -628,6 +633,7 @@ def create_main():
                             dmc.GridCol(
                                 create_map_disclaimer(),
                                 span="content",
+                                style={"maxWidth": "100%"},
                             ),
                             dmc.GridCol(
                                 create_impact_dropdown(),
