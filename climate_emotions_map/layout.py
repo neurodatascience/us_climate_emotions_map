@@ -27,7 +27,7 @@ SUPP_TEXT = {
 }
 
 MAP_LAYOUT = {
-    "margin": {"l": 15, "r": 15, "t": 15, "b": 15},
+    "margin": {"l": 0, "r": 0, "t": 15, "b": 15},
     "colormap_range_padding": 0,
 }
 
@@ -409,15 +409,12 @@ def create_map_plot():
                 decimals=NUM_DECIMALS,
                 # opinion_colormap=OPINION_COLORMAP,
             ),
-            # vh = % of viewport height
-            # TODO: Revisit once plot margins are adjusted
             config=DCC_GRAPH_CONFIG,
-            style={"height": "65vh"},
+            # NOTE: To verify centering/margins of figure, can apply a border
+            style={"maxHeight": "50vw", "height": "65vh"},
         ),
-        # set max width
-        # TODO: Revisit once plot margins are adjusted
-        # style={"maxWidth": "70vw"},
-        size="xl",
+        fluid=True,
+        w={"base": "100vw", "lg": "65vw"},
     )
     return us_map
 

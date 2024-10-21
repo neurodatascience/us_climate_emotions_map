@@ -199,7 +199,11 @@ def make_map(
         hoverinfo="none",  # no hoverbox but click events are still emitted (?)
         # TODO: revisit
         # position colorbar closer to plot area (map)
-        colorbar={"x": 1},
+        colorbar={
+            "x": 0.95,
+            "thicknessmode": "fraction",
+            "lenmode": "fraction",
+        },
     )
 
     # add outline for clicked state
