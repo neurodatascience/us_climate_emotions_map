@@ -28,15 +28,13 @@ jobs:
 
         -   name: Update submodule
             run: |
-                cd data
-                git switch main
-                output=$(git pull)
+                git submodule update --remote -- data
+                output=$(git status -s data)
                 echo "$output"
-                cd ..
-                if [[ "$output" != *"Already up to date."* ]]; then
+                # Check if the status output is non-empty
+                if [[ -n "$output" ]]; then
                     ./code/create_prerendered_figures.py
                 fi
-
 
         -   name: Create pull request
             uses: peter-evans/create-pull-request@v7
