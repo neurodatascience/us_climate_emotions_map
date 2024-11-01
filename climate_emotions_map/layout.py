@@ -27,7 +27,7 @@ SUPP_TEXT = {
 }
 
 MAP_LAYOUT = {
-    "margin": {"l": 15, "r": 15, "t": 15, "b": 15},
+    "margin": {"l": 0, "r": 0, "t": 15, "b": 15},
     "colormap_range_padding": 0,
 }
 
@@ -409,35 +409,37 @@ def create_map_plot():
                 decimals=NUM_DECIMALS,
                 # opinion_colormap=OPINION_COLORMAP,
             ),
-            # vh = % of viewport height
-            # TODO: Revisit once plot margins are adjusted
             config=DCC_GRAPH_CONFIG,
-            style={"height": "65vh"},
+            # NOTE: To verify centering/margins of figure, can apply a border
+            style={"maxHeight": "50vw", "height": "65vh"},
         ),
-        # set max width
-        # TODO: Revisit once plot margins are adjusted
-        # style={"maxWidth": "70vw"},
-        size="xl",
+        fluid=True,
+        w={"base": "100vw", "lg": "65vw"},
     )
     return us_map
 
 
 def create_map_disclaimer():
     """Create the disclaimer for the map section of the dashboard."""
-    return dmc.Flex(
-        [
+    return dmc.Text(
+        children=[
             html.I(
-                className="bi bi-exclamation-circle", style={"fontSize": 15}
+                className="bi bi-exclamation-circle",
+                style={
+                    "fontSize": 15,
+                    "display": "inline",
+                    "verticalAlign": "middle",
+                },
             ),
             dmc.Text(
                 children=SUPP_TEXT["map_disclaimer"],
                 fs="italic",
                 size="sm",
+                ms=5,
                 # ta="center",
+                style={"display": "inline", "verticalAlign": "middle"},
             ),
         ],
-        gap=5,
-        align="center",
     )
 
 
@@ -483,7 +485,7 @@ def create_bar_plots_for_question(question_id: str, subquestion_id: str):
         ),
         fluid=True,
         # TODO: Reduce currently hard-coded L/R margins in Plotly fig to fill up more available width
-        w={"base": "100vw", "lg": 1000},
+        w={"base": "100vw", "lg": 1000, "xl": 1100},
         # size="xl",
     )
     return figure
@@ -514,7 +516,7 @@ def create_selected_question_bar_plot():
         ),
         fluid=True,
         # TODO: Reduce currently hard-coded L/R margins in Plotly fig to fill up more available width
-        w={"base": "100vw", "lg": 1000},
+        w={"base": "100vw", "lg": 1000, "xl": 1100},
     )
 
     return dmc.Stack(
@@ -628,6 +630,7 @@ def create_main():
                             dmc.GridCol(
                                 create_map_disclaimer(),
                                 span="content",
+                                style={"maxWidth": "100%"},
                             ),
                             dmc.GridCol(
                                 create_impact_dropdown(),
