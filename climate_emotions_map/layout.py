@@ -485,7 +485,7 @@ def create_bar_plots_for_question(question_id: str, subquestion_id: str):
         ),
         fluid=True,
         # TODO: Reduce currently hard-coded L/R margins in Plotly fig to fill up more available width
-        w={"base": "100vw", "lg": 1000},
+        w={"base": "100vw", "lg": 1000, "xl": 1100},
         # size="xl",
     )
     return figure
@@ -516,7 +516,7 @@ def create_selected_question_bar_plot():
         ),
         fluid=True,
         # TODO: Reduce currently hard-coded L/R margins in Plotly fig to fill up more available width
-        w={"base": "100vw", "lg": 1000},
+        w={"base": "100vw", "lg": 1000, "xl": 1100},
     )
 
     return dmc.Stack(
