@@ -14,7 +14,7 @@ jobs:
             DOCKER_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/${{ vars.SERVICE_NAME }}:nightly
         steps:
         -   name: Checkout
-            uses: actions/checkout@v4
+            uses: actions/checkout@v5
             with:
                 submodules: recursive
                 token: ${{ secrets.CLIMATE_DB_DATA_PAT }}
