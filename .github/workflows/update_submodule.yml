@@ -37,7 +37,7 @@ jobs:
                 fi
 
         -   name: Create pull request
-            uses: peter-evans/create-pull-request@v7
+            uses: peter-evans/create-pull-request@v8
             with:
                 token: ${{ secrets.CLIMATE_DB_DATA_PAT }}
                 commit-message: '[create-pull-request] update data submodule'
